@@ -1,0 +1,121 @@
+/* login-page.css */
+
+/* Global body styling for login page */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7; /* Light background color */
+  }
+  
+  /* Flex container for login page */
+  .login-container {
+    display: flex;
+    min-height: 100vh;
+    justify-content: space-between;
+  }
+  
+  /* Left side image section */
+  .login-image {
+    flex: 1;
+    background-image: url('https://via.placeholder.com/600x800'); /* Replace with your image URL */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+  }
+  
+  /* Right side form container */
+  .login-form-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  /* Card for the login form */
+  .login-card {
+    width: 100%;
+    max-width: 400px; /* Adjust the width as per design */
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+  
+  /* Title and description styles */
+  .login-card .card-title {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .login-card .card-description {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 20px;
+  }
+  
+  /* Label and Input field styling */
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+  }
+  
+  input[type="text"]:focus, input[type="password"]:focus {
+    border-color: #4b9ed4; /* Blue color for focus */
+    outline: none;
+  }
+  
+  label {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 5px;
+    display: block;
+  }
+  
+  /* Button styles */
+  button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #4b9ed4; /* Blue color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #3a89b1; /* Darker blue on hover */
+  }
+  
+  /* Error message */
+  .error-message {
+    color: #f44336; /* Red color for error */
+    font-size: 0.875rem;
+    margin-top: 10px;
+  }
+  
+  /* Forgot password link and register link */
+  a {
+    color: #4b9ed4;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .mt-4 {
+    margin-top: 16px;
+  }
+  
