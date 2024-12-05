@@ -46,6 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { EventCard } from "./EventCard";
 
 interface User {
   email: string | null;
@@ -59,6 +60,15 @@ interface User {
   gender: string;
 }
 
+interface EventCardProps {
+  event_id: number;
+  event_name: string;
+  event_description: string;
+  event_type: string;
+  event_date: string;
+  dept_id: number;
+}
+
 export const CreateEvent: FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [eventName, setEventName] = useState('');
@@ -68,6 +78,7 @@ export const CreateEvent: FC = () => {
   const [host, setHost] = useState('');
   const [departments, setDepartments] = useState<string[]>([]);
   const [uploadType, setUploadType] = useState<'single' | 'bulk'>('single');
+  const [events, setEvents] = useState<EventCardProps[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -130,6 +141,98 @@ export const CreateEvent: FC = () => {
       navigate('/login');
     }
   }, [navigate]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        console.log(user?.institute_id);
+        if(!user?.institute_id)
+          return;
+        const response = await fetch(`http://localhost:3000/api/events/${user?.institute_id}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const programsData = await response.json();
+        console.log(programsData);
+        setEvents(programsData);
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        setEvents([]);
+      }
+    };
+
+    // Initial fetch
+    fetchEvents();
+
+    // Polling interval for continuous updating
+    // const interval = setInterval(fetchDepartments, 30000);
+
+    // return () => clearInterval(interval); // Cleanup on unmount
+  }, [user?.institute_id]); // Re-run if user or institute_id changes
+
+  const handleUpdateEvent = async (updatedData) => {
+    try {
+      console.log(updatedData);
+      const event_id = updatedData.event_id;
+      const event_name = updatedData.event_name;
+      const event_description = updatedData.event_description;
+      const event_type = updatedData.event_type;
+      const event_date = updatedData.event_date;
+      console.log("SentData:", event_id, event_name, event_description, event_type, event_date);
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/update-event/${event_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({event_name, event_description, event_type, event_date}),
+      });
+  
+      if (response.ok) {
+        toast.success('Event updated successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to update event.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while updating the event.');
+    }
+  };  
+
+  const handleDeleteEvent = async (data) => {
+    try {
+      const event_id = data.event_id;
+
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/delete-event/${event_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+  
+      if (response.ok) {
+        toast.success('Event deleted successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to delete Event.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while deleting the Event.');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -526,6 +629,20 @@ export const CreateEvent: FC = () => {
                 </DialogClose>
               </DialogContent>
             </Dialog>
+          </div>
+          <div className="pl-3 grid gap-x-5 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-12 lg:gap-y-12">
+              {events.map(event => (
+                  <EventCard
+                    event_id={event.event_id}
+                    event_name={event.event_name}
+                    event_description={event.event_description}
+                    event_type={event.event_type}
+                    event_date={event.event_date}
+                    dept_id={event.dept_id}
+                    onUpdate={handleUpdateEvent}
+                    onDelete={handleDeleteEvent}
+                    />
+              ))}
           </div>
         </main>
       </div>

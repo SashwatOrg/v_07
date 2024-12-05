@@ -115,6 +115,65 @@ export const CreateDepartment: FC = () => {
     }
   }
 
+  const handleUpdateDepartment = async (updatedData) => {
+    try {
+      const dept_name = updatedData.dept_name;
+      const coordemail = updatedData.coordinator_email;
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/update-department/${updatedData.dept_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({dept_name, coordemail}),
+      });
+  
+      if (response.ok) {
+        toast.success('Department updated successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to update department.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while updating the department.');
+    }
+  };  
+
+  const handleDeleteDepartment = async (data) => {
+    try {
+      const dept_id = data.dept_id;
+
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/delete-department/${dept_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+  
+      if (response.ok) {
+        toast.success('Department deleted successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to delete department.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while deleting the department.');
+    }
+  };
+
   useEffect(() => {
     const token = Cookies.get('token');
     if (!token) {
@@ -642,15 +701,17 @@ export const CreateDepartment: FC = () => {
           <div className="pl-3 grid gap-x-10 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-32 lg:gap-y-4">
             {departments.map((department) => (
               <DeptCard
-                key={department.department_id}
-                dept_name={department.dept_name}
-                dept_type={department.dept_type}
-                coordinator_email={department.coordinator_email}
-                coordinator_first_name={department.coordinator_first_name}
-                coordinator_last_name={department.coordinator_last_name}
-                department_id={department.department_id}
-                institute_id={department.institute_id}
-                coordinator_id={department.coordinator_id}
+              dept_id={department.department_id}
+              dept_name={department.dept_name}
+              dept_type={department.dept_type}
+              coordinator_email={department.coordinator_email}
+              coordinator_first_name={department.coordinator_first_name}
+              coordinator_last_name={department.coordinator_last_name}
+              department_id={department.department_id}
+              institute_id={department.institute_id}
+              coordinator_id={department.coordinator_id}
+              onUpdate={handleUpdateDepartment}
+              onDelete={handleDeleteDepartment}
               />
             ))}
           </div>

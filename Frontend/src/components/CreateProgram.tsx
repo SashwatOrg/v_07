@@ -43,7 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { ProgramCard } from "./ProgramCard";
 
 interface User {
   email: string | null;
@@ -57,6 +57,14 @@ interface User {
   gender: string;
 }
 
+interface ProgramCardProps {
+  program_id: number;
+  prog_name: string;
+  dept_name: string;
+  intake: number;
+  duration: number;
+  semester_count: number
+}
 
 export const CreateProgram: FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -67,6 +75,7 @@ export const CreateProgram: FC = () => {
   const [dept, setDept] = useState("");
   const [departments, setDepartments] = useState<string[]>([]);
   const [uploadType, setUploadType] = useState<"single" | "bulk">("single");
+  const [programs, setPrograms] = useState<ProgramCardProps[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const navigate = useNavigate();
 
@@ -97,6 +106,95 @@ export const CreateProgram: FC = () => {
     }
   }, [user?.institute_id]);
 
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        console.log(user?.institute_id);
+        if(!user?.institute_id)
+          return;
+        const response = await fetch(`http://localhost:3000/api/programs/${user?.institute_id}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const programsData = await response.json();
+        console.log(programsData);
+        setPrograms(programsData);
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        setPrograms([]);
+      }
+    };
+
+    // Initial fetch
+    fetchPrograms();
+
+    // Polling interval for continuous updating
+    // const interval = setInterval(fetchDepartments, 30000);
+
+    // return () => clearInterval(interval); // Cleanup on unmount
+  }, [user?.institute_id]); // Re-run if user or institute_id changes
+
+  const handleUpdateProgram = async (updatedData) => {
+    try {
+      console.log(updatedData);
+      const program_name = updatedData.program_name;
+      const duration = updatedData.duration;
+      const intake = updatedData.intake;
+      const semester_count = updatedData.semester_count;
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/update-program/${updatedData.program_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({program_name, duration, intake, semester_count}),
+      });
+  
+      if (response.ok) {
+        toast.success('Program updated successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to update program.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while updating the program.');
+    }
+  };  
+
+  const handleDeleteProgram = async (data) => {
+    try {
+      const prog_id = data.program_id;
+
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/delete-program/${prog_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+  
+      if (response.ok) {
+        toast.success('Program deleted successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to delete program.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while deleting the program.');
+    }
+  }; 
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -554,6 +652,20 @@ export const CreateProgram: FC = () => {
                 <DialogClose />
               </DialogContent>
             </Dialog>
+          </div>
+          <div className="pl-3 grid gap-x-5 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-12 lg:gap-y-12">
+              {programs.map(program => (
+                  <ProgramCard
+                    program_id={program.program_id}
+                    program_name={program.prog_name}
+                    department_name={program.dept_name}
+                    intake={program.intake}
+                    duration={program.duration}
+                    semester_count={program.semester_count}
+                    onUpdate={handleUpdateProgram}
+                    onDelete={handleDeleteProgram}
+                    />
+              ))}
           </div>
         </main>
       </div>
