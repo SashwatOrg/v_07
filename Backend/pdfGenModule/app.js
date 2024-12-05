@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const pdfRoutes = require('./routes/pdfRoutes');
+const pdfRoutes = require('./routes/pdfFinanceRoutes');
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');

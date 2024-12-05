@@ -125,9 +125,9 @@ const deleteProgramRoutes = require("./routes/deleteProgRoutes");
 const getEvents = require("./routes/getEventRoutes");
 const putEventChangesRoutes = require("./routes/putEventRoutes");
 const deleteEventRoutes = require("./routes/deleteEventRoutes");
+const updatepassRoutes=require("./routes/updatepassRoutes");
 
-
-
+app.use('/api',updatepassRoutes);
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
 app.use("/api", programRoutes);
@@ -1003,3 +1003,56 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Use the profile routes
 app.use('/api', profileRoutes);
 
+
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/media");
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+    cb(null, `${uniqueSuffix}-${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage });
+
+// Route: Upload Media
+app.post("/api/submit-media", upload.single("media"), (req, res) => {
+  const { username, departmentName, title, description } = req.body;
+
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  const mediaUrl = `${req.protocol}://${req.get("host")}/uploads/media/${req.file.filename}`;
+  const timeStamp = new Date();
+
+  const sql = `
+    INSERT INTO media (dept_name, title, description, url, timeStamp, username)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [departmentName, title, description, mediaUrl, timeStamp, username];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Database error:", err.message);
+      return res.status(500).json({ message: "Failed to save media data" });
+    }
+    res.status(200).json({ message: "Media uploaded successfully", url: mediaUrl });
+  });
+});
+
+// Route: Get Media (Optional)
+app.get("/api/media", (req, res) => {
+  const sql = "SELECT * FROM media ORDER BY timeStamp DESC";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Database error:", err.message);
+      return res.status(500).json({ message: "Failed to retrieve media" });
+    }
+    res.status(200).json(results);
+  });
+});
