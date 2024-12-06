@@ -3,7 +3,7 @@ const db = require("../../db/dbConnection.js"); // Use the existing DB connectio
 const getFinancialData = async (options, year) => {
     let results = [];
     let params = [year];
-    console.log('hey\n i am in userQueries \n the options selected are ', options);
+    // console.log('hey\n i am in userQueries \n the options selected are ', options);
   
     for (const option of options) {
       let query;

@@ -60,9 +60,10 @@ export const LoginForm: FC = () => {
       });
 
       const data = await response.json();
-
+      console.log('the response from back i s',data)
       if (response.ok) {
         Cookies.set('token', data.token, { expires: 0.5 });
+        console.log('success',username)
         toast.success('Login successful!', {
           className: 'custom-toast',
           autoClose: 1000,

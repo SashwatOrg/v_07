@@ -461,16 +461,21 @@ export const CreateDepartment: FC = () => {
                                 <SelectItem value="Examination">
                                   Examination
                                 </SelectItem>
-                                <SelectItem value="Student Administration">
-                                  Student Administration
+                                <SelectItem value="Student And Faculty Administration">
+                                  Student And Faculty Administration
                                 </SelectItem>
                                 <SelectItem value="Placement">
                                   Placement
                                 </SelectItem>
-                                <SelectItem value="Event">Event</SelectItem>
+                                <SelectItem value="Event">
+                                  Event
+                                  </SelectItem>
                                 <SelectItem value="Infrastructure">
                                   Infrastructure
                                 </SelectItem>
+                                <SelectItem value="Club">
+                                  Club
+                                  </SelectItem>
                               </SelectGroup>
                             </SelectContent>
                           </Select>

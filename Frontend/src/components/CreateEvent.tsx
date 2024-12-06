@@ -31,6 +31,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Label } from '@radix-ui/react-label';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -47,6 +48,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+// Comprehensive Interfaces
 interface User {
   email: string | null;
   first_name: string | null;
@@ -59,44 +61,84 @@ interface User {
   gender: string;
 }
 
+interface Department {
+  dept_id: number;
+  dept_name: string;
+}
+
+interface Club {
+  club_id: number;
+  club_name: string;
+}
+
+// Event Type Enum for Strict Typing
+enum EventTypeEnum {
+  Technical = 'Technical',
+  Cultural = 'Cultural',
+  InstituteLevel = 'Institute-level',
+  Other = 'Other'
+}
+
+// Host Type Enum
+enum HostTypeEnum {
+  Department = 'Department',
+  Club = 'Club'
+}
+
 export const CreateEvent: FC = () => {
+  // State Management with Improved Typing
   const [user, setUser] = useState<User | null>(null);
-  const [eventName, setEventName] = useState('');
-  const [eventDesc, setEventDesc] = useState('');
-  const [eventType, setEventType] = useState('');
-  const [eventDate, setEventDate] = useState('');
-  const [host, setHost] = useState('');
-  const [departments, setDepartments] = useState<string[]>([]);
+  const [eventName, setEventName] = useState<string>('');
+  const [eventDesc, setEventDesc] = useState<string>('');
+  const [eventType, setEventType] = useState<EventTypeEnum | ''>('');
+  const [eventDate, setEventDate] = useState<string>('');
+  const [host, setHost] = useState<HostTypeEnum | ''>('');
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
+  const [selectedClub, setSelectedClub] = useState<string>('');
   const [uploadType, setUploadType] = useState<'single' | 'bulk'>('single');
   const [file, setFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
+  // Comprehensive Data Fetching
   useEffect(() => {
-    const fetchDepartments = async () => {
+    const fetchDepartmentsAndClubs = async () => {
+      if (!user?.institute_id) return;
+
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/departmentNames/${user?.institute_id}`
+        // Fetch Departments
+        const departmentResponse = await fetch(
+          `http://localhost:3000/api/departmentNames/${user.institute_id}`
         );
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        if (!Array.isArray(data)) {
-          throw new Error('Unexpected data format');
-        }
-        setDepartments(data);
+        const departmentData: Department[] = await departmentResponse.json();
+        
+        // Ensure departments have valid structure
+        const validDepartments = departmentData.map((dept, index) => ({
+          dept_id: dept.dept_id || index + 1,
+          dept_name: dept.dept_name
+        }));
+
+        setDepartments(validDepartments);
+
+        // Fetch Clubs
+        const clubResponse = await fetch(
+          `http://localhost:3000/api/clubNamesOfInstitute/${user.institute_id}`
+        );
+        const clubData: Club[] = await clubResponse.json();
+        setClubs(clubData);
       } catch (error) {
-        console.error('Error fetching departments:', error);
-        setDepartments([]);
+        console.error('Error fetching data:', error);
+        toast.error('Failed to fetch departments and clubs');
       }
     };
 
-    if (user?.institute_id) {
-      fetchDepartments();
-    }
+    fetchDepartmentsAndClubs();
   }, [user?.institute_id]);
 
+  // User Authentication
   useEffect(() => {
     const token = Cookies.get('token');
     if (!token) {
@@ -109,7 +151,7 @@ export const CreateEvent: FC = () => {
       const currentTime = Date.now() / 1000;
 
       if (decoded.exp < currentTime) {
-        alert('Session expired. Please login again.');
+        toast.error('Session expired. Please login again.');
         Cookies.remove('token');
         navigate('/login');
         return;
@@ -123,6 +165,8 @@ export const CreateEvent: FC = () => {
         institute_id: decoded.institute_id,
         type_id: decoded.type_id,
         gender: decoded.gender,
+        is_active: true,
+        photoURL: null,
       };
 
       setUser(userDetails);
@@ -131,16 +175,46 @@ export const CreateEvent: FC = () => {
     }
   }, [navigate]);
 
+  // Event Submission Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
+    // Validation
+    if (!eventName || !eventDesc || !eventType || !eventDate || !host) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+  
     const token = Cookies.get('token');
     if (!token) {
       navigate('/login');
       return;
     }
-
+  
     try {
+      const submitData: any = {
+        eventName,
+        eventDescription: eventDesc,
+        eventType,
+        eventDate: new Date(eventDate).toISOString(),
+        year: new Date(eventDate).getFullYear(),
+      };
+  
+      // Handle Department or Club selection
+      if (host === HostTypeEnum.Department) {
+        if (!selectedDepartment) {
+          toast.error('Please select a department');
+          return;
+        }
+        submitData.deptId = selectedDepartment;
+      } else if (host === HostTypeEnum.Club) {
+        if (!selectedClub) {
+          toast.error('Please select a club');
+          return;
+        }
+        submitData.clubId = selectedClub;
+      }
+  
       const response = await fetch(
         `http://localhost:3000/api/create-event/${user?.institute_id}`,
         {
@@ -149,53 +223,55 @@ export const CreateEvent: FC = () => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            eventName,
-            eventDesc,
-            eventType,
-            host,
-            eventDate,
-          }),
+          body: JSON.stringify(submitData),
         }
       );
 
       if (response.ok) {
         toast.success('Event created successfully!', {
-          className: 'custom-toast',
-          autoClose: 2000,
           onClose: () => navigate(`/dashboard/${user?.username}`),
         });
-        setEventName('');
-        setEventDesc('');
-        setEventType('');
-        setEventDate('');
-        setHost('');
+        resetForm();
       } else {
         const errorData = await response.json();
-        toast.error(errorData.message || 'Failed to create event.');
+        toast.error(errorData.message || 'Failed to create event');
       }
     } catch (err) {
       toast.error('An error occurred. Please try again later.');
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const uploadedFile = e.target.files[0];
-      const allowedExtension = '.xlsx';
-      const maxSize = 5 * 1024 * 1024; // 5 MB
+  // Reset Form
+  const resetForm = () => {
+    setEventName('');
+    setEventDesc('');
+    setEventType('');
+    setEventDate('');
+    setHost('');
+    setSelectedDepartment('');
+    setSelectedClub('');
+    setFile(null);
+    setErrorMessage(null);
+  };
 
-      if (!uploadedFile.name.endsWith(allowedExtension)) {
-        setErrorMessage('Invalid file type. Please upload an .xlsx file.');
-        return;
-      }
-      if (uploadedFile.size > maxSize) {
-        setErrorMessage('File size exceeds 5 MB.');
-        return;
-      }
-      setFile(uploadedFile);
-      setErrorMessage(null); // Clear any previous error
+  // File Upload Handlers
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFile = e.target.files?.[0];
+    if (!uploadedFile) return;
+
+    const allowedExtension = '.xlsx';
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+
+    if (!uploadedFile.name.endsWith(allowedExtension)) {
+      setErrorMessage('Invalid file type. Please upload an .xlsx file.');
+      return;
     }
+    if (uploadedFile.size > maxSize) {
+      setErrorMessage('File size exceeds 5 MB.');
+      return;
+    }
+    setFile(uploadedFile);
+    setErrorMessage(null);
   };
 
   const handleUpload = async () => {
@@ -270,28 +346,18 @@ export const CreateEvent: FC = () => {
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 sticky top-0">
           <Sheet>
             <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="shrink-0 md:hidden"
-              >
+              <Button variant="outline" size="icon" className="shrink-0 md:hidden">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
               <nav className="grid gap-2 text-lg font-medium">
-                <Link
-                  to="/"
-                  className="flex items-center gap-2 text-lg font-semibold"
-                >
+                <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
                   <Package2 className="h-6 w-6" />
                   <span className="sr-only">Acme Inc</span>
                 </Link>
-                <Link
-                  to="/"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
+                <Link to="/" className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground">
                   <Home className="h-5 w-5" />
                   Dashboard
                 </Link>
@@ -302,7 +368,7 @@ export const CreateEvent: FC = () => {
             <form>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
+                < Input
                   type="search"
                   placeholder="Search or Type a Job"
                   className="h-10 px-3 mr-50 ring-offset-background file:border-0 file:bg-transparent file:text-sm
@@ -329,7 +395,7 @@ export const CreateEvent: FC = () => {
                     className="h-9 w-9 rounded-full"
                   />
                 ) : (
-                  <CircleUser className="h-5 w-5" />
+                  <CircleUser  className="h-5 w-5" />
                 )}
                 <span className="sr-only">Toggle user menu</span>
               </Button>
@@ -358,9 +424,9 @@ export const CreateEvent: FC = () => {
                   Manage Event Data
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[725px]">
+              <DialogContent className="sm:max-w-[725px]" aria-describedby="event-creation-dialog">
                 <DialogHeader>
-                  <DialogTitle>Manage Event Data</DialogTitle>
+                  <DialogTitle id="event-creation-dialog">Manage Event Data</DialogTitle>
                 </DialogHeader>
                 <ScrollArea className="max-h-[410px] p-4">
                   <div className="grid gap-4 py-4">
@@ -370,7 +436,7 @@ export const CreateEvent: FC = () => {
                       </Label>
                       <Input
                         id="eventname"
-                        type="string"
+                        type="text"
                         required
                         value={eventName}
                         onChange={(e) => setEventName(e.target.value)}
@@ -384,7 +450,6 @@ export const CreateEvent: FC = () => {
                       </Label>
                       <Textarea
                         id="description"
-                        type="string"
                         required
                         value={eventDesc}
                         onChange={(e) => setEventDesc(e.target.value)}
@@ -398,7 +463,7 @@ export const CreateEvent: FC = () => {
                       </Label>
                       <Select
                         name="type"
-                        onValueChange={(value) => setEventType(value)}
+                        onValueChange={(value) => setEventType(value as EventTypeEnum)}
                       >
                         <SelectTrigger className="w-[475px]">
                           <SelectValue placeholder="Select type" />
@@ -406,12 +471,10 @@ export const CreateEvent: FC = () => {
                         <SelectContent>
                           <SelectGroup>
                             <SelectLabel>Event Type</SelectLabel>
-                            <SelectItem value="Technical">Technical</SelectItem>
-                            <SelectItem value="Cultural">Cultural</SelectItem>
-                            <SelectItem value="Institute-level">
-                              Institute-level
-                            </SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
+                            <SelectItem value={EventTypeEnum.Technical}>Technical</SelectItem>
+                            <SelectItem value={EventTypeEnum.Cultural}>Cultural</SelectItem>
+                            <SelectItem value={ EventTypeEnum.InstituteLevel}>Institute-level</SelectItem>
+                            <SelectItem value={EventTypeEnum.Other}>Other</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -423,7 +486,11 @@ export const CreateEvent: FC = () => {
                       <Select
                         name="host"
                         value={host}
-                        onValueChange={(value) => setHost(value)}
+                        onValueChange={(value) => {
+                          setHost(value as HostTypeEnum);
+                          setSelectedDepartment('');
+                          setSelectedClub('');
+                        }}
                       >
                         <SelectTrigger className="w-[475px]">
                           <SelectValue placeholder="Select Host" />
@@ -431,19 +498,69 @@ export const CreateEvent: FC = () => {
                         <SelectContent>
                           <SelectGroup>
                             <SelectLabel>Hosted by</SelectLabel>
-                            {departments.map((department) => (
-                              <SelectItem
-                                key={department.dept_name}
-                                value={department.dept_name}
-                              >
-                                {department.dept_name}{' '}
-                                {/* Ensure you are rendering the dept_name property */}
-                              </SelectItem>
-                            ))}
+                            <SelectItem value={HostTypeEnum.Department}>Department</SelectItem>
+                            <SelectItem value={HostTypeEnum.Club}>Club</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Conditional rendering for department selection */}
+                    {host === HostTypeEnum.Department && (
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="department" className="text-left">
+                          Select Department
+                        </Label>
+                        <Select
+                          name="department"
+                          value={selectedDepartment}
+                          onValueChange={(value) => setSelectedDepartment(value)}
+                        >
+                          <SelectTrigger className="w-[475px]">
+                            <SelectValue placeholder="Select Department" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Available Departments</SelectLabel>
+                              {departments.map((dept) => (
+                                <SelectItem key={dept.dept_id} value={dept.dept_id.toString()}>
+                                  {dept.dept_name}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* Conditional rendering for club selection */}
+                    {host === HostTypeEnum.Club && (
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="club" className="text-left">
+                          Select Club
+                        </Label>
+                        <Select
+                          name="club"
+                          value={selectedClub}
+                          onValueChange={(value) => setSelectedClub(value)}
+                        >
+                          <SelectTrigger className="w-[475px]">
+                            <SelectValue placeholder="Select Club" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Available Clubs</SelectLabel>
+                              {clubs.map((club) => (
+                                <SelectItem key={club.club_id} value={club.club_id.toString()}>
+                                  {club.club_name}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="edate" className="text-left">
                         Date
@@ -454,29 +571,22 @@ export const CreateEvent: FC = () => {
                         required
                         value={eventDate}
                         onChange={(e) => setEventDate(e.target.value)}
-                        placeholder="Event Date"
                         className="col-span-3"
                       />
                     </div>
                     <div className="flex justify-between">
                       <Button
                         onClick={() =>
-                          setUploadType(
-                            uploadType === 'single' ? 'bulk' : 'single'
-                          )
+                          setUploadType(uploadType === 'single' ? 'bulk' : 'single')
                         }
                       >
-                        Switch to {uploadType === 'single' ? 'Bulk' : 'Single'}{' '}
-                        Upload
+                        Switch to {uploadType === 'single' ? 'Bulk' : 'Single'} Upload
                       </Button>
                     </div>
                     {uploadType === 'bulk' && (
                       <div>
                         <h3 className="text-lg font-semibold">Bulk Upload</h3>
-                        <label
-                          htmlFor="file"
-                          className="block text-sm font-medium text-gray-600"
-                        >
+                        <label htmlFor="file" className="block text-sm font-medium text-gray-600">
                           Upload File
                         </label>
                         <Input
@@ -485,21 +595,18 @@ export const CreateEvent: FC = () => {
                           onChange={handleFileChange}
                           className="mt-2 w-full"
                         />
-                        {errorMessage && (
-                          <div className="text-red-500">{errorMessage}</div>
-                        )}
+                        {errorMessage && <div className="text-red-500">{errorMessage}</div>}
                         <Button
                           disabled={!file}
                           onClick={handleUpload}
                           className={`mt-4 flex items-center gap-2 px-4 py-2 rounded-md ${
-                            file
-                              ? 'bg-green-500 text-white hover:bg-green-600'
-                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            file ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           }`}
                         >
                           <UploadCloud size={16} /> Upload
                         </Button>
-                        <div className="flex flex-wrap justify-end gap-3 mt-4">
+                        <div className="
+                          flex-wrap justify-end gap-3 mt-4">
                           <Button
                             onClick={handleDownload}
                             aria-label="Download event data"

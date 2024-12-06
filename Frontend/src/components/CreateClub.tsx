@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Sidebar } from "./Sidebar/Sidebar";
+import { Sidebar } from "./SideBar/Sidebar";
 import ModeToggle from "./mode-toggle";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Label } from "@radix-ui/react-label";

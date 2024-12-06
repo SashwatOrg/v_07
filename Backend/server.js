@@ -12,6 +12,7 @@ const corsOptions = {
   origin: 'http://localhost:5173', // Specify the frontend URL here
   methods: ['GET', 'POST', "PUT", "DELETE"],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 };
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -31,7 +32,7 @@ const xlsx = require("xlsx");
 const db = require("./db/dbConnection");
 const multer = require("multer");
 const sendOtp=require("./utils/sendOtp.js");
-const pdfRoutes = require('./pdfGenModule/routes/pdfFinanceRoutes.js')
+const pdfRoutes = require('./pdfGenModule/routes/allPdfAndHtmlRoutes.js')
 app.options("*", cors()); // Allow all OPTIONS requests for CORS preflight
 
 app.use(express.json());
@@ -39,6 +40,21 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", "./pdfGenModule/views");
+
+// Add this before your route definitions
+app.use((req, res, next) => {
+  console.log(`Received ${req.method} request to ${req.path}`);
+  next();
+});
+
+// Add error handling middleware at the end of your route configurations
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({
+    message: 'An unexpected error occurred',
+    error: err.message
+  });
+});
 app.use("/pdf", pdfRoutes);
 app.use(
   cors({
@@ -125,8 +141,7 @@ const deleteProgramRoutes = require("./routes/deleteProgRoutes");
 const getEvents = require("./routes/getEventRoutes");
 const putEventChangesRoutes = require("./routes/putEventRoutes");
 const deleteEventRoutes = require("./routes/deleteEventRoutes");
-
-
+const getInstituteClubNamesRoutes = require('./routes/getInstituteClubNamesRoutes.js')
 
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
@@ -169,8 +184,7 @@ app.use("/api", deleteProgramRoutes);
 app.use("/api", getEvents);
 app.use("/api", putEventChangesRoutes);
 app.use("/api", deleteEventRoutes)
-
-
+app.use("/api",getInstituteClubNamesRoutes);
 
 
 //HK add Courses
