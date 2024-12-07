@@ -276,6 +276,87 @@ export const CreateClub: FC = () => {
     }
   };
 
+  const [clubFile, setClubFile] = useState<File | null>(null);
+
+
+  const handleClubFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setClubFile(e.target.files[0]);
+    }
+  };
+
+
+  const handleClubUpload = async () => {
+    if (!clubFile) return;
+
+
+    const formData = new FormData();
+    formData.append("file", clubFile);
+    formData.append("institute_id", user?.institute_id);
+
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/club/upload-clubs`, {
+        method: "POST",
+        body: formData,
+      });
+
+
+      if (!res.ok) throw new Error("Upload failed");
+
+
+      toast.success("Clubs uploaded successfully!");
+      setClubFile(null); // Reset file after successful upload
+    } catch (err) {
+      console.error("Upload error:", err);
+      toast.error(err.message);
+    }
+  };
+
+
+  const handleClubTemplateDownload = () => {
+    fetch(`http://localhost:3000/api/club/download-template`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to download template");
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "club_template.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch((err) => console.error("Template download error:", err));
+  };
+
+
+  const handleClubDataDownload = () => {
+    fetch(
+      `http://localhost:3000/api/club/download-data?institute_id=${user?.institute_id}`
+    )
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Club_Data.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch((err) => console.error("Download error:", err));
+  };
+
+
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
       <Sidebar user={user} activePage="create-club" />
@@ -391,6 +472,58 @@ export const CreateClub: FC = () => {
                 </ScrollArea>
                 <DialogClose>
                   <Button type="submit" onClick={handleSubmit} className="mr-4">Create Club</Button>
+                </DialogClose>
+              </DialogContent>
+            </Dialog>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="mb-4 border-2">
+                  Create Multiple Clubs
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[725px]">
+                <DialogHeader>
+                  <DialogTitle>Bulk Club Creation</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="clubFile" className="text-left">
+                      Upload CSV
+                    </Label>
+                    <Input
+                      id="clubFile"
+                      type="file"
+                      accept=".csv"
+                      onChange={handleClubFileChange}
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleClubUpload}
+                      className="mt-4"
+                      disabled={!clubFile}
+                    >
+                      Upload Clubs
+                    </Button>
+                    <Button
+                      onClick={handleClubTemplateDownload}
+                      className="mt-4 ml-2"
+                    >
+                      Download Template
+                    </Button>
+                    <Button
+                      onClick={handleClubDataDownload}
+                      className="mt-4 ml-2"
+                    >
+                      Download Club Data
+                    </Button>
+                  </div>
+                </div>
+                <DialogClose>
+                  <Button type="button" className="mr-4">
+                    Close
+                  </Button>
                 </DialogClose>
               </DialogContent>
             </Dialog>

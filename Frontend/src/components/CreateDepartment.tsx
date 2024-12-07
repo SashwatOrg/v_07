@@ -303,21 +303,25 @@ export const CreateDepartment: FC = () => {
   const handleBulkSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = Cookies.get('token');
+
+    const token = Cookies.get("token");
     if (!token) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
+
     if (file) {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
+      formData.append("institute_id", user?.institute_id); // Include institute_id
+
 
       try {
         const response = await fetch(
-          'http://localhost:3000/api/upload-departments',
+          "http://localhost:3000/api/departments/upload",
           {
-            method: 'POST',
+            method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -325,48 +329,73 @@ export const CreateDepartment: FC = () => {
           }
         );
 
+
         if (response.ok) {
-          toast.success('Departments uploaded successfully!', {
-            className: 'custom-toast',
+          toast.success("Departments uploaded successfully!", {
+            className: "custom-toast",
             autoClose: 2000,
             onClose: () => navigate(`/dashboard/${user?.username}`),
           });
         } else {
           const errorData = await response.json();
-          toast.error(errorData.message || 'Failed to upload departments.');
+          toast.error(errorData.message || "Failed to upload departments.");
         }
       } catch (err) {
         toast.error(
-          'An error occurred while uploading the file. Please try again later.' +
+          "An error occurred while uploading the file. Please try again later." +
             err
         );
       }
     } else {
-      toast.error('Please select a file to upload.');
+      toast.error("Please select a file to upload.");
     }
   };
 
-  const handleDownloadTemplate = () => {
-    const link = document.createElement('a');
-    link.href = 'path/to/template.xlsx'; // Replace with actual template URL
-    link.setAttribute('download', 'department_template.xlsx');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/departments/template"
+      );
+      if (!response.ok) {
+        throw new Error("Failed to download template");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", "department_template.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      toast.error("Error downloading template: " + error.message);
+    }
   };
 
-  const handleDownloadData = () => {
-    const link = document.createElement('a');
-    link.href = 'path/to/data.xlsx'; // Replace with actual data URL
-    link.setAttribute('download', 'departments_data.xlsx');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+
+  const handleDownloadData = async (institute_id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/departments/download?institute_id=${user?.institute_id}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to download data");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", "departments_data.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      toast.error("Error downloading data: " + error.message);
+    }
   };
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
-      <Sidebar user={user} activePage="create-department " />
+      <Sidebar user={user} activePage="create-department" />
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 sticky top-0">
           <Sheet>
@@ -443,7 +472,7 @@ export const CreateDepartment: FC = () => {
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
             <h1 className="text-2xl text-primary font-bold">
-              Create Department
+              Departments
             </h1>
           </div>
           <div className="flex flex-col items-center justify-center">

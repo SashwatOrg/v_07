@@ -134,6 +134,10 @@ const getClubRoutes = require("./routes/getClubRoutes");
 const getUsersRoutes = require("./routes/getUsersRoutes"); 
 const toggleUserStatus = require("./routes/toggleUserStatusRoutes"); 
 const instAdminDashRoutes = require("./routes/instAdminDashRoutes");
+const BulkDepartmentRoutes = require("./routes/BulkDepartmentRoutes.js");
+const infrastructureRoutes = require("./routes/BulkInfrastructureRoutes.js");
+const BulkAchievementRoutes = require("./routes/BulkAchievementRoutes.js");
+const BulkClubRoutes = require("./routes/BulkClubRoutes.js");
 
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
@@ -185,9 +189,12 @@ app.use("/api", getClubRoutes);
 app.use("/api", getUsersRoutes);
 app.use("/api", toggleUserStatus);
 app.use("/api", instAdminDashRoutes);
+app.use("/api/departments", BulkDepartmentRoutes);
+app.use("/api/infrastructure", infrastructureRoutes);
+app.use("/api/achievement", BulkAchievementRoutes);
+app.use("/api/club", BulkClubRoutes);
 
 //HK add Courses
-
 
 
 //verify OTP

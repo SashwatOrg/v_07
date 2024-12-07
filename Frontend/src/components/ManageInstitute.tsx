@@ -10,6 +10,7 @@ import {
   Search,
   Command,
   User,
+  Landmark,
 } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { Label } from "@/components/ui/label";
@@ -27,6 +28,7 @@ import ModeToggle from "./mode-toggle";
 import { Sidebar } from "./SideBar/Sidebar";
 import Cookies from "js-cookie";
 import { Combobox } from "./Combobox";
+import Institute from '../components/icons/institute.png'
 
 interface User {
   email: string | null;
@@ -327,7 +329,7 @@ export const ManageInstitute: FC = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>
-                {user?.displayName || "My Account"}
+                {user?.username || "My Account"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -346,21 +348,26 @@ export const ManageInstitute: FC = () => {
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 m-4 overflow-auto">
           <div className="space-y-0.5">
             <div className="">
+              <div className="flex flex-row gap-2">
+                <div className="h-10 w-10">
+              <img src={Institute} alt="Institute" />
+              </div>
               <h2 className="text-2xl font-bold tracking-tight pt-2">
                 Manage Institute
               </h2>
+              </div>
               <p className="text-muted-foreground pb-6">
                 Edit your institute information here
               </p>
               <Separator />
             </div>
-            <h2 className="text-lg font-medium p-2">Institute Details</h2>
+            <h2 className="text-xl font-medium p-2 font-extrabold">Institute Details</h2>
             <Separator className="shrink-0 bg-border h-[1px] my-2 w-1/2" />
 
             <div className="mt-4">
               <Label
                 htmlFor="instname"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-neutral-200"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-neutral-200 pt-2"
               >
                 Institute Name
               </Label>
@@ -389,7 +396,7 @@ export const ManageInstitute: FC = () => {
               >
                 Address Line 1
               </Label>
-              <div className="mt-2">
+              <div className="mt-2 pb-4">
                 <Input
                   type="string"
                   name="addrl1"
@@ -410,7 +417,7 @@ export const ManageInstitute: FC = () => {
                 >
                   Sub-district
                 </Label>
-                <div className="mt-2">
+                <div className="mt-2 pb-4">
                   <Input
                     type="text"
                     name="subdist"

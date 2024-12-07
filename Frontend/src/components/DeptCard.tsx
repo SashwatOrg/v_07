@@ -35,8 +35,8 @@ export function DeptCard({
   institute_id,
   onUpdate,
   onDelete,
-  width = "300px",
-  height = "150px"
+  // width = "300px",
+  // height = "150px"
 }: DeptCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [updatedDeptName, setUpdatedDeptName] = useState(dept_name);
@@ -87,8 +87,8 @@ export function DeptCard({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
           <Card 
-            style={{ width, height }} 
-            className="relative rounded-lg border bg-card text-card-foreground shadow-sm cursor-pointer"
+            // style={{ width, height }} 
+            className="relative rounded-lg border bg-card text-card-foreground shadow-sm cursor-pointer shadow-sm hover:shadow-xl hover:border-2 hover:border-black w-auto"
           >
             <CardHeader>
               <CardTitle className="text-center tracking-tight text-lg font-medium">

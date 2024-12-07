@@ -59,6 +59,8 @@ export const CreateInfrastructure: FC = () => {
   const [dept, setDept] = useState("");
   const [departments, setDepartments] = useState<string[]>([]);
   const [infras, setInfras] = useState<InfraCardProps[]>([]);
+  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   console.log('Infras:',infras);
   const navigate = useNavigate();
 
@@ -269,6 +271,98 @@ export const CreateInfrastructure: FC = () => {
     }
   };
 
+  const handleBulkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+
+    const token = Cookies.get("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("institute_id", user?.institute_id.toString());
+      console.log([...formData]);
+
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/infrastructure/upload",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          }
+        );
+
+
+        if (response.ok) {
+          toast.success("Infrastructure data uploaded successfully!", {
+            className: "custom-toast",
+            autoClose: 2000,
+            onClose: () => navigate(`/admin/create-event`),
+          });
+        } else {
+          const errorData = await response.json();
+          toast.error(
+            errorData.message || "Failed to upload infrastructure data."
+          );
+        }
+      } catch (err) {
+        toast.error(
+          "An error occurred while uploading the file. Please try again later."
+        );
+      }
+    } else {
+      toast.error("Please select a file to upload.");
+    }
+  };
+
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/infrastructure/template");
+      if (!response.ok) {
+        throw new Error("Failed to download template");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", "infrastructure_template.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      toast.error("Error downloading template: " + error.message);
+    }
+  };
+
+  const handleDownloadData = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/infrastructure/download?institute_id=${user?.institute_id}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to download data");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", "infrastructure_data.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      toast.error("Error downloading data: " + error.message);
+    }
+  };
+
+
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
@@ -344,7 +438,7 @@ export const CreateInfrastructure: FC = () => {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Create Infrastructure</h1>
+            <h1 className="text-2xl text-primary font-bold">Infrastructure</h1>
           </div>
           <div className="flex flex-col items-center justify-center">
           <Dialog>
@@ -398,6 +492,38 @@ export const CreateInfrastructure: FC = () => {
                 </DialogClose>
               </DialogContent>
             </Dialog>
+            <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="mb-4 border-2">
+                  Bulk Upload
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[725px]">
+                <DialogHeader>
+                  <DialogTitle>Bulk Upload Infrastructure</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col gap-4">
+                  <Input
+                    type="file"
+                    accept=".xlsx"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        setFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                  <div className="flex gap-4 mt-4">
+                    <Button onClick={handleBulkSubmit}>
+                      Upload Infrastructure Data
+                    </Button>
+                    <Button onClick={handleDownloadTemplate}>
+                      Download Template
+                    </Button>
+                    <Button onClick={handleDownloadData}>Download Data</Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             </div>
             <div className="pl-3 grid gap-x-10 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-32 lg:gap-y-4">
             {infras.map((infra) => (
@@ -419,6 +545,3 @@ export const CreateInfrastructure: FC = () => {
     </div>
   );
 };
-
-
-

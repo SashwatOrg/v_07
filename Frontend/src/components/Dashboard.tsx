@@ -27,7 +27,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import ModeToggle from './mode-toggle';
 import { Sidebar } from './SideBar/Sidebar';
 import PolarAreaChart from "./visuals/PolarChart";
-import PlacementChart from "./visuals/PlacementChart";
+import PlacementChart from './visuals/PlacementChart';
 
 interface User {
   userid: number | null;
@@ -294,8 +294,8 @@ export const Dashboard: FC = () => {
               {user?.type_id === 2 && (
                 <>
                   {/* Coordinator-specific cards */}
-                  <StatsCard title="Tasks Assigned" />
-                  <StatsCard title="Ongoing Programs" />
+                  <StatsCard title="Tasks Assigned" entity="departments" username={user?.username} />
+                  <StatsCard title="Ongoing Programs" entity="departments" username={user?.username}  />
                   <div className="col-span-full">
                     <PieInteractive />
                   </div>
@@ -304,8 +304,8 @@ export const Dashboard: FC = () => {
               {user?.type_id === 3 && (
                 <>
                   {/* Faculty-specific cards */}
-                  <StatsCard title="Classes Taken" />
-                  <StatsCard title="Research Papers" />
+                  <StatsCard title="Classes Taken" entity="departments" username={user?.username} />
+                  <StatsCard title="Research Papers" entity="departments" username={user?.username} />
                   <div className="col-span-full">
                     <PieInteractive />
                   </div>
@@ -314,8 +314,8 @@ export const Dashboard: FC = () => {
               {user?.type_id === 4 && (
                 <>
                   {/* Student-specific cards */}
-                  <StatsCard title="Subjects Enrolled" />
-                  <StatsCard title="Assignments Due"/>
+                  <StatsCard title="Subjects Enrolled" entity="departments" username={user?.username} />
+                  <StatsCard title="Assignments Due" entity="departments" username={user?.username}/>
                   <div className="col-span-full">
                     <PieInteractive />
                   </div>

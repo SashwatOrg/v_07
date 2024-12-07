@@ -125,13 +125,13 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                   <Link
                     to="/admin/create-program"
                     className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                      activePage === 'create-event'
+                      activePage === 'create-program'
                         ? 'bg-muted text-primary'
                         : 'text-muted-foreground'
                     }`}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
-                    Create Programs
+                    Programs
                   </Link>
 
                   <Link
