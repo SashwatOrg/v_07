@@ -14,6 +14,10 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 };
+
+const corsConfig = require('./cors-config');
+
+app.use(cors(corsConfig));
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 // This will allow inline scripts and styles by setting 'unsafe-inline' (not recommended for production)
@@ -142,6 +146,7 @@ const getEvents = require("./routes/getEventRoutes");
 const putEventChangesRoutes = require("./routes/putEventRoutes");
 const deleteEventRoutes = require("./routes/deleteEventRoutes");
 const getInstituteClubNamesRoutes = require('./routes/getInstituteClubNamesRoutes.js')
+const departmentByCordIdRoutes = require('./routes/departmentByCordIdRoutes')
 
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
@@ -185,7 +190,7 @@ app.use("/api", getEvents);
 app.use("/api", putEventChangesRoutes);
 app.use("/api", deleteEventRoutes)
 app.use("/api",getInstituteClubNamesRoutes);
-
+app.use("/api",departmentByCordIdRoutes)
 
 //HK add Courses
 

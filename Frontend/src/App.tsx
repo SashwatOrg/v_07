@@ -43,6 +43,8 @@ import Home from './components/pages/Home/Home';// Your landing page Home compon
 import { GenerateEventReport } from './components/GenerateDepartmentReport/GenerateEventReport';
 import { GenerateClubReport } from './components/GenerateDepartmentReport/GenerateClubReport';
 import { GenerateStudentAndFacultyAdministrationReport } from './components/GenerateDepartmentReport/GenerateStudentAndFacultyAdministrationReport';
+import { GenerateAcademicReport } from './components/GenerateDepartmentReport/GenerateAcademicReport';
+import ReportVersionSelector from './components/ReportVersionSelector';
 
 const App: React.FC = () => {
 
@@ -120,7 +122,8 @@ const App: React.FC = () => {
           <Route path="/generate-event-report" element={<GenerateEventReport/>} />
           <Route path="/generate-club-report" element={<GenerateClubReport/>} />
           <Route path="/generate-studentandfacultyadministration-report" element={<GenerateStudentAndFacultyAdministrationReport/>} />
-          <Route path="/support" element={<Support />} />
+          <Route path="/generate-academic-report" element={<GenerateAcademicReport/>} />
+          <Route path="/view-reports/:institute_id" element={<ReportVersionSelector />} /> <Route path="/support" element={<Support />} />
           <Route
             path="/profile/:userid"
             element={

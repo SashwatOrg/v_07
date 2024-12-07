@@ -1,7 +1,7 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { FC, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CircleUser,
   Home,
@@ -34,24 +34,87 @@ import { jwtDecode } from "jwt-decode";
 import { StudentAndFacultyAdministrationDataTableDemo } from "./optionsForCustomizedReport/StudentAndFacultyAdministrationDataTableDemo";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 
-interface User {
-  email: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  username: string | null;
-  photoURL?: string | null;
-  institute_id: number | null;
-  type_id: number | null;
-  is_active?: boolean;
-  gender: string;
-}
+// ReportAccessDialog Component
+const ReportAccessDialog: React.FC<{
+  logId: number | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccessfulAccess: (filePath: string, reportType?: string) => void;
+}> = ({ logId, isOpen, onClose, onSuccessfulAccess }) => {
+  const [password, setPassword] = useState<string>('');
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
 
+  const handleVerifyPassword = async () => {
+    if (!logId) {
+      toast.error("Invalid report log ID");
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      const response = await fetch('http://localhost:3000/pdf/verify-report-access', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          logId, 
+          password 
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        onSuccessfulAccess(data.filePath, data.reportType);
+        toast.success("Report access verified successfully!");
+        onClose();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Invalid password");
+      }
+    } catch (error) {
+      console.error("Password verification error:", error);
+      toast.error("An error occurred during password verification");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Verify Report Access</DialogTitle>
+          <DialogDescription>
+            Enter the password from the downloaded CSV file to access the report.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col space-y-4">
+          <Input
+            type="password"
+            placeholder="Enter report access password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button 
+            onClick={handleVerifyPassword} 
+            disabled={isVerifying}
+          >
+            {isVerifying ? "Verifying..." : "Verify Password"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Main Component
 export const GenerateStudentAndFacultyAdministrationReport: FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // State Management
+  // User Interface State
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isCustomized, setIsCustomized] = useState<boolean>(false);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
@@ -59,9 +122,19 @@ export const GenerateStudentAndFacultyAdministrationReport: FC = () => {
     const currentYear = new Date().getFullYear();
     return `${currentYear}-${currentYear + 1}`;
   });
+  
+  // Report Generation States
   const [showReportTypeDialog, setShowReportTypeDialog] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [reportLogId, setReportLogId] = useState<number | null>(null);
+  const [isReportAccessDialogOpen, setIsReportAccessDialogOpen] = useState<boolean>(false);
+  
+  // New state to hold report details
+  const [reportDetails, setReportDetails] = useState<{
+    filePath: string;
+    reportType: string;
+  } | null>(null);
 
   // Report Options
   const reportOptions = [
@@ -73,7 +146,26 @@ export const GenerateStudentAndFacultyAdministrationReport: FC = () => {
     { id: "6", description: "Department-wise Analysis" },
   ];
 
-  // Authentication and User Retrieval
+  // Logout Handler
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:3000/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${Cookies.get("token")}`
+        }
+      });
+    } catch (error) {
+      console.error("Logout failed on backend", error);
+    } finally {
+      Cookies.remove("token");
+      setCurrentUser(null);
+      navigate("/login");
+      toast.success("Logged out successfully");
+    }
+  };
+
+  // Authentication Effect
   useEffect(() => {
     const token = Cookies.get("token");
     if (!token) {
@@ -100,19 +192,67 @@ export const GenerateStudentAndFacultyAdministrationReport: FC = () => {
         institute_id: decoded.institute_id,
         type_id: decoded.type_id,
         gender: decoded.gender,
+        user_id: decoded.id,
       };
-      setCurrentUser (userDetails);
+      setCurrentUser(userDetails);
     } catch (err) {
       navigate("/login");
     }
   }, [navigate]);
 
-  // Logout Handler
-  const handleLogout = () => {
-    Cookies.remove("token");
-    navigate("/login");
+  // Successful Access Handler
+  const handleSuccessfulAccess = async (filePath: string, reportType?: string) => {
+    try {
+      const token = Cookies.get("token");
+      
+      const newTab = window.open('about:blank', '_blank');
+      
+      console.log('Fetching file:', { filePath, reportType });
+  
+      const response = await fetch(filePath, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': reportType === 'pdf' ? 'application/pdf' : 'text/html'
+        }
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('File fetch error:', { 
+          status: response.status, 
+          statusText: response.statusText,
+          errorText 
+        });
+        throw new Error(`Failed to fetch file: ${errorText}`);
+      }
+  
+      // HTML handling
+      if (reportType === 'html') {
+        const htmlContent = await response.text();
+        console.log('HTML Content length:', htmlContent.length);
+        
+        if (newTab) {
+          newTab.document.open();
+          newTab.document.write(htmlContent);
+          newTab.document.close();
+        }
+      } else {
+        // PDF handling
+        const blob = await response.blob();
+        const fileURL = URL.createObjectURL(blob);
+        if (newTab) {
+          newTab.location.href = fileURL;
+        }
+      }
+    } catch (error) {
+      console.error("Detailed error accessing report:", error);
+      toast.error(`An error occurred: ${error.message}`);
+    } finally {
+      setReportDetails(null);
+      setIsReportAccessDialogOpen(false);
+    }
   };
-
   // Report Generation Handler
   const handleGenerateReport = async (format: string) => {
     const token = Cookies.get("token");
@@ -121,6 +261,13 @@ export const GenerateStudentAndFacultyAdministrationReport: FC = () => {
       return;
     }
 
+    // Validate report generation
+    if (isCustomized && selectedOptions.length === 0) {
+      toast.error("Please select at least one option for the customized report.");
+      return;
+    }
+
+    // Prepare endpoint and body
     const endpoint = format === "pdf" 
       ? "/pdf/generate-student-faculty-pdf" 
       : "/pdf/generate-student-faculty-html";
@@ -135,14 +282,16 @@ export const GenerateStudentAndFacultyAdministrationReport: FC = () => {
         last_name: currentUser ?.last_name,
         institute_id: currentUser ?.institute_id,
         email: currentUser ?.email,
+        user_id: currentUser ?.user_id,
+        
       },
       format,
     };
 
     try {
       setIsLoading(true);
-      setProgress(50);
-      
+      setProgress(30); // Initial progress
+      console.log("The sending is of data ",body);
       const response = await fetch(`http://localhost:3000${endpoint}`, {
         method: "POST",
         headers: {
@@ -152,31 +301,54 @@ export const GenerateStudentAndFacultyAdministrationReport: FC = () => {
         body: JSON.stringify(body),
       });
 
+      // Update progress
+      setProgress(60);
+
       if (response.ok) {
         const data = await response.json();
         const filePath = format === "pdf" 
           ? `http://localhost:3000/pdfs/${data.filePath}`
           : `http://localhost:3000${data.filePath}`;
 
-        if (format === "pdf") {
-          window.open(filePath, "_blank");
-        } else {
-          const link = document.createElement("a");
-          link.href = filePath;
-          link.download = data.filePath.split("/").pop();
-          link.click();
+        // Store report details instead of immediately opening
+        setReportDetails({
+          filePath,
+          reportType: format
+        });
+
+        // Store log ID for potential future use
+        setReportLogId(data.logId);
+
+        // Open password verification dialog
+        setIsReportAccessDialogOpen(true);
+
+        // Download Password CSV
+        if (data.passwordCsvPath) {
+          const csvLink = document.createElement("a");
+          csvLink.href = `http://localhost:3000${data.passwordCsvPath}`;
+          csvLink.download = "report_access_credentials.csv";
+          csvLink.click();
         }
 
+        // Update progress and show success toast
+        setProgress(80);
         toast.success("Report generated successfully!");
+
+        // Final progress
         setProgress(100);
       } else {
+        // Handle error response
         const errorData = await response.json();
         toast.error(errorData.message || "Failed to generate report.");
+        setProgress(0);
       }
     } catch (err) {
-      console.error("Error during fetch:", err);
-      toast.error("An error occurred while generating the report.");
+      // Handle network or unexpected errors
+      console.error("Error during report generation:", err);
+      toast.error("An unexpected error occurred while generating the report.");
+      setProgress(0);
     } finally {
+      // Reset dialog and loading states
       setShowReportTypeDialog(false);
       setIsLoading(false);
     }
@@ -318,11 +490,18 @@ export const GenerateStudentAndFacultyAdministrationReport: FC = () => {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="flex justify-between">
-                  < Button onClick={() => handleGenerateReport("pdf")}>PDF</Button>
+                  <Button onClick={() => handleGenerateReport("pdf")}>PDF</Button>
                   <Button onClick={() => handleGenerateReport("html")}>HTML</Button>
                 </div>
               </DialogContent>
             </Dialog>
+
+            <ReportAccessDialog
+              logId={reportLogId}
+              isOpen={isReportAccessDialogOpen}
+              onClose={() => setIsReportAccessDialogOpen(false)}
+              onSuccessfulAccess={handleSuccessfulAccess}
+            />
           </div>
         </main>
       </div>

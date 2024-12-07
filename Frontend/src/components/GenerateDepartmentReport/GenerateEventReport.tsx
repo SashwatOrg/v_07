@@ -1,9 +1,9 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  CircleUser,
+  CircleUser ,
   Home,
   Menu,
   Package2,
@@ -34,23 +34,87 @@ import { jwtDecode } from "jwt-decode";
 import { EventDataTableDemo } from "./optionsForCustomizedReport/EventDataTableDemo";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 
-interface User {
-  email: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  username: string | null;
-  photoURL: string | null;
-  institute_id: number | null;
-  type_id: number | null;
-  is_active: boolean;
-  gender: string;
-}
+// ReportAccessDialog Component
+const ReportAccessDialog: React.FC<{
+  logId: number | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccessfulAccess: (filePath: string, reportType?: string) => void;
+}> = ({ logId, isOpen, onClose, onSuccessfulAccess }) => {
+  const [password, setPassword] = useState<string>('');
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
 
+  const handleVerifyPassword = async () => {
+    if (!logId) {
+      toast.error("Invalid report log ID");
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      const response = await fetch('http://localhost:3000/pdf/verify-report-access', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          logId, 
+          password 
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        onSuccessfulAccess(data.filePath, data.reportType);
+        toast.success("Report access verified successfully!");
+        onClose();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Invalid password");
+      }
+    } catch (error) {
+      console.error("Password verification error:", error);
+      toast.error("An error occurred during password verification");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Verify Report Access</DialogTitle>
+          <DialogDescription>
+            Enter the password from the downloaded CSV file to access the report.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col space-y-4">
+          <Input
+            type="password"
+            placeholder="Enter report access password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button 
+            onClick={handleVerifyPassword} 
+            disabled={isVerifying}
+          >
+            {isVerifying ? "Verifying..." : "Verify Password"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Main Component
 export const GenerateEventReport: FC = () => {
   const location = useLocation();
   const { user } = location.state || {};
-  const [currentUser, setCurrentUser] = useState<User | null>(user || null);
+  const [currentUser , setCurrentUser ] = useState<User | null>(user || null);
   const [isCustomized, setIsCustomized] = useState<boolean>(false);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const navigate = useNavigate();
@@ -59,6 +123,8 @@ export const GenerateEventReport: FC = () => {
   const [showReportTypeDialog, setShowReportTypeDialog] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [reportLogId, setReportLogId] = useState<number | null>(null);
+  const [isReportAccessDialogOpen, setIsReportAccessDialogOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -78,7 +144,7 @@ export const GenerateEventReport: FC = () => {
         return;
       }
 
-      if (!currentUser) {
+      if (!currentUser ) {
         const userDetails: User = {
           username: decoded.username,
           first_name: decoded.first_name,
@@ -87,13 +153,14 @@ export const GenerateEventReport: FC = () => {
           institute_id: decoded.institute_id,
           type_id: decoded.type_id,
           gender: decoded.gender,
+          user_id: decoded.id,
         };
-        setCurrentUser(userDetails);
+        setCurrentUser (userDetails);
       }
     } catch (err) {
       navigate("/login");
     }
-  }, [navigate, currentUser]);
+  }, [navigate, currentUser ]);
 
   const handleLogout = () => {
     Cookies.remove("token");
@@ -118,10 +185,11 @@ export const GenerateEventReport: FC = () => {
       options: isCustomized ? selectedOptions : ["1", "2", "3", "4", "5", "6", "7", "8"],
       year: yearLowerLimit,
       user: {
-        first_name: currentUser?.first_name,
-        last_name: currentUser?.last_name,
-        institute_id: currentUser?.institute_id,
-        email: currentUser?.email,
+        first_name: currentUser ?.first_name,
+        last_name: currentUser ?.last_name,
+        institute_id: currentUser ?.institute_id,
+        email: currentUser ?.email,
+        user_id: currentUser ?.userid,
       },
       format,
     };
@@ -138,7 +206,7 @@ export const GenerateEventReport: FC = () => {
           return prev + 10;
         });
       }, 500);
-
+      console.log('the data sending from front event is ',body)
       const response = await fetch(`http://localhost:3000${endpoint}`, {
         method: "POST",
         headers: {
@@ -150,16 +218,22 @@ export const GenerateEventReport: FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        if (format === "pdf") {
-          const filePath = data.filePath;
-          window.open(`http://localhost:3000/pdfs/${filePath}`, '_blank');
-        } else if (format === "html") {
-          const filePath = data.filePath;
-          const downloadLink = document.createElement("a");
-          downloadLink.href = `http://localhost:3000${filePath}`;
-          downloadLink.download = filePath.split('/').pop();
-          downloadLink.click();
+        const filePath = data.filePath;
+
+        // Store log ID for potential future use
+        setReportLogId(data.logId);
+
+        // Open password verification dialog
+        setIsReportAccessDialogOpen(true);
+
+        // Download Password CSV
+        if (data.passwordCsvPath) {
+          const csvLink = document.createElement("a");
+          csvLink.href = `http://localhost:3000${data.passwordCsvPath}`;
+          csvLink.download = "report_access_credentials.csv";
+          csvLink.click();
         }
+
         toast.success("Report generated successfully!", {
           className: "custom-toast",
           autoClose: 1000,
@@ -191,11 +265,58 @@ export const GenerateEventReport: FC = () => {
     setShowReportTypeDialog(true);
   };
 
+  const handleSuccessfulAccess = async (filePath: string, reportType?: string) => {
+    try {
+      const token = Cookies.get("token");
+      const newTab = window.open('about:blank', '_blank');
+
+      const response = await fetch(filePath, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': reportType === 'pdf' ? 'application/pdf' : 'text/html'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('File fetch error:', { 
+          status: response.status, 
+          statusText: response.statusText,
+          errorText 
+        });
+        throw new Error(`Failed to fetch file: ${errorText}`);
+      }
+
+      // HTML handling
+      if (reportType === 'html') {
+        const htmlContent = await response.text();
+        if (newTab) {
+          newTab.document.open();
+          newTab.document.write(htmlContent);
+          newTab.document.close();
+        }
+      } else {
+        // PDF handling
+        const blob = await response.blob();
+        const fileURL = URL.createObjectURL(blob);
+        if (newTab) {
+          newTab.location.href = fileURL;
+        }
+      }
+    } catch (error) {
+      console.error("Detailed error accessing report:", error);
+      toast.error(`An error occurred: ${error.message}`);
+    } finally {
+      setReportLogId(null);
+      setIsReportAccessDialogOpen(false);
+    }
+  };
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
-      <Sidebar user={currentUser} activePage="generate-event" />
+      <Sidebar user={currentUser } activePage="generate-event" />
       <div className="flex flex-col">
-        {/* Header component remains the same as in previous example */}
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
             <h1 className="text-2xl text-primary font-bold">Generate Event Report</h1>
@@ -212,7 +333,7 @@ export const GenerateEventReport: FC = () => {
                   : "You are generating the default event report."}
               </p>
               <div className="mb-4">
-               <Label className="mr-2">Select Year:</Label>
+                <Label className="mr-2">Select Year:</Label>
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
@@ -252,24 +373,12 @@ export const GenerateEventReport: FC = () => {
               </DialogContent>
             </Dialog>
 
-            <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Alert</DialogTitle>
-                  <DialogDescription>
-                    You need to log in again to continue. Do you want to log out?
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-end">
-                  <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
-                    No
-                  </Button>
-                  <Button variant="primary" onClick={handleLogout}>
-                    Yes
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <ReportAccessDialog
+              logId={reportLogId}
+              isOpen={isReportAccessDialogOpen}
+              onClose={() => setIsReportAccessDialogOpen(false)}
+              onSuccessfulAccess={handleSuccessfulAccess}
+            />
           </div>
         </main>
       </div>

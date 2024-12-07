@@ -14,19 +14,9 @@ if (!fs.existsSync(pdfDirectory)) {
 const generatePlacementPdf = async (req, res) => {
   try {
     const { options, year, user } = req.body; // Get user details from request
-    // console.log('hey i am inside generatePdf');
-    // console.log('Request body:', req.body);
 
     // Generate placement data based on options and year
     const placementData = await userQueries.getPlacementData(options, year);
-    // console.log('Placement data retrieved:', placementData);
-
-    const pdfFileName = `placement_report_${year}.pdf`; // Example file name
-    const pdfFilePath = path.join(pdfDirectory, pdfFileName); // Use the absolute path
-
-    // Use Puppeteer to generate PDF
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
 
     // Check if placement data is not empty before generating the PDF
     if (placementData.length === 0) {
@@ -37,9 +27,27 @@ const generatePlacementPdf = async (req, res) => {
 
     // Fetch institute name based on institute_id
     const instituteId = user.institute_id; // Get institute_id from user
-    const instituteData = await userQueries.getInstituteName(instituteId); // You need to implement this function
-    // console.log('the insitue data is ', instituteData);
+    const instituteData = await userQueries.getInstituteName(instituteId);
     const instituteName = instituteData[0]?.institute_name || 'Institute Name'; // Default name if not found
+
+    // Determine the next version number
+    const departmentName = 'Placement'; // Adjust as necessary
+    const [versionRows] = await db.promise().query(
+      `SELECT COALESCE(MAX(version), 0) + 1 AS next_version 
+       FROM report_logs 
+       WHERE report_year = ? AND department_name = ?`,
+      [year, departmentName]
+    );
+
+    const nextVersion = versionRows[0].next_version;
+
+    // Prepare the PDF file name and path
+    const pdfFileName = `placement_report_${year}_v${nextVersion}.pdf`; // Include version in the name
+    const pdfFilePath = path.join(pdfDirectory, pdfFileName); // Use the absolute path
+
+    // Use Puppeteer to generate PDF
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
 
     // Prepare the HTML content for the PDF
     const htmlContent = `
@@ -70,59 +78,58 @@ const generatePlacementPdf = async (req, res) => {
           }
         </style>
       </head>
-   <body>
-  <!-- Timestamp at top-right corner -->
-  <div style="position: fixed; top: 20px; right: 20px; font-size: 12px; color: #555;">
-    Generated on: ${new Date().toLocaleString()}
-  </div>
+      <body>
+        <!-- Timestamp at top-right corner -->
+        <div style="position: fixed; top: 20px; right: 20px; font-size: 12px; color: #555;">
+          Generated on: ${new Date().toLocaleString()}
+        </div>
 
-  <!-- Introductory content -->
-  <div style="page-break-after: always; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 90vh; text-align: center; font-family: Arial, sans-serif; line-height: 1.8;">
-    <h1 style="margin: 0; font-size: 36px; font-weight: bold;">Placement Report for Year: ${year}</h1>
-    <div style 
-    <div style="margin-top: 20px; font-size: 18px;">
-      <p style="margin: 5px 0;">Prepared by: ${user.first_name} ${user.last_name}</p>
-      <p style="margin: 5px 0;">Department: Placement Department</p>
-      <p style="margin: 5px 0;">Email: ${user.email}</p>
-    </div>
-  </div>
+        <!-- Introductory content -->
+        <div style="page-break-after: always; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 90vh; text-align: center; font-family: Arial, sans-serif; line-height: 1.8;">
+          <h1 style="margin: 0; font-size: 36px; font-weight: bold;">Placement Report for Year: ${year}</h1>
+          <div style="margin-top: 20px; font-size: 18px;">
+            <p style="margin: 5px 0;">Prepared by: ${user.first_name} ${user.last_name}</p>
+            <p style="margin: 5px 0;">Department: Placement Department</p>
+            <p style="margin: 5px 0;">Email: ${user.email}</p>
+          </div>
+        </div>
 
-  <!-- Placement data table -->
-  <table>
-    <thead>
-      <tr>
-        <th>Student Name</th>
-        <th>Company</th>
-        <th>Position</th>
-        <th>Salary</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${placementData.map(data => `
-        <tr>
-          <td>${data.student_name}</td>
-          <td>${data.company_name}</td>
-          <td>${data.position}</td>
-          <td>${data.salary}</td>
-        </tr>
-      `).join('')}
-    </tbody>
-  </table>
+        <!-- Placement data table -->
+        <table>
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Company</th>
+              <th>Position</th>
+              <th>Salary</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${placementData.map(data => `
+              <tr>
+                <td>${data.student_name}</td>
+                <td>${data.company_name}</td>
+                <td>${data.position}</td>
+                <td>${data.salary}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
 
-  <!-- Footer with Institute Name -->
-  <div class="footer" style="position: fixed; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 16px; font-weight: bold;">
-    ${instituteName}
-  </div>
+        <!-- Footer with Institute Name -->
+        <div class="footer" style="position: fixed; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 16px; font-weight: bold;">
+          ${instituteName}
+        </div>
 
-  <!-- Page Number -->
-  <div class="page-number">
-    <script type="text/php">
-      if ( isset($pdf) ) {
-        $pdf->page_script('page {PAGE_NUM} of {PAGE_COUNT}');
-      }
-    </script>
-  </div>
-</body>
+        <!-- Page Number -->
+        <div class="page-number">
+          <script type="text/php">
+            if ( isset($pdf) ) {
+              $pdf->page_script('page {PAGE_NUM} of {PAGE_COUNT}');
+            }
+          </script>
+        </div>
+      </body>
       </html>
     `;
 
@@ -131,17 +138,20 @@ const generatePlacementPdf = async (req, res) => {
 
     await browser.close();
 
+    // Insert log into report_logs
+    await db.promise().query(
+      `INSERT INTO report_logs (report_type, report_name, generated_by_user_id, report_year, department_name, version, file_path)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      ['pdf', pdfFileName, user.id, year, departmentName, nextVersion, pdfFilePath]
+    );
+
     // Check if the file exists after generation
     if (!fs.existsSync(pdfFilePath)) {
-      return res
-        .status(404)
-        .json({ message: 'PDF not found after generation' });
+      return res.status(404).json({ message: 'PDF not found after generation' });
     }
 
     // Send the PDF file path or success message to the frontend
-    return res
-      .status(200)
-      .json({ message: 'PDF generated successfully', filePath: pdfFileName });
+    return res.status(200).json({ message: 'PDF generated successfully', filePath: pdfFileName });
   } catch (error) {
     console.error('Error generating PDF:', error);
     res.status(500).json({ message: 'Error generating PDF' });
