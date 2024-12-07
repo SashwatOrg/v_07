@@ -10,7 +10,7 @@ interface ProfileSectionProps {
 
 export const ProfileSection: FC<ProfileSectionProps> = ({ user }) => (
   <div className="mt-auto pl-0 p-2">
-    <a href="/profile" className="flex items-center px-4 mb-2 mx-2 ml-5">
+    <a href="/profile" className="flex items-center px-4 mb-2 mx-2 ml-5 bg-customBackground">
       {user?.photoURL ? (
         <img
           src={user.photoURL}

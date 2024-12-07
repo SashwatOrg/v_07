@@ -10,13 +10,13 @@ interface AddSidebarProps {
     email: string | null;
     username: string | null;
     institute_id: number | null;
-    type_id: number | null;
+    type_id: string | null;
   } | null;
 }
 
 export const SidebarHeader: FC<AddSidebarProps> = ({ user }) => {
   return ( // Use return to properly return the JSX
-    <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+    <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6 bg-customBackground">
       <Link to={`/dashboard/${user?.username}`} className="flex items-center gap-2 font-semibold"> {/* Use template literals with backticks */}
         <FileCheck2 className="h-6 w-6" />
         <span>ReportEase</span>

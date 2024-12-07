@@ -113,7 +113,7 @@ const App: React.FC = () => {
           <Route path="/media" element={<UploadMedia/>} />
           <Route path="/generate-finance-report" element={<GenerateFinancialReport/>} />
           <Route path="/generate-placement-report" element={<GeneratePlacementReport/>} />
-          <Route path="/pie" element={<PieInteractive institute_id={1}/>} />
+          <Route path="/pie" element={<PieInteractive />} />
           <Route path="/support" element={<Support />} />
           <Route path="/user-management" element={<UserManagement />} />
           <Route

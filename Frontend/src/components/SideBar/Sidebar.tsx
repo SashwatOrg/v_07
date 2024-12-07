@@ -40,11 +40,11 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
   }, [user?.institute_id]);
 
   return (
-    <div className="hidden border-r bg-muted/40 md:block w-[230px]">
+    <div className="hidden border-r bg-muted/40 md:block w-[230px] bg-customBackground">
       <div className="flex flex-col gap-2">
         <SidebarHeader user={user} activePage="add-finance" />
 
-        <nav className="flex-1 grid items-start px-2 text-sm font-medium lg:px-4">
+        <nav className="flex-1 grid items-start px-2 text-sm font-medium lg:px-4 bg-customBackground">
           {/* Add Data Dialog for Faculty (type_id = 3) */}
           {/* Dashboard Link  */}
           <Link

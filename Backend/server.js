@@ -133,6 +133,7 @@ const getInfraRoutes = require("./routes/getInfraRoutes");
 const getClubRoutes = require("./routes/getClubRoutes");
 const getUsersRoutes = require("./routes/getUsersRoutes"); 
 const toggleUserStatus = require("./routes/toggleUserStatusRoutes"); 
+const instAdminDashRoutes = require("./routes/instAdminDashRoutes");
 
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
@@ -183,6 +184,7 @@ app.use("/api", getInfraRoutes);
 app.use("/api", getClubRoutes);
 app.use("/api", getUsersRoutes);
 app.use("/api", toggleUserStatus);
+app.use("/api", instAdminDashRoutes);
 
 //HK add Courses
 

@@ -19,7 +19,7 @@ interface AddDataDialogProps {
     email: string | null;
     username: string | null;
     institute_id: number | null;
-    type_id: number | null;
+    type_id: string | null;
   } | null;
 }
 

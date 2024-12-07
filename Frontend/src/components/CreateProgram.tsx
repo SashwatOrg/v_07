@@ -255,7 +255,7 @@ export const CreateProgram: FC = () => {
       const response = await fetch(
         `http://localhost:3000/api/create-program/${user?.username}`,
         {
-          method: " POST",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,

@@ -15,6 +15,9 @@ theme: {
 		colors: {
 			background: 'hsl(var(--background))',
 			foreground: 'hsl(var(--foreground))',
+			customBackground: '#f1f4fc',
+			custom2: '#e6f0ff',
+
 			card: {
 				DEFAULT: 'hsl(var(--card))',
 				foreground: 'hsl(var(--card-foreground))'
