@@ -24,6 +24,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { InfraCard } from "./InfraCard";
+
+
 
 
 interface User {
@@ -39,6 +42,18 @@ interface User {
 }
 
 
+interface InfraCardProps {
+  infra_id: number;
+  department: string;
+  description: string;
+  budget: number;
+  startdate: Date;
+  enddate: Date;
+  onUpdate: (data: any) => void;
+  onDelete: (data: any) => void;
+}
+
+
 export const CreateInfrastructure: FC = () => {
   const [user, setUser ] = useState<User | null>(null);
   const [infraDesc, setInfraDesc] = useState<string>("");
@@ -47,6 +62,10 @@ export const CreateInfrastructure: FC = () => {
   const [endDate, setEndDate] = useState<Date>();
   const [dept, setDept] = useState("");
   const [departments, setDepartments] = useState<string[]>([]);
+  const [infras, setInfras] = useState<InfraCardProps[]>([]);
+  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  console.log('Infras:',infras);
   const navigate = useNavigate();
 
 
@@ -69,10 +88,115 @@ export const CreateInfrastructure: FC = () => {
     };
 
 
+
+
     if (user?.institute_id) {
       fetchDepartments();
     }
   }, [user?.institute_id]);
+
+
+  useEffect(() => {
+    const fetchInfra = async () => {
+      try {
+        console.log(user?.institute_id);
+        if(!user?.institute_id)
+          return;
+        const response = await fetch(`http://localhost:3000/api/infrastructure/${user?.institute_id}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const infraData = await response.json();
+        console.log(infraData);
+        setInfras(infraData);
+      } catch (error) {
+        console.error('Error fetching infrastructure:', error);
+        setInfras([]);
+      }
+    };
+
+
+    // Initial fetch
+    fetchInfra();
+
+
+    // Polling interval for continuous updating
+    // const interval = setInterval(fetchDepartments, 30000);
+
+
+    // return () => clearInterval(interval); // Cleanup on unmount
+  }, [user?.institute_id]); // Re-run if user or institute_id changes
+
+
+  const handleUpdateInfra = async (updatedData: any) => {
+    console.log(updatedData);
+    try {
+      const budget = updatedData.budget;
+      const start_date = updatedData.startdate;
+      const end_date = updatedData.enddate;
+      const infra_desc = updatedData.description;
+      const dept_id = updatedData.dept_id;
+      const department = updatedData.department;
+      console.log({department, infra_desc, budget, start_date, end_date});
+
+
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/update-infrastructure/${updatedData.infra_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({department, infra_desc, budget, start_date, end_date}),
+      });
+      if (response.ok) {
+        toast.success('Infrastructure updated successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to update infrastructure.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while updating the infrastructure.');
+    }
+  };  
+
+
+  const handleDeleteInfra = async (data) => {
+    try {
+      const dept_id = data.dept_id;
+
+
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/delete-infrastructure/${data.infra_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+ 
+      if (response.ok) {
+        toast.success('Infrastructure deleted successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to delete infrastructure.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while deleting the infrastructure.');
+    }
+  };
 
 
   useEffect(() => {
@@ -83,9 +207,13 @@ export const CreateInfrastructure: FC = () => {
     }
 
 
+
+
     try {
       const decoded: any = jwtDecode(token);
       const currentTime = Date.now() / 1000;
+
+
 
 
       if (decoded.exp < currentTime) {
@@ -94,6 +222,8 @@ export const CreateInfrastructure: FC = () => {
         navigate('/login');
         return;
       }
+
+
 
 
       const userDetails: User = {
@@ -107,10 +237,14 @@ export const CreateInfrastructure: FC = () => {
       };
 
 
+
+
       setUser(userDetails);
     } catch (err) {
       navigate('/login');
     }
+
+
 
 
     const loadDepartments = async () => {
@@ -119,10 +253,16 @@ export const CreateInfrastructure: FC = () => {
     };
 
 
+
+
     loadDepartments();
 
 
+
+
   }, [navigate]);
+
+
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,7 +291,7 @@ export const CreateInfrastructure: FC = () => {
         toast.success('Event created successfully!', {
           className: 'custom-toast',
           autoClose: 2000,
-          onClose: () => navigate(`/admin/create-event`),
+          onClose: () => navigate(`/admin/create-infrastructure`),
         });
         setInfraBudget(0);
         setDept("");
@@ -164,6 +304,112 @@ export const CreateInfrastructure: FC = () => {
       toast.error('An error occurred. Please try again later.');
     }
   };
+
+
+  const handleBulkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+
+
+
+    const token = Cookies.get("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+
+
+
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("institute_id", user?.institute_id.toString());
+      console.log([...formData]);
+
+
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/infrastructure/upload",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          }
+        );
+
+
+
+
+        if (response.ok) {
+          toast.success("Infrastructure data uploaded successfully!", {
+            className: "custom-toast",
+            autoClose: 2000,
+            onClose: () => navigate(`/admin/create-event`),
+          });
+        } else {
+          const errorData = await response.json();
+          toast.error(
+            errorData.message || "Failed to upload infrastructure data."
+          );
+        }
+      } catch (err) {
+        toast.error(
+          "An error occurred while uploading the file. Please try again later."
+        );
+      }
+    } else {
+      toast.error("Please select a file to upload.");
+    }
+  };
+
+
+
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/infrastructure/template");
+      if (!response.ok) {
+        throw new Error("Failed to download template");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", "infrastructure_template.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      toast.error("Error downloading template: " + error.message);
+    }
+  };
+
+
+  const handleDownloadData = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/infrastructure/download?institute_id=${user?.institute_id}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to download data");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", "infrastructure_data.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      toast.error("Error downloading data: " + error.message);
+    }
+  };
+
+
+
+
 
 
   return (
@@ -240,7 +486,7 @@ export const CreateInfrastructure: FC = () => {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Create Infrastructure</h1>
+            <h1 className="text-2xl text-primary font-bold">Infrastructure</h1>
           </div>
           <div className="flex flex-col items-center justify-center">
           <Dialog>
@@ -294,12 +540,60 @@ export const CreateInfrastructure: FC = () => {
                 </DialogClose>
               </DialogContent>
             </Dialog>
+            <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="mb-4 border-2">
+                  Bulk Upload
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[725px]">
+                <DialogHeader>
+                  <DialogTitle>Bulk Upload Infrastructure</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col gap-4">
+                  <Input
+                    type="file"
+                    accept=".xlsx"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        setFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                  <div className="flex gap-4 mt-4">
+                    <Button onClick={handleBulkSubmit}>
+                      Upload Infrastructure Data
+                    </Button>
+                    <Button onClick={handleDownloadTemplate}>
+                      Download Template
+                    </Button>
+                    <Button onClick={handleDownloadData}>Download Data</Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             </div>
+            <div className="pl-3 grid gap-x-10 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-32 lg:gap-y-4">
+            {infras.map((infra) => (
+              <InfraCard
+              department={infra.department}
+              description={infra.description}
+              start_date={infra.startdate}
+              end_date={infra.enddate}
+              budget={infra.budget}
+              infra_id={infra.infra_id}
+              onUpdate={handleUpdateInfra}
+              onDelete={handleDeleteInfra}
+              dept={departments}
+              />
+            ))}
+          </div>
         </main>
       </div>
     </div>
   );
 };
+
 
 
 

@@ -45,6 +45,9 @@ import { GenerateClubReport } from './components/GenerateDepartmentReport/Genera
 import { GenerateStudentAndFacultyAdministrationReport } from './components/GenerateDepartmentReport/GenerateStudentAndFacultyAdministrationReport';
 import { GenerateAcademicReport } from './components/GenerateDepartmentReport/GenerateAcademicReport';
 import ReportVersionSelector from './components/ReportVersionSelector';
+import { UserManagement } from './components/UserManagement';
+
+
 
 const App: React.FC = () => {
 
@@ -124,6 +127,7 @@ const App: React.FC = () => {
           <Route path="/generate-studentandfacultyadministration-report" element={<GenerateStudentAndFacultyAdministrationReport/>} />
           <Route path="/generate-academic-report" element={<GenerateAcademicReport/>} />
           <Route path="/view-reports/:institute_id" element={<ReportVersionSelector />} /> <Route path="/support" element={<Support />} />
+          <Route path="/user-management" element={<UserManagement />} />
           <Route
             path="/profile/:userid"
             element={

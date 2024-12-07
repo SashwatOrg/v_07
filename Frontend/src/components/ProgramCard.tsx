@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
+
 interface ProgramCardProps {
   program_id: number;
   program_name: string;
@@ -17,6 +18,7 @@ interface ProgramCardProps {
   width?: string;
   height?: string;
 }
+
 
 export function ProgramCard({
   program_id,
@@ -37,6 +39,7 @@ export function ProgramCard({
   const [updatedIntake, setUpdatedIntake] = useState(intake);
   const [updatedSemesterCount, setUpdatedSemesterCount] = useState(semester_count);
 
+
   const handleUpdate = () => {
     onUpdate({
       program_id,
@@ -48,10 +51,12 @@ export function ProgramCard({
     setIsDialogOpen(false);
   };
 
+
   const handleDelete = () => {
     onDelete({ program_id });
     setIsDialogOpen(false);
   };
+
 
   return (
     <>
@@ -76,6 +81,7 @@ export function ProgramCard({
             </div>
           </Card>
         </DialogTrigger>
+
 
         <DialogContent className="p-6 max-w-lg mx-auto">
           <DialogHeader>
@@ -149,3 +155,7 @@ export function ProgramCard({
     </>
   );
 }
+
+
+
+

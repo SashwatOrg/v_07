@@ -72,7 +72,7 @@ exports.login = async (req, res) => {
   const { username, password } = req.body;
   // console.log("the username & password  is ", username, " ", password);
   const hashedPassword = md5(password);
-  const query = "SELECT * FROM `user` WHERE username = ?";
+  const query = "SELECT * FROM `user` WHERE username = ? AND is_active=1";
   db.query(query, [username], async (err, results) => {
     if (err) {
       return res.status(500).json({ message: "Internal server error" });

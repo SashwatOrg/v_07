@@ -10,6 +10,7 @@ import {
   Search,
   Command,
   User,
+  Landmark,
 } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { Label } from "@/components/ui/label";
@@ -27,6 +28,8 @@ import ModeToggle from "./mode-toggle";
 import { Sidebar } from "./SideBar/Sidebar";
 import Cookies from "js-cookie";
 import { Combobox } from "./Combobox";
+import Institute from '../components/icons/institute.png'
+
 
 interface User {
   email: string | null;
@@ -40,6 +43,7 @@ interface User {
   gender: string;
 }
 
+
 interface Institute {
   institute: string | null;
   addressl1: string | null;
@@ -48,6 +52,7 @@ interface Institute {
   state: string | null;
   country: string | null;
 }
+
 
 const frameworks = [
   {
@@ -94,6 +99,7 @@ const frameworks = [
   { value: "West Bengal", label: "West Bengal" },
 ];
 
+
 export const ManageInstitute: FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [institute, setInstitute] = useState("");
@@ -107,10 +113,12 @@ export const ManageInstitute: FC = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
+
   const handleFrameworkChange = (selectedValue: string) => {
     console.log("Selected Framework:", selectedValue);
     setState(selectedValue);
   };
+
 
   const MyCombobox = () => {
     useEffect(() => {
@@ -133,8 +141,10 @@ export const ManageInstitute: FC = () => {
         }
       };
 
+
       fetchState();
     }, []);
+
 
     return (
       <Combobox
@@ -148,6 +158,7 @@ export const ManageInstitute: FC = () => {
     );
   };
 
+
   useEffect(() => {
     const token = Cookies.get("token");
     if (!token) {
@@ -155,9 +166,11 @@ export const ManageInstitute: FC = () => {
       return;
     }
 
+
     try {
       const decoded: any = jwtDecode(token);
       const currentTime = Date.now() / 1000;
+
 
       if (decoded.exp < currentTime) {
         alert("Session expired. Please login again.");
@@ -165,6 +178,7 @@ export const ManageInstitute: FC = () => {
         navigate("/login");
         return;
       }
+
 
       const userDetails: User = {
         username: decoded.username,
@@ -178,15 +192,18 @@ export const ManageInstitute: FC = () => {
         photoURL: decoded.photoURL, // If you have this in the token
       };
 
+
       setUser(userDetails);
     } catch (err) {
       navigate("/login");
     }
   }, [navigate]);
 
+
   useEffect(() => {
     const fetchInstitute = async () => {
       if (!user?.username) return;
+
 
       try {
         console.log("Fetching for user:", user.username);
@@ -210,8 +227,10 @@ export const ManageInstitute: FC = () => {
       }
     };
 
+
     fetchInstitute();
   }, [user]);
+
 
   // Update institute details
   const handleSaveChanges = async () => {
@@ -233,6 +252,7 @@ export const ManageInstitute: FC = () => {
         }
       );
 
+
       if (response.ok) {
         alert("Institute details updated successfully!");
       } else {
@@ -243,14 +263,17 @@ export const ManageInstitute: FC = () => {
     }
   };
 
+
   if (loading) {
     return <div>Loading...</div>;
   }
+
 
   const handleLogout = async () => {
     setUser(null);
     navigate("/login");
   };
+
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
@@ -294,11 +317,11 @@ export const ManageInstitute: FC = () => {
                 <Input
                   type="search"
                   placeholder="Search or Type a Job"
-                  className="h-10 px-3 mr-50 ring-offset-background file:border-0 file:bg-transparent file:text-sm 
-                  file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 
-                  focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed py-2 ps-10 pe-16 
-                  block w-1/2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-200 
-                  focus:ring-0 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 
+                  className="h-10 px-3 mr-50 ring-offset-background file:border-0 file:bg-transparent file:text-sm
+                  file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2
+                  focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed py-2 ps-10 pe-16
+                  block w-1/2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-200
+                  focus:ring-0 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700
                   dark:text-neutral-400 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-600"
                 />
                 <div className="absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-3 text-gray-400">
@@ -327,7 +350,7 @@ export const ManageInstitute: FC = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>
-                {user?.displayName || "My Account"}
+                {user?.username || "My Account"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -346,21 +369,27 @@ export const ManageInstitute: FC = () => {
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 m-4 overflow-auto">
           <div className="space-y-0.5">
             <div className="">
+              <div className="flex flex-row gap-2">
+                <div className="h-10 w-10">
+              <img src={Institute} alt="Institute" />
+              </div>
               <h2 className="text-2xl font-bold tracking-tight pt-2">
                 Manage Institute
               </h2>
+              </div>
               <p className="text-muted-foreground pb-6">
                 Edit your institute information here
               </p>
               <Separator />
             </div>
-            <h2 className="text-lg font-medium p-2">Institute Details</h2>
+            <h2 className="text-xl font-medium p-2 font-extrabold">Institute Details</h2>
             <Separator className="shrink-0 bg-border h-[1px] my-2 w-1/2" />
+
 
             <div className="mt-4">
               <Label
                 htmlFor="instname"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-neutral-200"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-neutral-200 pt-2"
               >
                 Institute Name
               </Label>
@@ -382,6 +411,7 @@ export const ManageInstitute: FC = () => {
               institute name.
             </p>
 
+
             <div className="mt-4">
               <Label
                 htmlFor="addrl1"
@@ -389,7 +419,7 @@ export const ManageInstitute: FC = () => {
               >
                 Address Line 1
               </Label>
-              <div className="mt-2">
+              <div className="mt-2 pb-4">
                 <Input
                   type="string"
                   name="addrl1"
@@ -402,6 +432,7 @@ export const ManageInstitute: FC = () => {
               </div>
             </div>
 
+
             <div className="flex flex-wrap gap-4 mt-4">
               <div className="flex-1 sm:col-span-3 mr-3">
                 <Label
@@ -410,7 +441,7 @@ export const ManageInstitute: FC = () => {
                 >
                   Sub-district
                 </Label>
-                <div className="mt-2">
+                <div className="mt-2 pb-4">
                   <Input
                     type="text"
                     name="subdist"
@@ -422,6 +453,7 @@ export const ManageInstitute: FC = () => {
                   />
                 </div>
               </div>
+
 
               <div className="flex-1 sm:col-span-3">
                 <Label
@@ -444,6 +476,7 @@ export const ManageInstitute: FC = () => {
               </div>
             </div>
 
+
             <div className="flex flex-wrap gap-4 mt-4">
               <div className="flex-1 sm:col-span-3 mr-3">
                 <Label
@@ -456,6 +489,7 @@ export const ManageInstitute: FC = () => {
                   <MyCombobox />
                 </div>
               </div>
+
 
               <div className="flex-1 sm:col-span-3">
                 <Label
@@ -492,3 +526,7 @@ export const ManageInstitute: FC = () => {
     </div>
   );
 };
+
+
+
+
