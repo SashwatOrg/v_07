@@ -72,7 +72,7 @@ exports.login = async (req, res) => {
   const { username, password } = req.body;
   // console.log("the username & password  is ", username, " ", password);
   const hashedPassword = md5(password);
-  const query = "SELECT * FROM `user` WHERE username = ?";
+  const query = "SELECT * FROM `user` WHERE username = ? AND is_active = 1";
   db.query(query, [username], async (err, results) => {
     if (err) {
       return res.status(500).json({ message: "Internal server error" });
@@ -113,6 +113,21 @@ exports.login = async (req, res) => {
       { expiresIn: "12h" }
     );
 
+    const userId = user.user_id;
+    const logQuery = `
+      INSERT INTO loginhistory (user_id, login_time)
+      VALUES (?, NOW())
+    `;
+
+    // Insert login log into the database
+    db.query(logQuery, [userId], (logErr) => {
+      if (logErr) {
+        console.error("Failed to log login attempt:", logErr);
+        // Optional: Return a response indicating failure to log (if critical)
+        return res.status(500).json({ message: "Failed to log login attempt" });
+      }
+
     res.status(200).json({ token });
   });
+});
 };

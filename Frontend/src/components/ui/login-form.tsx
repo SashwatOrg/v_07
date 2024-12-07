@@ -70,6 +70,10 @@ export const LoginForm: FC = () => {
         });
       } else {
         setError(data.message || 'Login failed');
+        toast.error('Invalid username or password!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
       }
     } catch (err) {
       setError('An error occurred. Please try again later.');

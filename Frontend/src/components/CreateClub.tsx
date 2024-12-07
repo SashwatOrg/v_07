@@ -4,7 +4,6 @@ import { CircleUser , Command, Home, Menu, Package2, Search } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar/Sidebar";
 import ModeToggle from "./mode-toggle";
@@ -16,15 +15,8 @@ import { toast, ToastContainer } from 'react-toastify'; // Import ToastContainer
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for toast notifications
 import { jwtDecode } from 'jwt-decode';
 import { Combobox } from "./Combobox";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select";
+import { ClubCard } from "./ClubCard";
 
 interface User {
   email: string | null;
@@ -38,6 +30,13 @@ interface User {
   gender: string;
 }
 
+interface ClubCardProps {
+  club_id: number;
+  club_name: string;
+  club_type: string;
+  email_id: string;
+}
+
 export const CreateClub: FC = () => {
   const [user, setUser ] = useState<User | null>(null);
   const [clubName, setClubName] = useState("");
@@ -46,62 +45,8 @@ export const CreateClub: FC = () => {
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
   const [faculties, setFaculties] = useState<string[]>([]);
+  const [clubs, setClubs] = useState<ClubCardProps[]>([]);
   const navigate = useNavigate();
-
-  const frameworks = faculties.map((faculty) => ({
-    value: faculty,
-    label: faculty,
-  }));
-
-  const handleFrameworkChange = (selectedValue: string) => {
-    console.log("Selected Framework:", selectedValue);
-    setCoord(selectedValue);
-  };
-
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        console.log('the user is insititue id is ', user?.institute_id);
-        const response = await fetch(`http://localhost:3000/api/clubNames/${user?.institute_id}`);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        if (!Array.isArray(data)) {
-          throw new Error('Unexpected data format');
-        }
-
-        console.log('after sending the response is ', data);
-        const formattedFaculties = data.map(faculty =>
-          `${faculty.first_name} ${faculty.last_name}`
-        );
-
-        setFaculties(formattedFaculties);
-        console.log(formattedFaculties);
-      } catch (error) {
-        console.error('Error fetching departments:', error);
-        setFaculties([]);
-      }
-    };
-
-    if (user?.institute_id) {
-      fetchDepartments();
-    }
-  }, [user?.institute_id]);
-
-  const MyCombobox = () => {
-    console.log('before sending it to combobox', frameworks);
-    return (
-      <Combobox
-        frameworks={frameworks}
-        value={value}
-        setValue={setValue}
-        open={open}
-        setOpen={setOpen}
-        onChange={handleFrameworkChange}
-      />
-    );
-  };
 
   useEffect(() => {
     const token = Cookies.get('token');
@@ -143,6 +88,147 @@ export const CreateClub: FC = () => {
 
     loadDepartments();
   }, [navigate]);
+
+  const frameworks = faculties.map((faculty) => ({
+    value: faculty,
+    label: faculty,
+  }));
+
+  const handleFrameworkChange = (selectedValue: string) => {
+    console.log("Selected:", selectedValue);
+    setCoord(selectedValue);
+  };
+
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        console.log(user?.institute_id);
+        if(!user?.institute_id)
+          return;
+        const response = await fetch(`http://localhost:3000/api/clubs/${user?.institute_id}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const programsData = await response.json();
+        console.log(programsData);
+        setClubs(programsData);
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        setClubs([]);
+      }
+    };
+
+    // Initial fetch
+    fetchClubs();
+
+    // Polling interval for continuous updating
+    // const interval = setInterval(fetchDepartments, 30000);
+
+    // return () => clearInterval(interval); // Cleanup on unmount
+  }, [user?.institute_id]);
+
+  const handleUpdateClub = async (updatedData: any) => {
+    console.log(updatedData);
+    try {
+      const club_head_email = updatedData.club_head;
+      const club_type = updatedData.club_type
+      const club_name = updatedData.club_name;
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/update-club/${updatedData.club_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({club_name, club_type, club_head_email}),
+      });
+  
+      if (response.ok) {
+        toast.success('Department updated successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to update department.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while updating the department.');
+    }
+  };  
+
+  const handleDeleteClub = async (data) => {
+    try {
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/delete-club/${data.club_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+  
+      if (response.ok) {
+        toast.success('Club deleted successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to delete club.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while deleting the club.');
+    }
+  };
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        console.log('the user institute id is ', user?.institute_id);
+        const response = await fetch(`http://localhost:3000/api/clubNames/${user?.institute_id}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+          throw new Error('Unexpected data format');
+        }
+
+        console.log('after sending the response is ', data);
+        const formattedFaculties = data.map(faculty =>
+          `${faculty.first_name} ${faculty.last_name}`
+        );
+
+        setFaculties(formattedFaculties);
+        console.log(formattedFaculties);
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        setFaculties([]);
+      }
+    };
+
+    if (user?.institute_id) {
+      fetchDepartments();
+    }
+  }, [user?.institute_id]);
+
+  const MyCombobox = () => {
+    return (
+      <Combobox
+        frameworks={frameworks}
+        value={value}
+        setValue={setValue}
+        open={open}
+        setOpen={setOpen}
+        onChange={handleFrameworkChange}
+      />
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -309,8 +395,21 @@ export const CreateClub: FC = () => {
               </DialogContent>
             </Dialog>
           </div>
+          <div className="pl-3 grid gap-x-10 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-32 lg:gap-y-4">
+            {clubs.map((club) => (
+              <ClubCard
+              club_id={club.club_id}
+              club_name={club.club_name}
+              club_head={club.email_id}
+              club_type={club.club_type}
+              onUpdate={handleUpdateClub}
+              onDelete={handleDeleteClub}
+              faculties={faculties}
+              />
+            ))}
+          </div>
         </main>
-        <ToastContainer /> {/* Add ToastContainer here */}
+        <ToastContainer />
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { StatsCard } from './StatsCard';
-import { Component } from './visuals/PieInteractive';
+import { PieInteractive } from './visuals/PieInteractive';
 import {
   CircleUser,
   Home,
@@ -285,7 +285,7 @@ export const Dashboard: FC = () => {
                   <StatsCard title="Total Departments" />
                   <StatsCard title="Faculty Count" />
                   <StatsCard title="Total Students" />
-                  <Component institute_id={user.institute_id} />
+                  <PieInteractive institute_id={user.institute_id} />
                 </>
               )}
               {user?.type_id === 2 && (
@@ -293,7 +293,7 @@ export const Dashboard: FC = () => {
                   {/* Coordinator-specific cards */}
                   <StatsCard title="Tasks Assigned" />
                   <StatsCard title="Ongoing Programs" />
-                  <Component institute_id={user.institute_id} />
+                  <PieInteractive institute_id={user.institute_id} />
                 </>
               )}
               {user?.type_id === 3 && (
@@ -301,7 +301,7 @@ export const Dashboard: FC = () => {
                   {/* Faculty-specific cards */}
                   <StatsCard title="Classes Taken" />
                   <StatsCard title="Research Papers" />
-                  <Component institute_id={user.institute_id} />
+                  <PieInteractive institute_id={user.institute_id} />
                 </>
               )}
               {user?.type_id === 4 && (
@@ -309,7 +309,7 @@ export const Dashboard: FC = () => {
                   {/* Student-specific cards */}
                   <StatsCard title="Subjects Enrolled" />
                   <StatsCard title="Assignments Due" />
-                  <Component institute_id={user.institute_id} />
+                  <PieInteractive institute_id={user.institute_id} />
                 </>
               )}
             </div>

@@ -7,7 +7,6 @@ import axios from 'axios';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -28,7 +27,7 @@ import {
 
 
 interface PieProps {
-    institute_id: number | undefined;
+    institute_id: number | null;
   }
 
 
@@ -39,7 +38,7 @@ const chartConfig = {
 } satisfies ChartConfig
 
 
-export function Component({ institute_id }: PieProps) {
+export function PieInteractive({ institute_id }: PieProps) {
   const id = "pie-interactive"
   const [data, setData] = React.useState([])
   const [activeDept, setActiveDept] = React.useState(null)

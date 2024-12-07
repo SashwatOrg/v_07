@@ -39,6 +39,8 @@ import './index.css'
 import WOW from "wow.js";
 import { useLocation } from "react-router-dom";
 import Home from './components/pages/Home/Home';// Your landing page Home component
+import { PieInteractive } from './components/visuals/PieInteractive';
+import { UserManagement } from './components/UserManagement';
 
 const App: React.FC = () => {
 
@@ -111,7 +113,9 @@ const App: React.FC = () => {
           <Route path="/media" element={<UploadMedia/>} />
           <Route path="/generate-finance-report" element={<GenerateFinancialReport/>} />
           <Route path="/generate-placement-report" element={<GeneratePlacementReport/>} />
+          <Route path="/pie" element={<PieInteractive institute_id={1}/>} />
           <Route path="/support" element={<Support />} />
+          <Route path="/user-management" element={<UserManagement />} />
           <Route
             path="/profile/:userid"
             element={

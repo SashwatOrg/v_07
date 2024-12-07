@@ -125,8 +125,14 @@ const deleteProgramRoutes = require("./routes/deleteProgRoutes");
 const getEvents = require("./routes/getEventRoutes");
 const putEventChangesRoutes = require("./routes/putEventRoutes");
 const deleteEventRoutes = require("./routes/deleteEventRoutes");
-
-
+const putClubRoutes = require("./routes/putClubRoutes");
+const deleteClubRoutes = require("./routes/deleteClubRoutes");
+const putInfraRoutes = require("./routes/putInfraRoutes");
+const deleteInfraRoutes = require("./routes/deleteInfraRoutes");
+const getInfraRoutes = require("./routes/getInfraRoutes");
+const getClubRoutes = require("./routes/getClubRoutes");
+const getUsersRoutes = require("./routes/getUsersRoutes"); 
+const toggleUserStatus = require("./routes/toggleUserStatusRoutes"); 
 
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
@@ -169,9 +175,14 @@ app.use("/api", deleteProgramRoutes);
 app.use("/api", getEvents);
 app.use("/api", putEventChangesRoutes);
 app.use("/api", deleteEventRoutes)
-
-
-
+app.use("/api", putClubRoutes);
+app.use("/api", deleteClubRoutes);
+app.use("/api", putInfraRoutes);
+app.use("/api", deleteInfraRoutes);
+app.use("/api", getInfraRoutes);
+app.use("/api", getClubRoutes);
+app.use("/api", getUsersRoutes);
+app.use("/api", toggleUserStatus);
 
 //HK add Courses
 

@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { InfraCard } from "./InfraCard";
 
 
 interface User {
@@ -38,6 +39,16 @@ interface User {
   gender: string;
 }
 
+interface InfraCardProps {
+  infra_id: number;
+  department: string;
+  description: string;
+  budget: number;
+  startdate: Date;
+  enddate: Date;
+  onUpdate: (data: any) => void;
+  onDelete: (data: any) => void;
+}
 
 export const CreateInfrastructure: FC = () => {
   const [user, setUser ] = useState<User | null>(null);
@@ -47,8 +58,9 @@ export const CreateInfrastructure: FC = () => {
   const [endDate, setEndDate] = useState<Date>();
   const [dept, setDept] = useState("");
   const [departments, setDepartments] = useState<string[]>([]);
+  const [infras, setInfras] = useState<InfraCardProps[]>([]);
+  console.log('Infras:',infras);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -74,6 +86,98 @@ export const CreateInfrastructure: FC = () => {
     }
   }, [user?.institute_id]);
 
+  useEffect(() => {
+    const fetchInfra = async () => {
+      try {
+        console.log(user?.institute_id);
+        if(!user?.institute_id)
+          return;
+        const response = await fetch(`http://localhost:3000/api/infrastructure/${user?.institute_id}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const infraData = await response.json();
+        console.log(infraData);
+        setInfras(infraData);
+      } catch (error) {
+        console.error('Error fetching infrastructure:', error);
+        setInfras([]);
+      }
+    };
+
+    // Initial fetch
+    fetchInfra();
+
+    // Polling interval for continuous updating
+    // const interval = setInterval(fetchDepartments, 30000);
+
+    // return () => clearInterval(interval); // Cleanup on unmount
+  }, [user?.institute_id]); // Re-run if user or institute_id changes
+
+  const handleUpdateInfra = async (updatedData: any) => {
+    console.log(updatedData);
+    try {
+      const budget = updatedData.budget;
+      const start_date = updatedData.startdate;
+      const end_date = updatedData.enddate;
+      const infra_desc = updatedData.description;
+      const dept_id = updatedData.dept_id;
+      const department = updatedData.department;
+      console.log({department, infra_desc, budget, start_date, end_date});
+
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/update-infrastructure/${updatedData.infra_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({department, infra_desc, budget, start_date, end_date}),
+      });
+      if (response.ok) {
+        toast.success('Infrastructure updated successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to update infrastructure.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while updating the infrastructure.');
+    }
+  };  
+
+  const handleDeleteInfra = async (data) => {
+    try {
+      const dept_id = data.dept_id;
+
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/delete-infrastructure/${data.infra_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+  
+      if (response.ok) {
+        toast.success('Infrastructure deleted successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to delete infrastructure.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while deleting the infrastructure.');
+    }
+  };
 
   useEffect(() => {
     const token = Cookies.get('token');
@@ -151,7 +255,7 @@ export const CreateInfrastructure: FC = () => {
         toast.success('Event created successfully!', {
           className: 'custom-toast',
           autoClose: 2000,
-          onClose: () => navigate(`/admin/create-event`),
+          onClose: () => navigate(`/admin/create-infrastructure`),
         });
         setInfraBudget(0);
         setDept("");
@@ -295,6 +399,21 @@ export const CreateInfrastructure: FC = () => {
               </DialogContent>
             </Dialog>
             </div>
+            <div className="pl-3 grid gap-x-10 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-32 lg:gap-y-4">
+            {infras.map((infra) => (
+              <InfraCard
+              department={infra.department}
+              description={infra.description}
+              start_date={infra.startdate}
+              end_date={infra.enddate}
+              budget={infra.budget}
+              infra_id={infra.infra_id}
+              onUpdate={handleUpdateInfra}
+              onDelete={handleDeleteInfra}
+              dept={departments}
+              />
+            ))}
+          </div>
         </main>
       </div>
     </div>
