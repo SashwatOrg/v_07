@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, ReactNode } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { User } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -63,6 +62,11 @@ const Profile: React.FC<ProfileProps> = ({
       setSelectedFile(file);
       setPreview(URL.createObjectURL(file));
     }
+  };
+
+  const Navigate=useNavigate();
+  const handleClose = () => {
+    Navigate("/dashboard/"+user.username); // Redirect to dashboard
   };
 
   const handleUpload = async () => {
@@ -138,113 +142,131 @@ const Profile: React.FC<ProfileProps> = ({
     }
   };
 
-  // const handleUpdatePassword = async () => {
-  //   try {
-  //     const currentPassword = document.querySelector(
-  //       'input[placeholder="Current Password"]'
-  //     )?.value;
-  //     const newPassword = document.querySelector(
-  //       'input[placeholder="New Password"]'
-  //     )?.value;
-  //     const confirmPassword = document.querySelector(
-  //       'input[placeholder="Confirm New Password"]'
-  //     )?.value;
-
-  //     if (!currentPassword || !newPassword || !confirmPassword) {
-  //       alert("Please fill in all the fields.");
-  //       return;
-  //     }
-
-  //     if (newPassword !== confirmPassword) {
-  //       alert("New Password and Confirm Password do not match.");
-  //       return;
-  //     }
-
-  //     const response = await axios.put(
-  //       `http://localhost:3000/api/update-password`,
-  //       {
-  //         userId: userid,
-  //         currentPassword,
-  //         newPassword,
-  //       }
-  //     );
-
-  //     alert("Password updated successfully!");
-  //   } catch (error) {
-  //     console.error("Failed to update password:", error);
-  //     alert("Failed to update password. Please try again.");
-  //   }
-  // };
-
   const handleUpdatePassword = async () => {
-    // Get the input values from state
-    const userId = userid; // Replace with your state variable holding `user_id`
+    const userId = userid; // Replace this with the logged-in user's ID
     const currentPassword = document.querySelector(
       'input[placeholder="Current Password"]'
-    )?.value;
+    ).value;
     const newPassword = document.querySelector(
       'input[placeholder="New Password"]'
-    )?.value;
+    ).value;
     const confirmPassword = document.querySelector(
       'input[placeholder="Confirm New Password"]'
-    )?.value; // Replace with your confirm password state
-    console.log("user id  ", userId);
-    console.log("current password is ", currentPassword);
-    console.log("new password is ", newPassword);
-    // Validate input fields
-    if (!userId || !currentPassword || !newPassword || !confirmPassword) {
-      alert("All fields are required.");
-      return;
-    }
+    ).value;
 
     if (newPassword !== confirmPassword) {
       alert("New password and confirm password do not match.");
       return;
     }
 
-    if (newPassword.length < 8) {
-      alert("Password must be at least 8 characters long.");
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/update-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, currentPassword, newPassword }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message);
+      } else {
+        alert(data.error || "Failed to update password.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
+  const [otp, setOtp] = useState("");
+  const [email, setEmail] = useState("");
+  // const [userId, setUserId] = useState("");
+
+  const handleSendResetLink = async () => {
+     const userId = userid; // Replace this with the logged-in user's ID
+     console.log("userId is ", userId);
+    try {
+      const response = await fetch("http://localhost:3000/send-reset-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }), // Replace userId dynamically based on logged-in user
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("OTP sent to your email.");
+        setEmail(data.email); // Store email for later use
+        setSecuritySubSection("verifyOtp"); // Move to OTP verification
+      } else {
+        alert(data.error || "Failed to send reset link.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    
+    const userId = userid; 
+    try {
+      const response = await fetch("http://localhost:3000/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, otp }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("OTP verified.");
+        setSecuritySubSection("resetPassword"); // Move to new password step
+      } else {
+        alert(data.error || "Invalid OTP.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
+  const handleResetPassword = async () => {
+    const newPassword = document.querySelector(
+      'input[placeholder="New Password"]'
+    ).value;
+    const confirmPassword = document.querySelector(
+      'input[placeholder="Confirm Password"]'
+    ).value;
+
+    const userId = userid;
+
+    if (newPassword !== confirmPassword) {
+      alert("Passwords do not match.");
       return;
     }
 
     try {
-      // Call the backend API
-      const response = await fetch(`http://localhost:3000/api/updatepassword`, {
+      const response = await fetch("http://localhost:3000/reset-password", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          newPassword,
-          currentPassword,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, newPassword }),
       });
-
-      console.log("response is ", response);
-      if (!response.ok) {
-        if (response.status === 404) {
-          alert("User not found or no changes made.");
-        } else {
-          throw new Error("Failed to update password.");
-        }
-        return;
-      }else{
-        alert("Password updated successfully.");
-      }
 
       const data = await response.json();
 
-      // Handle success response
-      alert(data.message);
-      // Reset the form or state variables if needed
-      setUserIdState(""); // Clear user ID field
-      setCurrentPasswordState(""); // Clear current password field
-      setNewPasswordState(""); // Clear new password field
-      setConfirmPasswordState(""); // Clear confirm password field
-      setSecuritySubSection(null); // If using security subsection state
+      if (response.ok) {
+        alert(data.message);
+        setSecuritySubSection("initial"); // Reset back to initial step
+      } else {
+        alert(data.error || "Failed to reset password.");
+      }
     } catch (error) {
-      console.error("Error:", error);
+      console.error(error);
       alert("An error occurred. Please try again.");
     }
   };
@@ -254,12 +276,13 @@ const Profile: React.FC<ProfileProps> = ({
       fetchPersonalInfo();
     }
   }, [activeSection]);
-
+  // onOpenChange={onClose} onClose={handleClose}
   return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+    <Dialog open onOpenChange={onClose} >
+      <DialogContent className="max-w-2x2">
         <DialogHeader>
           <DialogTitle>Profile Settings</DialogTitle>
+          
         </DialogHeader>
 
         {/* Navigation Buttons */}
@@ -328,8 +351,6 @@ const Profile: React.FC<ProfileProps> = ({
           )}
 
           {activeSection === "info" && personalInfo && (
-           
-
             <Card className="max-w-3xl mx-auto p-8 bg-white shadow-md rounded-lg border border-gray-200">
               <CardHeader className="flex justify-between items-center">
                 <CardTitle className="text-3xl text-gray-900 font-bold">
@@ -343,7 +364,7 @@ const Profile: React.FC<ProfileProps> = ({
               </CardHeader>
 
               <Separator className="my-6" />
- 
+
               <CardContent>
                 {isEditing ? (
                   <motion.div
@@ -512,73 +533,6 @@ const Profile: React.FC<ProfileProps> = ({
             </Card>
           )}
 
-          {/* {activeSection === "security" && (
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Security</h3>
-              <p>Manage your account security settings here.</p>
-            </div>
-          )} */}
-
-          {/* {activeSection === "security" && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Security Settings</h3>
-              <div className="mb-4">
-                <Button
-                  className="mb-2"
-                  onClick={() => setActiveSection("updatePassword")}
-                >
-                  Update Password
-                </Button>
-                <Button
-                  className="mb-2"
-                  variant="outline"
-                  onClick={() => setActiveSection("resetPassword")}
-                >
-                  Reset Password
-                </Button>
-              </div>
-
-
-              {activeSection === "updatePassword" && (
-                <div>
-                  <h4 className="text-md font-semibold mb-2">
-                    Update Password
-                  </h4>
-                  <Input
-                    type="password"
-                    placeholder="Current Password"
-                    className="mb-2"
-                  />
-                  <Input
-                    type="password"
-                    placeholder="New Password"
-                    className="mb-2"
-                  />
-                  <Input
-                    type="password"
-                    placeholder="Confirm New Password"
-                    className="mb-4"
-                  />
-                  <Button onClick={handleUpdatePassword}>
-                    Update Password
-                  </Button>
-                </div>
-              )}
-
-              {activeSection === "resetPassword" && (
-                <div>
-                  <h4 className="text-md font-semibold mb-2">Reset Password</h4>
-                  <p className="mb-4">
-                    If you have forgotten your password, you can reset it by
-                    clicking the button below. A reset link will be sent to your
-                    registered email.
-                  </p>
-                  <Button onClick={handleResetPassword}>Send Reset Link</Button>
-                </div>
-              )}
-            </div>
-          )} */}
-
           {activeSection === "security" && (
             <div>
               <h3 className="text-lg font-semibold mb-4">Security Settings</h3>
@@ -593,7 +547,7 @@ const Profile: React.FC<ProfileProps> = ({
                   <Button
                     className="mb-2"
                     variant="outline"
-                    onClick={() => setSecuritySubSection("resetPassword")}
+                    onClick={() => setSecuritySubSection("initial")} // Reset to initial state
                   >
                     Reset Password
                   </Button>
@@ -633,19 +587,64 @@ const Profile: React.FC<ProfileProps> = ({
                 </div>
               )}
 
-              {securitySubSection === "resetPassword" && (
+              {securitySubSection === "initial" && (
                 <div>
                   <h4 className="text-md font-semibold mb-2">Reset Password</h4>
                   <p className="mb-4">
                     If you have forgotten your password, you can reset it by
-                    clicking the button below. A reset link will be sent to your
+                    clicking the button below. An Otp will be sent to your
                     registered email.
                   </p>
-                  <Button onClick={handleResetPassword}>Send Reset Link</Button>
+                  <Button onClick={handleSendResetLink}>Send Reset Link</Button>
                   <Button
                     variant="outline"
                     className="mt-2"
                     onClick={() => setSecuritySubSection(null)}
+                  >
+                    Back
+                  </Button>
+                </div>
+              )}
+              {securitySubSection === "verifyOtp" && (
+                <div>
+                  <h4 className="text-md font-semibold mb-2">Verify OTP</h4>
+                  <Input
+                    type="text"
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="mb-4"
+                  />
+                  <Button onClick={handleVerifyOtp}>Verify OTP</Button>
+                  <Button
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => setSecuritySubSection("initial")}
+                  >
+                    Back
+                  </Button>
+                </div>
+              )}
+              {securitySubSection === "resetPassword" && (
+                <div>
+                  <h4 className="text-md font-semibold mb-2">
+                    Set New Password
+                  </h4>
+                  <Input
+                    type="password"
+                    placeholder="New Password"
+                    className="mb-2"
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Confirm Password"
+                    className="mb-4"
+                  />
+                  <Button onClick={handleResetPassword}>Reset Password</Button>
+                  <Button
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => setSecuritySubSection("initial")}
                   >
                     Back
                   </Button>

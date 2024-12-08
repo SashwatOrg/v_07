@@ -34,11 +34,20 @@ import { GenerateFinancialReport } from './components/GenerateDepartmentReport/G
 import { GeneratePlacementReport } from './components/GenerateDepartmentReport/GeneratePlacementReport';
 import { CreateClub } from './components/CreateClub';
 import { CreateAchievement } from './components/CreateAchievement';
+import {GenerateInfrastructureReport} from './components/GenerateDepartmentReport/GenerateInfrastructureReport'
 import './index.css'
 // Landing page imports
 import WOW from "wow.js";
 import { useLocation } from "react-router-dom";
 import Home from './components/pages/Home/Home';// Your landing page Home component
+import { GenerateEventReport } from './components/GenerateDepartmentReport/GenerateEventReport';
+import { GenerateClubReport } from './components/GenerateDepartmentReport/GenerateClubReport';
+import { GenerateStudentAndFacultyAdministrationReport } from './components/GenerateDepartmentReport/GenerateStudentAndFacultyAdministrationReport';
+import { GenerateAcademicReport } from './components/GenerateDepartmentReport/GenerateAcademicReport';
+import ReportVersionSelector from './components/ReportVersionSelector';
+import { UserManagement } from './components/UserManagement';
+
+
 
 const App: React.FC = () => {
 
@@ -105,13 +114,20 @@ const App: React.FC = () => {
           <Route path="/student/create-achievement" element={<CreateAchievement/>} />
           <Route path="/faculty/create-achievement" element={<CreateAchievement/>} />
           <Route path="/admin/create-club" element={<CreateClub/>} />
+          <Route path="/co-ordinator/create-club" element={<CreateClub/>} />
           <Route path="/add-finance" element={<CreateFinance/>} />
           <Route path="/byStudent/feedback" element={<FeedbackByStudent/>} />
           <Route path="/input-otp/:email" element={<InputOTPWithSeparator />} />
           <Route path="/media" element={<UploadMedia/>} />
           <Route path="/generate-finance-report" element={<GenerateFinancialReport/>} />
           <Route path="/generate-placement-report" element={<GeneratePlacementReport/>} />
-          <Route path="/support" element={<Support />} />
+          <Route path="/generate-infrastructure-report" element={<GenerateInfrastructureReport/>} />
+          <Route path="/generate-event-report" element={<GenerateEventReport/>} />
+          <Route path="/generate-club-report" element={<GenerateClubReport/>} />
+          <Route path="/generate-studentandfacultyadministration-report" element={<GenerateStudentAndFacultyAdministrationReport/>} />
+          <Route path="/generate-academic-report" element={<GenerateAcademicReport/>} />
+          <Route path="/view-reports/:institute_id" element={<ReportVersionSelector />} /> <Route path="/support" element={<Support />} />
+          <Route path="/user-management" element={<UserManagement />} />
           <Route
             path="/profile/:userid"
             element={

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { StatsCard } from './StatsCard';
-import { Component } from './visuals/PieInteractive';
+import { PieInteractive } from './visuals/PieInteractive';
 import {
   CircleUser,
   Home,
@@ -26,6 +26,9 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import ModeToggle from './mode-toggle';
 import { Sidebar } from './SideBar/Sidebar';
+import PolarAreaChart from "./visuals/PolarChart";
+import PlacementChart from './visuals/PlacementChart';
+
 
 interface User {
   userid: number | null;
@@ -42,71 +45,99 @@ interface User {
   gender: string;
 }
 
+
 export const Dashboard: FC = () => {
   const { username } = useParams();
   const navigate = useNavigate();
 
+
   // User state
   const [user, setUser] = useState<User | null>(null);
+  console.log(user);
   const [notificationCount, setNotificationCount] = useState(0);
   const [userType, setUserType] = useState<number | null>(null);
+
 
   const fetchPhotoURL = async (userid: number | null) => {
     console.log(userid);
 
+
     if (!userid) return;
+
 
     try {
       // const response = await fetch(`/api/get-photo-url?user_id=${userId}`);
+
 
       const response = await fetch(
         `http://localhost:3000/api/user-photo/${userid}`
       );
 
+
       const data = await response.json();
 
+
       console.log(data.photoURL);
+
 
       if (response.ok && data.photoURL) {
         // setUser((prevUser) => ({
 
+
         //   ...prevUser,
+
 
         //   photoURL: data.photoUrl,
 
+
         // }));
 
+
         console.log('data.photoUrl', data.photoURL);
+
 
         setUser((prevUser) => ({
           ...(prevUser ?? {
             photoURL: null,
 
+
             institute_id: null,
+
 
             userid: null,
 
+
             email: null,
+
 
             first_name: null,
 
+
             last_name: null,
+
 
             username: null,
 
+
             department: null,
+
 
             type_id: null,
 
+
             gender: null,
 
+
             is_active: false,
+
 
             mobile: null,
           }), // Default empty values for user
 
+
           photoURL: data.photoURL,
         }));
+
 
         console.log(user?.photoURL); // setUser({ ...user, photoURL: data.photoUrl });
       }
@@ -125,6 +156,7 @@ export const Dashboard: FC = () => {
       const decoded: any = jwtDecode(token);
       const currentTime = Date.now() / 1000;
 
+
       if (decoded.exp < currentTime) {
         alert('Session expired. Please login again.');
         Cookies.remove('token');
@@ -134,6 +166,7 @@ export const Dashboard: FC = () => {
         navigate('/login');
         return;
       }
+
 
       // Assuming the decoded token has these fields
       const userDetails: User = {
@@ -151,8 +184,10 @@ export const Dashboard: FC = () => {
         mobile: decoded.mobile_number,
       };
 
+
       // console.log('the user details',userDetails);
       // console.log("DataType of type_id is:", typeof user?.type_id);
+
 
       setUser(userDetails);
       setNotificationCount(decoded.notificationCount || 0); // Set notification count if available
@@ -161,6 +196,7 @@ export const Dashboard: FC = () => {
       navigate('/login');
     }
   }, [username, navigate]);
+
 
   const handleLogout = async () => {
     Cookies.remove('token'); // Remove the token on logout
@@ -176,9 +212,10 @@ export const Dashboard: FC = () => {
     }
   });
 
+
   return (
     <>
-      <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
+      <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr] bg-customBackground">
         <Sidebar user={user} activePage="dashboard" />
         <div className="flex flex-col">
           <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
@@ -251,7 +288,7 @@ export const Dashboard: FC = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>
-                  {user?.displayName || 'My Account'}
+                  {user?.username || 'My Account'}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -277,39 +314,129 @@ export const Dashboard: FC = () => {
                   'User'}
               </h1>
             </div>
-            <div className="pl-3 grid gap-4 grid-cols-2 md:grid-cols-3 md:gap-8 lg:grid-cols-4">
+            <div className='grid grid-cols-[2fr_1fr] gap-8 flex flex-col'>
+            <div className="pl-3 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
               {user?.type_id === 1 && (
                 <>
                   {/* Admin-specific cards */}
-                  <StatsCard title="Programs Offered" />
-                  <StatsCard title="Total Departments" />
-                  <StatsCard title="Faculty Count" />
-                  <StatsCard title="Total Students" />
-                  <Component institute_id={user.institute_id} />
+                  <StatsCard title="Programs Offered" entity="departments" username={user?.username} />
+                  <StatsCard title="Total Departments" entity="programs" username={user?.username} />
+                  <StatsCard title="Faculty Count" entity="faculty" username={user?.username} />
+                  <StatsCard title="Total Students" entity="students" username={user?.username}/>
                 </>
               )}
               {user?.type_id === 2 && (
                 <>
                   {/* Coordinator-specific cards */}
-                  <StatsCard title="Tasks Assigned" />
-                  <StatsCard title="Ongoing Programs" />
-                  <Component institute_id={user.institute_id} />
+                  <StatsCard title="Tasks Assigned" entity="departments" username={user?.username} />
+                  <StatsCard title="Ongoing Programs" entity="departments" username={user?.username}  />
+                  <div className="col-span-full">
+                    <PieInteractive />
+                  </div>
                 </>
               )}
               {user?.type_id === 3 && (
                 <>
                   {/* Faculty-specific cards */}
-                  <StatsCard title="Classes Taken" />
-                  <StatsCard title="Research Papers" />
-                  <Component institute_id={user.institute_id} />
+                  <StatsCard title="Classes Taken" entity="departments" username={user?.username} />
+                  <StatsCard title="Research Papers" entity="departments" username={user?.username} />
+                  <div className="col-span-full">
+                    <PieInteractive />
+                  </div>
                 </>
               )}
               {user?.type_id === 4 && (
                 <>
                   {/* Student-specific cards */}
-                  <StatsCard title="Subjects Enrolled" />
-                  <StatsCard title="Assignments Due" />
-                  <Component institute_id={user.institute_id} />
+                  <StatsCard title="Subjects Enrolled" entity="departments" username={user?.username} />
+                  <StatsCard title="Assignments Due" entity="departments" username={user?.username}/>
+                  <div className="col-span-full">
+                    <PieInteractive />
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="flex-1 bg-white rounded-lg shadow-xl mt-4 p-8">
+                    <h4 className="text-xl text-gray-900 font-bold">Activity log</h4>
+                    <div className="relative px-4">
+                        <div className="absolute h-full border border-dashed border-opacity-20 border-secondary"></div>
+
+
+                        <div className="flex items-center w-full my-6 -ml-1.5">
+                            <div className="w-1/12 z-10">
+                                <div className="w-3.5 h-3.5 bg-blue-600 rounded-full"></div>
+                            </div>
+                            <div className="w-11/12">
+                                <p className="text-sm">Profile informations changed.</p>
+                                <p className="text-xs text-gray-500">3 min ago</p>
+                            </div>
+                        </div>
+
+
+                        <div className="flex items-center w-full my-6 -ml-1.5">
+                            <div className="w-1/12 z-10">
+                                <div className="w-3.5 h-3.5 bg-blue-600 rounded-full"></div>
+                            </div>
+                            <div className="w-11/12">
+                                <p className="text-sm">
+                                    Connected with <a href="#" className="text-blue-600 font-bold">Colby Covington</a>.</p>
+                                <p className="text-xs text-gray-500">15 min ago</p>
+                            </div>
+                        </div>
+
+
+                        <div className="flex items-center w-full my-6 -ml-1.5">
+                            <div className="w-1/12 z-10">
+                                <div className="w-3.5 h-3.5 bg-blue-600 rounded-full"></div>
+                            </div>
+                            <div className="w-11/12">
+                                <p className="text-sm">Invoice <a href="#" className="text-blue-600 font-bold">#4563</a> was created.</p>
+                                <p className="text-xs text-gray-500">57 min ago</p>
+                            </div>
+                        </div>
+
+
+                        <div className="flex items-center w-full my-6 -ml-1.5">
+                            <div className="w-1/12 z-10">
+                                <div className="w-3.5 h-3.5 bg-blue-600 rounded-full"></div>
+                            </div>
+                            <div className="w-11/12">
+                                <p className="text-sm">
+                                    Message received from <a href="#" className="text-blue-600 font-bold">Cecilia Hendric</a>.</p>
+                                <p className="text-xs text-gray-500">1 hour ago</p>
+                            </div>
+                        </div>
+
+
+                        <div className="flex items-center w-full my-6 -ml-1.5">
+                            <div className="w-1/12 z-10">
+                                <div className="w-3.5 h-3.5 bg-blue-600 rounded-full"></div>
+                            </div>
+                            <div className="w-11/12">
+                                <p className="text-sm">New order received <a href="#" className="text-blue-600 font-bold">#OR9653</a>.</p>
+                                <p className="text-xs text-gray-500">2 hours ago</p>
+                            </div>
+                        </div>
+                     
+                        <div className="flex items-center w-full my-6 -ml-1.5">
+                            <div className="w-1/12 z-10">
+                                <div className="w-3.5 h-3.5 bg-blue-600 rounded-full"></div>
+                            </div>
+                            <div className="w-11/12">
+                                <p className="text-sm">
+                                    Message received from <a href="#" className="text-blue-600 font-bold">Jane Stillman</a>.</p>
+                                <p className="text-xs text-gray-500">2 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="col-span-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+              {user?.institute_id && user.type_id === 1 && (
+                <>
+                  <PieInteractive institute_id={user.institute_id} />
+                  <PolarAreaChart institute_id={user.institute_id} />
+                  <PlacementChart institute_id={user.institute_id} />
                 </>
               )}
             </div>
@@ -319,3 +446,8 @@ export const Dashboard: FC = () => {
     </>
   );
 };
+
+
+
+
+

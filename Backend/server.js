@@ -12,7 +12,12 @@ const corsOptions = {
   origin: 'http://localhost:5173', // Specify the frontend URL here
   methods: ['GET', 'POST', "PUT", "DELETE"],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 };
+
+const corsConfig = require('./cors-config');
+
+app.use(cors(corsConfig));
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 // This will allow inline scripts and styles by setting 'unsafe-inline' (not recommended for production)
@@ -31,7 +36,7 @@ const xlsx = require("xlsx");
 const db = require("./db/dbConnection");
 const multer = require("multer");
 const sendOtp=require("./utils/sendOtp.js");
-const pdfRoutes = require('./pdfGenModule/routes/pdfFinanceRoutes.js')
+// const pdfRoutes = require('./pdfGenModule/routes/allPdfAndHtmlRoutes.js')
 app.options("*", cors()); // Allow all OPTIONS requests for CORS preflight
 
 app.use(express.json());
@@ -39,7 +44,22 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", "./pdfGenModule/views");
-app.use("/pdf", pdfRoutes);
+
+// Add this before your route definitions
+app.use((req, res, next) => {
+  console.log(`Received ${req.method} request to ${req.path}`);
+  next();
+});
+
+// Add error handling middleware at the end of your route configurations
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({
+    message: 'An unexpected error occurred',
+    error: err.message
+  });
+});
+// app.use("/pdf", pdfRoutes);
 app.use(
   cors({
     origin: ["http://localhost:5173"],
@@ -126,8 +146,17 @@ const getEvents = require("./routes/getEventRoutes");
 const putEventChangesRoutes = require("./routes/putEventRoutes");
 const deleteEventRoutes = require("./routes/deleteEventRoutes");
 const updatepassRoutes=require("./routes/updatepassRoutes");
-
-app.use('/api',updatepassRoutes);
+const getInstituteClubNamesRoutes = require('./routes/getInstituteClubNamesRoutes.js')
+const departmentByCordIdRoutes = require('./routes/departmentByCordIdRoutes')
+const instAdminDashRoutes = require("./routes/instAdminDashRoutes");
+const putInfraRoutes = require("./routes/putInfraRoutes");
+const deleteInfraRoutes = require("./routes/deleteInfraRoutes");
+const getInfraRoutes = require("./routes/getInfraRoutes");
+const putClubRoutes = require("./routes/putClubRoutes");
+const deleteClubRoutes = require("./routes/deleteClubRoutes");
+const getClubRoutes = require("./routes/getClubRoutes");
+const getUsersRoutes = require("./routes/getUsersRoutes");
+const toggleUserStatus = require("./routes/toggleUserStatusRoutes");app.use('/api',updatepassRoutes);
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
 app.use("/api", programRoutes);
@@ -169,10 +198,20 @@ app.use("/api", deleteProgramRoutes);
 app.use("/api", getEvents);
 app.use("/api", putEventChangesRoutes);
 app.use("/api", deleteEventRoutes)
-
-
-
-
+app.use("/api",getInstituteClubNamesRoutes);
+app.use("/api",departmentByCordIdRoutes)
+app.use("/api", instAdminDashRoutes);
+app.use("/api", putInfraRoutes);
+app.use("/api", deleteInfraRoutes);
+app.use("/api", getInfraRoutes);
+app.use("/api", putClubRoutes);
+app.use("/api", deleteClubRoutes);
+app.use("/api", getClubRoutes);
+app.use("/api", getProgRoutes);
+app.use("/api", putProgChangesRoutes);
+app.use("/api", deleteProgramRoutes);
+app.use("/api", getUsersRoutes);
+app.use("/api", toggleUserStatus);
 //HK add Courses
 
 
@@ -1054,5 +1093,85 @@ app.get("/api/media", (req, res) => {
       return res.status(500).json({ message: "Failed to retrieve media" });
     }
     res.status(200).json(results);
+  });
+});
+
+const crypto = require("crypto"); 
+app.post("/send-reset-link", (req, res) => {
+  const { userId } = req.body;
+  console.log("userId is ", userId);
+  let email="";
+  const query = "SELECT email_id FROM user WHERE user_id = ?";
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    email = results[0].email_id;
+    console.log("email is ", results[0].email_id);
+    const otp = crypto.randomInt(100000, 999999); // Generate a 6-digit OTP
+
+    // Store OTP in the database or cache (with expiry)
+    const otpQuery = `UPDATE user 
+SET otp = ? 
+WHERE email_id = ?;`;
+    // const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+    db.query(otpQuery, [otp,email], (otpErr) => {
+      if (otpErr)
+        return res.status(500).json({ error: "Failed to store OTP." });
+
+      // Send OTP via email
+      sendOtp(email, otp);
+      res.status(200).json({ email });
+    });
+  });
+});
+
+app.post("/verify-otp", (req, res) => {
+  const { userId, otp } = req.body;
+  let email="";
+  const query = "SELECT email_id FROM user WHERE user_id = ?";
+  
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    email = results[0].email_id;
+    console.log("email is .....", results[0].email_id);
+  });
+  // const email=
+  console.log("email is ", email);
+  const query1 =
+    "SELECT * FROM user WHERE user_id = ? AND otp = ? AND isVerified = 0";
+    console.log("email in ")
+  db.query(query1, [userId, otp], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    if (results.length === 0) {
+      return res.status(400).json({ error: "Invalid or expired OTP." });
+    }
+
+    res.status(200).json({ message: "OTP verified." });
+  });
+});
+
+app.post("/reset-password", (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  const hashedPassword = crypto
+    .createHash("md5")
+    .update(newPassword)
+    .digest("hex"); // Use bcrypt for production
+
+  const query = "UPDATE user SET password = ? WHERE user_id = ?";
+  db.query(query, [hashedPassword, userId], (err) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    res.status(200).json({ message: "Password updated successfully." });
   });
 });

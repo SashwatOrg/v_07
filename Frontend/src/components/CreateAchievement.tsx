@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+
 interface User {
   email: string | null;
   first_name: string | null;
@@ -37,6 +38,7 @@ interface User {
   gender: string;
 }
 
+
 export const CreateAchievement: FC = () => {
   const [user, setUser ] = useState<User | null>(null);
   const [title, setTitle] = useState<string>();
@@ -47,7 +49,9 @@ export const CreateAchievement: FC = () => {
   const [score, setScore] = useState<number | null>();
   const [assoWith, setAssoWith] = useState<string>("");
   const [type, setType] = useState<string>();
+  const [file, setFile] = useState<File | null>(null);
   const navigate = useNavigate();
+
 
   useEffect(() => {
     const token = Cookies.get('token');
@@ -56,9 +60,11 @@ export const CreateAchievement: FC = () => {
       return;
     }
 
+
     try {
       const decoded: any = jwtDecode(token);
       const currentTime = Date.now() / 1000;
+
 
       if (decoded.exp < currentTime) {
         alert('Session expired. Please login again.');
@@ -66,6 +72,7 @@ export const CreateAchievement: FC = () => {
         navigate('/login');
         return;
       }
+
 
       const userDetails: User = {
         username: decoded.username,
@@ -77,20 +84,24 @@ export const CreateAchievement: FC = () => {
         gender: decoded.gender
       };
 
+
       setUser (userDetails);
     } catch (err) {
       navigate('/login');
     }
   }, [navigate]);
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
 
     const token = Cookies.get('token');
     if (!token) {
       navigate('/login');
       return;
     }
+
 
     try {
       const response = await fetch(`http://localhost:3000/api/create-achievement/${user?.username}`, {
@@ -101,6 +112,7 @@ export const CreateAchievement: FC = () => {
         },
         body: JSON.stringify({ title, description, date, assoWith, issuer, score, appNo, type }),
       });
+
 
       if (response.ok) {
         console.log('The achievement is added..!');
@@ -125,6 +137,101 @@ export const CreateAchievement: FC = () => {
       toast.error('An error occurred. Please try again later.');
  }
   };
+
+
+  const handleBulkUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = Cookies.get("token");
+    if (!token || !file || !user?.institute_id) {
+      toast.error("Please provide all required fields.");
+      return;
+    }
+
+
+
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("institute_id", user.institute_id);
+
+
+
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/achievement/bulk-achievement`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+
+
+
+      if (response.ok) {
+        toast.success("Bulk achievements uploaded successfully!", {
+          className: "custom-toast",
+          autoClose: 1000,
+        });
+        setFile(null); // Clear the file input after successful upload
+      } else {
+        const errorData = await response.text();
+        toast.error(errorData || "Failed to upload bulk achievements.");
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("An error occurred. Please try again later.");
+    }
+  };
+
+
+
+
+  const downloadTemplate = () => {
+    const token = Cookies.get("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+
+
+
+    // Trigger the download
+    window.open(
+      "http://localhost:3000/api/achievement/download-template",
+      "_blank"
+    );
+  };
+
+
+
+
+  const downloadData = () => {
+    if (!user?.institute_id) {
+      alert("Please enter an Institute ID.");
+      return;
+    }
+
+
+
+
+    // Construct the URL with the institute_id as a query parameter
+    const url = `http://localhost:3000/api/achievement/download-achievements?institute_id=${user?.institute_id}`;
+
+
+
+
+    // Open the URL in a new tab to trigger the download
+    window.open(url, "_blank");
+  };
+
+
+
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
@@ -200,7 +307,7 @@ export const CreateAchievement: FC = () => {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Achievement</h1>
+            <h1 className="text-2xl text-primary font-bold">Achievements</h1>
           </div>
           <div className="flex flex-col items-center justify-center">
             <Dialog>
@@ -230,6 +337,7 @@ export const CreateAchievement: FC = () => {
                         </SelectContent>
                       </Select>
                     </div>
+
 
                     {type === 'Honor and Award' && (
                       <>
@@ -277,7 +385,7 @@ export const CreateAchievement: FC = () => {
                           <Label htmlFor="otitle" className="text-left">Title</Label>
                           <Input id="otitle" type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="col-span-3" />
                         </div>
-                        
+                       
                         <div className="grid grid-cols-4 items-center gap-4">
                           <Label htmlFor="odate" className="text-left">Date</Label>
                           <Input id="odate" type="date" required value={date} onChange={(e) => setDate(e.target.value)} className="col-span-3" />
@@ -315,10 +423,55 @@ export const CreateAchievement: FC = () => {
                 </DialogClose>
               </DialogContent>
             </Dialog>
+              {/* Bulk Achievement Dialog */}
+              <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="mb-4 border-2">
+                  Bulk Achievement
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[725px]">
+                <DialogHeader>
+                  <DialogTitle>Upload Bulk Achievements</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <Label htmlFor="file-upload" className="text-left">
+                    Upload Excel File{" "}
+                  </Label>
+                  <Input
+                    id="file-upload"
+                    type="file"
+                    accept=".xlsx, .xls"
+                    onChange={(e) =>
+                      setFile(e.target.files ? e.target.files[0] : null)
+                    }
+                    className="col-span-3"
+                  />
+                  <Button
+                    type="submit"
+                    onClick={handleBulkUpload}
+                    className="mr-4"
+                  >
+                    Upload Achievements
+                  </Button>
+                  <Button variant="outline" onClick={downloadData}>
+                    Download Data
+                  </Button>
+                  <Button variant="outline" onClick={downloadTemplate}>
+                    Download Template
+                  </Button>
+                </div>
+                <DialogClose></DialogClose>
+              </DialogContent>
+            </Dialog>
           </div>
         </main>
-        <ToastContainer /> 
+        <ToastContainer />
       </div>
     </div>
   );
 };
+
+
+
+

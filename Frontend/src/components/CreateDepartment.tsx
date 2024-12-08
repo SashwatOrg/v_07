@@ -1,5 +1,5 @@
-import { FC, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { FC, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CircleUser,
   Command,
@@ -7,8 +7,8 @@ import {
   Menu,
   Package2,
   Search,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,11 +16,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Sidebar } from './SideBar/Sidebar';
-import ModeToggle from './mode-toggle';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sidebar } from "./SideBar/Sidebar";
+import ModeToggle from "./mode-toggle";
 import {
   Dialog,
   DialogContent,
@@ -28,14 +28,14 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
-} from '@/components/ui/dialog';
-import { Label } from '@radix-ui/react-label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
-import { jwtDecode } from 'jwt-decode';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from "@/components/ui/dialog";
+import { Label } from "@radix-ui/react-label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -44,8 +44,8 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { DeptCard } from './DeptCard';
+} from "@/components/ui/select";
+import { DeptCard } from "./DeptCard";
 
 interface User {
   email: string | null;
@@ -75,18 +75,18 @@ export const CreateDepartment: FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
-  const [department, setDepartment] = useState('');
-  const [deptType, setDeptType] = useState('');
-  const [deptSubType, setDeptSubType] = useState('');
+  const [department, setDepartment] = useState("");
+  const [deptType, setDeptType] = useState("");
+  const [deptSubType, setDeptSubType] = useState("");
   const [departments, setDepartments] = useState<DeptCardProps[]>([]);
   const [coordData, setCoordData] = useState({
-    username: '',
-    first_name: '',
-    last_name: '',
-    email: '',
+    username: "",
+    first_name: "",
+    last_name: "",
+    email: "",
     phone_number: 0,
-    gender: '',
-    password: '',
+    gender: "",
+    password: "",
   });
   const [file, setFile] = useState<File | null>(null);
   const navigate = useNavigate();
@@ -103,22 +103,85 @@ export const CreateDepartment: FC = () => {
 
   async function fetchDepartments() {
     try {
-      const response = await fetch('http://localhost:3000/api/departments');
+      const response = await fetch("http://localhost:3000/api/departments");
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
       const departments = await response.json();
       return departments;
     } catch (error) {
-      console.error('Error fetching departments:', error);
+      console.error("Error fetching departments:", error);
       return [];
     }
   }
 
+  const handleUpdateDepartment = async (updatedData) => {
+    try {
+      const dept_name = updatedData.dept_name;
+      const coordemail = updatedData.coordinator_email;
+      const token = Cookies.get("token");
+      const response = await fetch(
+        `http://localhost:3000/api/update-department/${updatedData.dept_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ dept_name, coordemail }),
+        }
+      );
+
+      if (response.ok) {
+        toast.success("Department updated successfully!", {
+          className: "custom-toast",
+          autoClose: 1000,
+        });
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Failed to update department.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while updating the department.");
+    }
+  };
+
+  const handleDeleteDepartment = async (data) => {
+    try {
+      const dept_id = data.dept_id;
+
+      const token = Cookies.get("token");
+      const response = await fetch(
+        `http://localhost:3000/api/delete-department/${dept_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        toast.success("Department deleted successfully!", {
+          className: "custom-toast",
+          autoClose: 1000,
+        });
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Failed to delete department.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while deleting the department.");
+    }
+  };
+
   useEffect(() => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("token");
     if (!token) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
@@ -127,9 +190,9 @@ export const CreateDepartment: FC = () => {
       const currentTime = Date.now() / 1000;
 
       if (decoded.exp < currentTime) {
-        alert('Session expired. Please login again.');
-        Cookies.remove('token');
-        navigate('/login');
+        alert("Session expired. Please login again.");
+        Cookies.remove("token");
+        navigate("/login");
         return;
       }
 
@@ -147,7 +210,7 @@ export const CreateDepartment: FC = () => {
       setUser(userDetails);
     } catch (err) {
       console.log(err);
-      navigate('/login');
+      navigate("/login");
     }
 
     const loadDepartments = async () => {
@@ -160,8 +223,8 @@ export const CreateDepartment: FC = () => {
 
   const handleDeptTypeChange = (value: string) => {
     setDeptType(value);
-    if (value === 'Non-Academic') {
-      setDepartment('');
+    if (value === "Non-Academic") {
+      setDepartment("");
     }
   };
 
@@ -181,13 +244,13 @@ export const CreateDepartment: FC = () => {
       !coordData.email ||
       !coordData.password
     ) {
-      toast.error('Please fill in all required fields.');
+      toast.error("Please fill in all required fields.");
       return;
     }
 
-    const token = Cookies.get('token');
+    const token = Cookies.get("token");
     if (!token) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
@@ -196,11 +259,11 @@ export const CreateDepartment: FC = () => {
       const institute_id = user?.institute_id;
 
       const response = await fetch(
-        'http://localhost:3000/api/create-department',
+        "http://localhost:3000/api/create-department",
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
@@ -214,51 +277,52 @@ export const CreateDepartment: FC = () => {
 
       if (response.ok) {
         setCoordData({
-          username: '',
-          first_name: '',
-          last_name: '',
-          email: '',
+          username: "",
+          first_name: "",
+          last_name: "",
+          email: "",
           phone_number: 0,
-          gender: '',
-          password: '',
+          gender: "",
+          password: "",
         });
-        setDepartment('');
-        setDeptType('');
-        setDeptSubType('');
+        setDepartment("");
+        setDeptType("");
+        setDeptSubType("");
         setIsDialogOpen(false);
-        alert('Department and coordinator created successfully!');
-        toast.success('Department created successfully!', {
-          className: 'custom-toast',
+        alert("Department and coordinator created successfully!");
+        toast.success("Department created successfully!", {
+          className: "custom-toast",
           autoClose: 2000,
           onClose: () => navigate(`/dashboard/${username}`),
         });
       } else {
         const errorData = await response.json();
-        toast.error(errorData.message || 'Failed to create department.');
+        toast.error(errorData.message || "Failed to create department.");
       }
     } catch (err) {
-      toast.error('An error occurred. Please try again later.' + err);
+      toast.error("An error occurred. Please try again later." + err);
     }
   };
 
   const handleBulkSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = Cookies.get('token');
+    const token = Cookies.get("token");
     if (!token) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
     if (file) {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
+      formData.append("institute_id", user?.institute_id); // Include institute_id
 
       try {
         const response = await fetch(
-          'http://localhost:3000/api/upload-departments',
+          "http://localhost:3000/api/departments/upload",
           {
-            method: 'POST',
+            method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -267,47 +331,69 @@ export const CreateDepartment: FC = () => {
         );
 
         if (response.ok) {
-          toast.success('Departments uploaded successfully!', {
-            className: 'custom-toast',
+          toast.success("Departments uploaded successfully!", {
+            className: "custom-toast",
             autoClose: 2000,
             onClose: () => navigate(`/dashboard/${user?.username}`),
           });
         } else {
           const errorData = await response.json();
-          toast.error(errorData.message || 'Failed to upload departments.');
+          toast.error(errorData.message || "Failed to upload departments.");
         }
       } catch (err) {
         toast.error(
-          'An error occurred while uploading the file. Please try again later.' +
+          "An error occurred while uploading the file. Please try again later." +
             err
         );
       }
     } else {
-      toast.error('Please select a file to upload.');
+      toast.error("Please select a file to upload.");
     }
   };
 
-  const handleDownloadTemplate = () => {
-    const link = document.createElement('a');
-    link.href = 'path/to/template.xlsx'; // Replace with actual template URL
-    link.setAttribute('download', 'department_template.xlsx');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/departments/template"
+      );
+      if (!response.ok) {
+        throw new Error("Failed to download template");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", "department_template.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      toast.error("Error downloading template: " + error.message);
+    }
   };
 
-  const handleDownloadData = () => {
-    const link = document.createElement('a');
-    link.href = 'path/to/data.xlsx'; // Replace with actual data URL
-    link.setAttribute('download', 'departments_data.xlsx');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadData = async (institute_id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/departments/download?institute_id=${user?.institute_id}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to download data");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", "departments_data.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      toast.error("Error downloading data: " + error.message);
+    }
   };
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
-      <Sidebar user={user} activePage="create-department " />
+      <Sidebar user={user} activePage="create-department" />
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 sticky top-0">
           <Sheet>
@@ -370,10 +456,10 @@ export const CreateDepartment: FC = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>
-                {user?.username || 'My Account'}
+                {user?.username || "My Account"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/profile')}>
+              <DropdownMenuItem onClick={() => navigate("/profile")}>
                 Profile Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -383,9 +469,7 @@ export const CreateDepartment: FC = () => {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">
-              Create Department
-            </h1>
+            <h1 className="text-2xl text-primary font-bold">Departments</h1>
           </div>
           <div className="flex flex-col items-center justify-center">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -443,7 +527,7 @@ export const CreateDepartment: FC = () => {
                           </div>
                         </RadioGroup>
                       </div>
-                      {deptType === 'Non-Academic' && (
+                      {deptType === "Non-Academic" && (
                         <div className="grid grid-cols-4 items-center gap-4">
                           <Label htmlFor="deptsubtype" className="text-left">
                             Sub Department Type
@@ -461,8 +545,8 @@ export const CreateDepartment: FC = () => {
                                 <SelectItem value="Examination">
                                   Examination
                                 </SelectItem>
-                                <SelectItem value="Student Administration">
-                                  Student Administration
+                                <SelectItem value="Student And Faculty Administration">
+                                  Student And Faculty Administration
                                 </SelectItem>
                                 <SelectItem value="Placement">
                                   Placement
@@ -471,6 +555,7 @@ export const CreateDepartment: FC = () => {
                                 <SelectItem value="Infrastructure">
                                   Infrastructure
                                 </SelectItem>
+                                <SelectItem value="Club">Club</SelectItem>
                               </SelectGroup>
                             </SelectContent>
                           </Select>
@@ -642,7 +727,7 @@ export const CreateDepartment: FC = () => {
           <div className="pl-3 grid gap-x-10 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-32 lg:gap-y-4">
             {departments.map((department) => (
               <DeptCard
-                key={department.department_id}
+                dept_id={department.department_id}
                 dept_name={department.dept_name}
                 dept_type={department.dept_type}
                 coordinator_email={department.coordinator_email}
@@ -651,6 +736,8 @@ export const CreateDepartment: FC = () => {
                 department_id={department.department_id}
                 institute_id={department.institute_id}
                 coordinator_id={department.coordinator_id}
+                onUpdate={handleUpdateDepartment}
+                onDelete={handleDeleteDepartment}
               />
             ))}
           </div>
