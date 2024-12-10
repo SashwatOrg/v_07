@@ -14,6 +14,8 @@ import Cookies from 'js-cookie';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import loginImage from "@/assets/Login_Page/login-img-two.svg";
+import ReportEaseLogo from "../../assets/img/logo/Reporteasy_logo.png";
+
 export const LoginForm: FC = () => {
 
   const [username, setUsername] = useState('');
@@ -28,6 +30,9 @@ export const LoginForm: FC = () => {
     username: "",
     password: "",
   });
+
+  // State to toggle registration options
+  const [showRegisterOptions, setShowRegisterOptions] = useState(false);
 
   const validateForm = () => {
     let isValid = true;
@@ -46,6 +51,7 @@ export const LoginForm: FC = () => {
     setFormErrors(errors);
     return isValid;
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -60,10 +66,10 @@ export const LoginForm: FC = () => {
       });
 
       const data = await response.json();
-      console.log('the response from back i s',data)
+      console.log('the response from back i s', data)
       if (response.ok) {
         Cookies.set('token', data.token, { expires: 0.5 });
-        console.log('success',username)
+        console.log('success', username)
         toast.success('Login successful!', {
           className: 'custom-toast',
           autoClose: 1000,
@@ -81,10 +87,25 @@ export const LoginForm: FC = () => {
     }
   };
 
+  // Handler for toggling registration options
+  const handleRegisterClick = () => {
+    setShowRegisterOptions((prev) => !prev);
+  };
+
   return (
     <div className="flex flex-row h-screen w-screen">
       {/* Left Side - Image */}
-      <div className="hidden md:flex items-center justify-center w-1/2 bg-gradient-to-r from-blue-700 to-teal-500 animate__animated animate__fadeIn animate__delay-1s h-full">
+      <div className="hidden md:flex flex-col items-center justify-center w-1/2 bg-gradient-to-r from-blue-700 to-teal-500 animate__animated animate__fadeIn animate__delay-1s h-full">
+        {/* Logo */}
+        <Link to="/" className="absolute top-4 left-4">
+            <img
+         src={ReportEaseLogo} // Replace with the actual path to your logo
+           alt="Logo"
+           className="w-[250px] h-auto animate__animated animate__fadeInDown"
+           />
+           </Link>
+        
+        {/* Login Illustration */}
         <img
           src={loginImage}
           alt="Login Illustration"
@@ -153,11 +174,41 @@ export const LoginForm: FC = () => {
           <div className="text-center my-4">
             <p className="text-gray-500 text-sm">
               Don't have an account?{" "}
-              <a href="/" className="text-blue-500 hover:underline">
+              <button
+                onClick={handleRegisterClick}
+                className="text-blue-500 hover:underline cursor-pointer"
+              >
                 Register here
-              </a>
+              </button>
             </p>
           </div>
+
+          {/* Show Register Options */}
+          {showRegisterOptions && (
+           
+
+            <div className="text-center mt-4 space-y-4">
+              <Link
+                to="/signup/instituteAdmin" // Path for Institute registration
+                className="w-full  text-black py-2 px-4 rounded-md hover:bg-blue-600 block text-center"
+              >
+                Register as Institute
+              </Link>
+              <Link
+                to="/signup/faculty" // Path for Faculty registration
+                className="w-full text-black py-2 px-4 rounded-md hover:bg-blue-600 block text-center"
+              >
+                Register as Faculty
+              </Link>
+              <Link
+                to="/signup/student" // Path for Student registration
+                className="w-full text-black py-2 px-4 rounded-md hover:bg-blue-600 block text-center"
+              >
+                Register as Student
+              </Link>
+            </div>
+            
+          )}
         </div>
       </div>
     </div>

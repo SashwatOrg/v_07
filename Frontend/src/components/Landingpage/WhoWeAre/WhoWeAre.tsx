@@ -1,32 +1,42 @@
 import React from "react";
 import { Link } from "react-router-dom";
 // Adjust the import path to be correct based on the folder structure
-import img01 from "../../../assets/img/images/about_img01.png"; // Ensure the correct relative path
+import backgroundImage from "../../../assets/img/images/collab.jpeg"; // Replace with your actual image path
 
-interface WhoWeAreProps {
-  imgSrc?: string; // Optional prop if needed for dynamic images
-}
-
-const WhoWeAre: React.FC<WhoWeAreProps> = ({ imgSrc = img01 }) => {
+const WhoWeAre: React.FC = () => {
   return (
-    <section id="about" className="about-area pt-130 pb-130">
-      <div className="container">
+    <section id="about" className="about-area pt-130 pb-130" style={{ display: 'flex' }}>
+      {/* Left Side with Background Image */}
+      <div
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          width: "45%", // Occupy half of the screen
+          height: "65vh", // Full height of the viewport
+          borderTopLeftRadius: "10px", // Optional: rounded corners
+          borderBottomLeftRadius: "20px", // Optional: rounded corners
+          opacity:"0.8",
+        
+        }}
+      />
+      {/* Right Side with Content */}
+      <div className="container" style={{ width: "50%", padding: "0 20px" }}>
         <div className="row align-items-center">
-          <div className="col-lg-6">
-            <div className="about-img wow fadeInLeft" data-wow-delay=".2s">
-              <img src={imgSrc} alt="About Us" />
-            </div>
-          </div>
-          <div className="col-lg-6">
+          <div className="col-lg-12">
             <div className="about-content wow fadeInRight" data-wow-delay=".2s">
               <div className="section-title mb-30">
                 <span className="sub-title">Who we are</span>
                 <h2 className="title">
-                  Streamlining <span>Annual Report</span> Creation for Educational Institutes.
+                  Streamlining <span>Annual Report</span> Creation for
+                  Educational Institutes.
                 </h2>
               </div>
               <p>
-                We streamline the process of creating comprehensive annual reports for educational institutes. From data collection to report generation, we offer a complete solution to enhance transparency and optimize decision-making.
+                We streamline the process of creating comprehensive annual
+                reports for educational institutes. From data collection to
+                report generation, we offer a complete solution to enhance
+                transparency and optimize decision-making.
               </p>
               <Link to="/" className="btn">
                 READ MORE

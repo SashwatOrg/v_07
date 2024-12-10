@@ -2,6 +2,7 @@ import { FC, useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
+import ReportEaseLogo from "../assets/img/logo/Reporteasy_logo.png";
 
 
 import { Button } from "@/components/ui/button";
@@ -289,11 +290,19 @@ const[isEnrollmentKeyValid,setIsEnrollmentKeyValid] = useState();
   return (
     <div className="flex min-h-screen bg-gradient-to-r from-purple-500 to-pink-500">
       {/* Left side with image */}
-      <div className="flex-1 flex justify-center items-center">
+      <div className="w-1/2 bg-gradient-to-r from-pink-500 to-purple-600 flex flex-col justify-center items-center p-8 relative">
+      {/* Logo moved to the top-left corner */}
+      <Link to="/" className="absolute top-4 left-4">
+  <img
+    src={ReportEaseLogo} // Replace with the actual path to your logo
+    alt="Logo"
+    className="w-[250px] h-auto animate__animated animate__fadeInDown"
+  />
+</Link>
         <img
           src={loginImage}
           alt="Institute Illustration"
-          className="w-[80%] h-[80%] max-w-[400px] max-h-[400px] rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-500"
+          className=" -mt-40 w-[80%] h-[80%] max-w-[400px] max-h-[400px] rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-500"
         />
       </div>
 

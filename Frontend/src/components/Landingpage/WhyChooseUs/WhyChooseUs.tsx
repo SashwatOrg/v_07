@@ -50,58 +50,52 @@ const WhyChooseUs: React.FC = () => {
       alt: "Comprehensive Data Integration",
       link: "/",
       title: "Comprehensive Data Integration",
-      description:
-        "Seamlessly collect and integrate data from various departments and stakeholders to ensure a unified and accurate report.",
+      description: "Unify data from all departments for accurate reports.",
     },
     {
       src: icon02,
       alt: "Customizable Reporting",
       link: "/",
       title: "Customizable Reporting",
-      description:
-        "Generate tailored reports that meet the specific needs of your institution, with flexible options to adjust data presentation and focus.",
+      description: "Create reports tailored to your institution's needs.",
     },
     {
       src: icon03,
       alt: "Role-Based Dashboards",
       link: "/",
       title: <>Role-Based Dashboards</>,
-      description:
-        "Enable cross-department collaboration with real-time data sharing, fostering efficient communication and decision-making.",
+      description: "Collaborate effectively with real-time data sharing.",
     },
     {
       src: icon04,
       alt: "Enhanced Transparency",
       link: "/",
       title: "Enhanced Transparency",
-      description:
-        "Streamline the process of creating comprehensive reports that improve institutional transparency and accountability.",
+      description: "Boost accountability with streamlined reporting.",
     },
     {
       src: icon01,
       alt: "Automated Reporting",
       link: "/",
       title: "Automated Reporting",
-      description:
-        "Save time and resources with automated report generation, ensuring timely and accurate annual reports for stakeholders.",
+      description: "Save time with automated and accurate report generation.",
     },
     {
       src: icon03,
       alt: "Real-Time Collaboration",
       link: "/",
       title: <>Real-Time Collaboration</>,
-      description:
-        "Facilitate seamless collaboration between stakeholders with tools that allow updates and feedback in real-time.",
+      description: "Enable real-time updates and feedback among teams.",
     },
     {
       src: icon04,
       alt: "Secure Data Management",
       link: "/",
       title: "Secure Data Management",
-      description:
-        "Protect sensitive institutional data with robust encryption and security measures.",
+      description: "Protect data with robust encryption and security tools.",
     },
   ];
+  
 
   const initialState = 0;
   const [count, setCount] = useState<number>(initialState);
@@ -115,7 +109,7 @@ const WhyChooseUs: React.FC = () => {
   }, [sliderItems.length]);
 
   return (
-    <section className="choose-area pb-130">
+    <section className="choose-area pb-80">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-xl-6">

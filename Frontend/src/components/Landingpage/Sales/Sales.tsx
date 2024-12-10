@@ -1,100 +1,137 @@
-import React from "react";
-import chartImg from "../../../assets/img/images/chart.jpg";
-import SalesTabButton from "./SalesTabButton";
-import SalesTabContent from "./SalesTabContent";
+import React, { useEffect, useState } from "react";
 
-interface SalesTabButtonProps {
-  title: string;
-  className: string;
+interface WorkflowStep {
   id: string;
-  target: string;
-  ariaControls: string;
-  ariaSelected: boolean;
-}
-
-interface SalesTabContentProps {
-  className: string;
-  id: string;
-  ariaLabel: string;
   title: string;
   description: string;
-  link: string;
+  gif: string;
 }
 
-const Sales: React.FC = () => {
-  const chart_info_list: string[] = [
-    "Contingency: 70%",
-    "Business Development: 10%",
-    "Investor: 30%",
-    "Poland",
-    "Legal & Regulation:10%",
-    "Czech Republic",
+const WorkflowComponentWithGIFs: React.FC = () => {
+  const workflowSteps: WorkflowStep[] = [
+    {
+      id: "execution",
+      title: "Dynamic Permission Management",
+      description: "",
+      gif: "/gifs/diagram.gif",
+    },
+    {
+      id: "accepted-200",
+      title: "User -Based Access Control",
+      description: "",
+      gif: "/gifs/social-media.gif",
+    },
+    {
+      id: "submitted-110",
+      title: "Customizable Dashboards",
+      description: "",
+      gif: "/gifs/line-chart.gif",
+    },
+    {
+      id: "integration-visited",
+      title: "Generate Selectable Reports",
+      description: "",
+      gif: "/gifs/document.gif",
+    },
+    {
+      id: "final-accepted",
+      title: "Download Reports in Multiple Formats",
+      description: "",
+      gif: "/gifs/generate_pdf.gif",
+    },
+    {
+      id: "final-accepted",
+      title: "Maintain User Access Log",
+      description: "",
+      gif: "/gifs/7211842.gif",
+    },
   ];
 
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [enlargedCard, setEnlargedCard] = useState<number>(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    const transitionEffect = () => {
+      const nextIndex = (activeIndex + 1) % workflowSteps.length;
+
+      // Simulate zoom effect transition
+      setEnlargedCard(activeIndex);
+
+      setTimeout(() => {
+        setActiveIndex(nextIndex);
+        setEnlargedCard(nextIndex);
+      }, 2000); // 1-second delay for transition
+
+      interval = setInterval(() => {
+        setEnlargedCard(nextIndex);
+
+        const nextTransition = (nextIndex + 1) % workflowSteps.length;
+        setTimeout(() => setActiveIndex(nextTransition), 4000);
+      }, 4000);
+    };
+
+    transitionEffect();
+
+    return () => clearInterval(interval);
+  }, [activeIndex]);
+
   return (
-    <section id="sales" className="chart-area chart-bg">
+    <section id="workflow" className="workflow-section py-5">
       <div className="container">
-        <div className="chart-inner">
-          <div className="row align-items-center justify-content-center">
-            <div className="col-lg-6 col-md-10 order-0 order-lg-2">
-              <div className="chart-wrap wow fadeInRight" data-wow-delay=".2s">
-                <img src={chartImg} alt="Chart" />
-                <ul>
-                  {chart_info_list.map((x, index) => (
-                    <li key={index}>{x}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+        {/* Section Header */}
+        <div className="text-center mb-5">
+          <h1
+            className="mb-3"
+            style={{ fontWeight: "bold", fontSize: "2.5rem", color: "#05c5db" }}
+          >
+            Workflow of ReportEase
+          </h1>
+          <p className="lead" style={{ color: "white" }}>
+            Streamlining the process end-to-end with stages of execution.
+          </p><br /><br />
+        </div>
 
-            <div className="col-lg-6 col-md-10">
-              <div className="chart-content wow fadeInLeft" data-wow-delay=".2s">
-                <ul className="nav nav-tabs" id="myTab" role="tablist">
-                  <SalesTabButton
-                    title="Funding Allocation"
-                    className="active"
-                    id="funding-tab"
-                    target="#funding"
-                    ariaControls="funding"
-                    ariaSelected={true}
-                  />
-
-                  <SalesTabButton
-                    title="Token Allocation"
-                    className=""
-                    id="token-tab"
-                    target="#token"
-                    ariaControls="token"
-                    ariaSelected={false}
-                  />
-                </ul>
-
-                <div className="tab-content" id="myTabContent">
-                  <SalesTabContent
-                    className={"show active"}
-                    id="funding"
-                    ariaLabel="funding-tab"
-                    title="1 CNL = 0.0863 BTC"
-                    description="The World’s 1st ICO Platform That Offers Rewards and helps investors make it easy to purchase and sell their tokens."
-                    link="/"
-                  />
-
-                  <SalesTabContent
-                    className={""}
-                    id="token"
-                    ariaLabel="token-tab"
-                    title="2 CNL = 0.0967 BTC"
-                    description="The World’s 1st ICO Platform That Offers Rewards and helps investors make it easy to purchase and sell their tokens."
-                    link="/"
+        {/* Workflow Steps with transition effects */}
+        <div className="workflow-steps-container">
+          {workflowSteps.map((step, index) => (
+            <div
+              className={`workflow-step-container ${
+                enlargedCard === index ? "enlarged-card" : ""
+              }`}
+              key={step.id}
+            >
+              {/* Card with GIFs */}
+              <div className="workflow-step">
+                <div className="gif-container">
+                  <img
+                    src={step.gif}
+                    alt={step.title}
+                    className="workflow-gif"
                   />
                 </div>
+                <div className="workflow-info">
+                  <h4 className="step-title">{step.title}</h4>
+                  <p className="step-description">{step.description}</p>
+                </div>
               </div>
+              {/* Arrow pointing to the next card */}
+              {index < workflowSteps.length - 1 && (
+                <div
+                  className={`arrow ${
+                    index === enlargedCard  ? "visible" : "hidden"
+                  }`}
+                >
+                  ➜
+                </div>
+              )}
             </div>
-          </div>
+          ))}
         </div>
-      </div>
+      </div> <br /><br />
     </section>
   );
 };
 
-export default Sales;
+export default WorkflowComponentWithGIFs;

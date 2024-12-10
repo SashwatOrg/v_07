@@ -51,7 +51,7 @@ body.white-background,
 }
 img,
 .img {
-  max-width: 27%;
+  max-width: 75%;
   transition: all 0.3s ease-out 0s;
   margin-left: 0px;
 }
@@ -370,10 +370,11 @@ label {
   flex-grow: 1;
 }
 .navbar-wrap ul {
+  margin-top: 5px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  margin-left: 50px;
+  margin-left: 220px;
   gap: 50px;
 }
 .navbar-wrap > ul > li {
@@ -392,7 +393,7 @@ label {
 /* Container for the dropdown menu */
 .register-dropdown {
   position: absolute;
-  top: 135%;   /* Position it directly below the REGISTER button */
+  top: 160%;   /* Position it directly below the REGISTER button */
   left: 30px;     /* Align with the left edge of the REGISTER button */
   width: 200px;  /* Adjust width as needed */
   opacity: 0;    /* Start with the dropdown hidden */
@@ -443,8 +444,8 @@ label {
 
 
 .navbar-wrap > ul > li > a {
-  left: 30px;
-  top: 8px;
+  left: 200px;
+  top: 14px;
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
@@ -503,7 +504,7 @@ label {
   padding-left: 20px;
 }
 .header-action > ul > li:first-child {
-  top: 7px;
+  
   margin-left: 0;
   padding-left: 0;
 }
@@ -511,7 +512,7 @@ label {
   content: "";
   position: absolute;
   left: 0;
-  top: 35px;
+  top: 45px;
   transform: translateY(-50%);
   width: 2px;
   height: 28px;
@@ -580,7 +581,7 @@ label {
   color: #00c4f4;
 }
 .header-btn .btn {
-  top: 5px;
+  top: 15px;
   font-size: 12px;
   padding: 20px 45px;
 }
@@ -734,6 +735,7 @@ label {
   display: block !important;
 }
 .mobile-menu .nav-logo {
+  
   position: relative;
   padding: 30px 25px;
   text-align: left;
@@ -924,11 +926,13 @@ label {
   -o-border-radius: 3px;
 }
 .mobile-menu .social-links li a:hover {
+  
   border-color: #00c4f4;
   background: #00c4f4;
   color: #fff;
 }
 .menu-area .mobile-nav-toggler {
+  
   position: relative;
   float: right;
   font-size: 30px;
@@ -964,6 +968,7 @@ label {
   z-index: -1;
 }
 .banner-shape-wrap img {
+  width: 350px;
   position: absolute;
   left: 0;
   top: 0;
@@ -971,7 +976,7 @@ label {
 }
 .banner-shape-wrap img.img-one {
   top: 28%;
-  left: -3%;
+  left: 1.5%;
   animation: leftToRight 5s infinite linear;
 }
 .banner-shape-wrap img.img-two {
@@ -1591,7 +1596,6 @@ label {
 
 /* choose-two */
 .choose-bg {
-  background-image: url(../img/bg/choose_bg.jpg);
   background-size: cover;
   background-position: center;
   padding: 130px 0 218px;
@@ -1637,11 +1641,26 @@ label {
   padding: 0 110px;
 }
 .chart-bg {
+  position: relative; /* Required for pseudo-element positioning */
+  padding: 130px 0;
+}
+
+.chart-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-image: url(../img/bg/chart_bg.jpg);
   background-size: cover;
   background-position: center;
-  padding: 130px 0;
+  opacity: 0.6; /* Reduce only the image opacity */
+  z-index: -1; /* Place behind content */
 }
+
+
+
 .chart-content .nav-tabs {
   border-bottom: none;
   margin: 0 -20px;
@@ -1686,7 +1705,7 @@ label {
   line-height: 1.2;
 }
 .chart-content-inner p {
-  color: #a4b4c3;
+  color: #ffffff;
   margin-bottom: 45px;
 }
 .chart-content-inner .btn {
@@ -1844,6 +1863,7 @@ label {
 .roadmap-title {
   display: inline-block;
   color: #00c4f4;
+  margin-left: 20px;
   font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
@@ -1909,6 +1929,7 @@ label {
 .roadmap-item:nth-child(even) .roadmap-title {
   margin-top: 22px;
   margin-bottom: 0;
+  margin-left: 10px;
 }
 .roadmap-item:nth-child(even) .roadmap-content {
   padding-bottom: 110px;
@@ -1919,7 +1940,7 @@ label {
 }
 .roadmap-item:nth-child(odd) {
   margin-top: 165px;
-  margin-left: -180px;
+  margin-left: 20px
 }
 .roadmap-item:nth-child(1) {
   margin-left: 100px;
@@ -2107,10 +2128,32 @@ label {
 
 /* 12. Document */
 .area-bg {
+  position: relative; /* Needed to position the overlay */
   background-image: url(../img/bg/bg1.jpg);
   background-size: cover;
   background-position: center;
+  /* Adjust the height as needed */
 }
+
+.area-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7); /* Black color with 50% transparency */
+  z-index: 1;
+}
+
+.text-content {
+  position: relative; /* Ensure the text is above the overlay */
+  color: white; /* Adjust text color if necessary */
+  z-index: 2;
+  text-align: center;
+  padding: 20px;
+}
+
 .document-content .document-list {
   margin-bottom: 40px;
 }
@@ -2136,153 +2179,246 @@ label {
   border-radius: 50%;
 }
 
-/* 13. Team */
-.team-area {
-  position: relative;
-  z-index: 1;
-}
-.team-area::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(360deg, #0b1d33 0%, rgba(11, 29, 51, 0) 97.51%);
-  transform: matrix(1, 0, 0, -1, 0, 0);
-  z-index: -1;
-}
-.team-item {
-  text-align: center;
-  margin-bottom: 60px;
+
+
+ /* team */
+
+
+
+
+ .team-area {
+  padding-top: 130px; /* Adjust spacing above the team section */
 }
 
-.team-item .team-content{
-  
-}
-.team-item .team-thumb {
-  max-width: 100%;
-  position: relative;
-  border-radius: 50%;
-  padding: 15px;
-  margin-bottom: 30px;
-  display: inline-block;
-}
-.team-item .team-thumb::before {
-  content: "";
-  left: 0;
-  top: 0;
-  width: 226px;
-  height: 226px;
-  background: transparent;
-  border: 2px dashed #00c4f4;
-  border-radius: 50%;
-  position: absolute;
-  transition: all 0.3s ease-in-out;
-  animation: rotateme 0.4s linear infinite;
-  opacity: 0;
-}
-.team-item:hover .team-thumb::before {
-  opacity: 1;
-}
-.team-item .team-thumb img {
-  border-radius: 50%;
-  filter: grayscale(100%);
-  transition: all 0.3s ease-in-out;
-}
-.team-item:hover .team-thumb img {
-  filter: grayscale(0);
-}
-.team-content .title {
-  margin-bottom: 10px;
-  font-size: 22px;
-  font-weight: 500;
-  transition: 0.3s linear;
-}
-.team-content span {
-  display: block;
-  margin-bottom: 10px;
-}
-.team-content .team-social {
+.team-area .row {
   display: flex;
+  flex-wrap: wrap; /* Ensures items wrap on smaller screens */
+  justify-content: center; /* Centers the team members horizontally */
+  gap: 30px; /* Adds consistent spacing between items */
+}
+
+.team-item {
+  text-align: center; /* Ensures all content (image, name, designation) is centered */
+  margin-bottom: 30px; /* Spacing below each item */
+}
+
+.team-thumb {
+  margin: 0 auto; /* Centers the image container */
+  max-width: 230px; /* Restricts the size for uniformity */
+  position: relative; /* For effects like rings */
+}
+
+.team-content {
+  margin-top: 15px; /* Adds spacing between the image and content */
+}
+
+.team-content h2.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333; /* Dark color for readability */
+  margin-bottom: 5px;
+}
+
+.team-content span {
+  font-size: 14px;
+  color: #555; /* Softer color for designation text */
+}
+
+@media (max-width: 768px) {
+  .team-area .row {
+    gap: 20px; /* Adjusts spacing for smaller screens */
+  }
+
+  .team-thumb {
+    max-width: 200px; /* Reduces image size on smaller screens */
+  }
+}
+
+.team-item .team-content {
+ 
+  text-align: center; /* Centers the content */
+  margin-top: 15px; /* Adds space between image and name */
+  padding-left: 30px; /* Moves the text 30px to the right */
+}
+
+
+
+
+/* Positioning the Team Social Icons */
+.team-content .team-social {
+  display: flex; /* Arrange the icons horizontally */
+  gap: 15px; /* Space between icons */
+  margin-left: 28px; /* Move icons 20px from the left */
+  margin-top: 15px; /* Add spacing above the icons */
+  padding: 0; /* Reset padding */
+  list-style: none; /* Remove bullet points */
+}
+
+.team-content .team-social li {
+  list-style: none; /* Ensure no list styling */
+}
+
+.team-content .team-social li a {
+  display: flex; /* Center the icon inside the container */
   align-items: center;
   justify-content: center;
-  margin: 0 -10px;
+  width: 40px; /* Fixed size for the icon */
+  height: 40px;
+  border-radius: 50%; /* Circular container */
+  background-color: #adaaaa; /* Background color for the icon container */
+  color: #555; /* Default icon color */
+  transition: all 0.3s ease-in-out; /* Smooth hover effect */
+  text-decoration: none; /* Remove underline from links */
 }
-.team-content .team-social li {
-  padding: 0 10px;
-}
-.team-content .team-social li a {
-  color: #fff;
-  font-size: 13px;
-}
+
 .team-content .team-social li a:hover {
-  color: #00c4f4;
+  background-color: #007bff; /* Change background color on hover */
+  color: #fff; /* Change icon color on hover */
+  transform: scale(1.1); /* Slight zoom effect on hover */
+}
+
+.team-content .team-social li a i {
+  font-size: 18px; /* Adjust the icon size */
 }
 
 
-
-/* team-two */
-.team-bg {
-  background-image: url(../img/bg/team_bg.jpg);
-  background-size: cover;
-  background-position: center;
-  padding: 130px 0 100px;
+ .team-item .team-thumb {
+  left: 20px;
+  max-width: 230px; /* Set a fixed size for uniformity */
+  aspect-ratio: 1; /* Ensures it's a perfect circle */
   position: relative;
+  border-radius: 50%;
+  display: flex; /* Center the image inside */
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Ensures any overflow is hidden */
+  margin-bottom: 30px;
+  background-color: #ffffff; /* Adds background only to the container */
+  padding: 5px; /* Space between the border and the image */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+  transition: transform 0.3s ease-in-out; /* Smooth hover animation */
 }
-.team-bg::after,
-.team-bg::before {
+
+.team-item .team-thumb img {
+  
+  border-radius: 50%; /* Ensures the image remains circular */
+  width: 100%; /* Image fully fits the container */
+  height: 100%; /* Stretches to maintain the circle */
+  object-fit: cover; /* Ensures image doesn't distort */
+  filter: grayscale(100%); /* Initially grayscale */
+  transition: filter 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth transition for grayscale and zoom */
+}
+
+.team-item:hover .team-thumb {
+  left: 20px;
+
+  transform: scale(1.1); /* Slight zoom effect for the container */
+}
+
+.team-item:hover .team-thumb img {
+  filter: grayscale(0); /* Removes grayscale on hover */
+  transform: scale(1); /* Adds a zoom-in effect to the image */
+}
+
+.team-item .team-thumb::after {
+  left: 20px;
+
   content: "";
   position: absolute;
-  left: 0;
-  top: 0;
-  background-image: url(../img/bg/team_shape01.png);
-  background-position: center;
-  background-repeat: repeat;
   width: 100%;
-  height: 29px;
+  height: 100%;
+  border: 3px solid rgba(0, 123, 255, 0.5); /* Circular border with a semi-transparent color */
+  border-radius: 50%;
+  top: 0;
+  left: 0;
+  z-index: -1; /* Ensures the ring is behind the image */
+  opacity: 0;
+  transform: scale(1.2);
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth animation */
 }
-.team-bg::after {
-  background-image: url(../img/bg/team_shape02.png);
-  top: auto;
-  bottom: 0;
-  height: 23px;
-}
-.team-item.team-item-two .team-thumb img {
-  border-radius: 0;
-  filter: grayscale(100%);
-  transition: all 0.3s ease-in-out;
-}
-.team-item.team-item-two:hover .team-thumb img {
-  filter: grayscale(0);
-}
-.team-item.team-item-two .team-thumb {
-  border-radius: 0;
-  padding: 0;
-  margin-bottom: 35px;
-}
-.team-item.team-item-two .team-thumb::before {
-  display: none;
-}
-.team-item.team-item-two {
-  margin-bottom: 30px;
+
+.team-item:hover .team-thumb::after {
+  left: 20px;
+
+  opacity: 1; /* Ring becomes visible on hover */
+  transform: scale(1.5); /* Expands the ring */
 }
 
 
-/* 14. Download */
-.download-content p {
-  color: #727885;
-  margin-bottom: 30px;
-}
-.download-btn {
-  display: flex;
+.chart-wrap {
+  height: 400px; /* Set an explicit height for the parent */
   align-items: center;
+  text-align: center;
+  justify-content: center;
 }
-.download-btn a {
-  margin-right: 20px;
-  margin-top: 10px;
-  display: block;
+
+
+
+/* Adjust for the first row of two images */
+
+
+
+.team-area .row.first-row {
+  
+  display: flex; /* Arrange items horizontally */
+  justify-content: center; /* Center the items */
+  gap: 90px; /* Even spacing between items */
+  margin-bottom: 30px; /* Match spacing with other rows */
 }
+
+/* Ensure uniform alignment and sizing for all team items */
+.team-area .row .team-item {
+  
+  flex: 0 0 230px; /* Fixed width for uniform size */
+  width: 230px; /* Prevents the items from growing too large */
+}
+
+/* Remove extra margins on team items */
+.team-item {
+  margin: 0; /* Reset margin */
+  text-align: center; /* Center-align content */
+}
+
+/* Add a consistent margin at the bottom */
+.team-item {
+  margin-bottom: 30px; /* Matches spacing for rows */
+}
+
+/* Ensure all rows below align properly */
+.team-area .row:not(.first-row) {
+  
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px; /* Consistent spacing */
+}
+
+
+
+/* Change the color of the name */
+.team-content h2.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f6f1f1; /* Change to your preferred color */
+  margin-bottom: 5px;
+}
+
+/* Change the color of the designation */
+.team-content span {
+  font-size: 14px;
+  color: #6ff7f5; /* Change to your preferred color for the designation */
+}
+
+/* Optional: Add hover effect for both name and designation */
+.team-content h2.title:hover,
+.team-content span:hover {
+  color: #007bff; /* Change to your desired hover color */
+}
+
+.row.first-row .team-social{
+  margin-left: 20px;
+}
+
 
 /* 15. Faq */
 .faq-area {
@@ -3123,4 +3259,365 @@ label {
 }
 .bt-roadmap-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgb(33, 217, 238); 
+}
+
+/*
+CHANGES FROM MY SIDE*/
+
+/* Ensure the buttons are visible on smaller screens */
+.header-action .btn {
+  display: inline-block;
+  padding: 10px -1px;
+  font-size: 14px;
+  text-align: center;
+  
+}
+
+/* Adjust for mobile view */
+@media (max-width: 768px) {
+  .header-action {
+    display: none; /* Hide desktop actions */
+  }
+
+  .mobile-menu .menu-box .menu-outer {
+    display: block; /* Ensure menu-outer is visible */
+  }
+
+  .mobile-menu .menu-box .menu-outer ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .mobile-menu .menu-box .menu-outer ul li a {
+    display: block;
+    padding: 10px;
+    font-size: 16px;
+    text-decoration: none;
+  }
+
+  .mobile-menu .menu-box .menu-outer ul li a:hover {
+    background-color: #f1f1f1; /* Add hover effect for better UX */
+  }
+
+  .mobile-menu .menu-box {
+    padding: 15px;
+  }
+
+  .mobile-menu .menu-box .btn {
+    display: block;
+    margin: 10px 0;
+  }
+}
+
+
+/* Ensure buttons remain visible on maximized screens */
+@media (min-width: 1200px) { /* Adjust based on your layout's breakpoint */
+  .header-action {
+    display: flex; /* Ensure buttons are aligned properly */
+    justify-content: flex-end; /* Align to the right of the header */
+    position: relative;
+    z-index: 10; /* Make sure they're not hidden by other elements */
+    background-color: transparent;
+  }
+
+  .header-btn {
+    margin-left: 10px; /* Add spacing between buttons */
+    background-color: transparent;
+  }
+
+  
+}
+
+
+.mobile-menu .register-dropdown {
+  display: none; /* Hide by default */
+  padding: 10px 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.mobile-menu .register-dropdown li a {
+  display: block;
+  color: #333;
+  padding: 5px 10px;
+  text-decoration: none;
+}
+
+.mobile-menu .register-dropdown li a:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+
+.logo img {
+
+  height: 100%; /* You can change this value */
+  
+}
+
+
+
+/* Workflow*/
+
+/* General Section Styling */
+.workflow-section {
+  background-color: rgb(11, 1, 24);
+   padding: 30px 0;
+}
+
+.container {
+  padding: 0 20px;
+}
+
+/* Header Section with Modern Look */
+.header-section {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  color: rgb(9, 1, 1);
+  padding: 90px 0;
+  text-align: center;
+  border-bottom: 4px solid #4b5fef;
+  transition: all 0.3s ease;
+  margin-top: 0px;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.main-title {
+  color: #ffffff;
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 1.3rem;
+  margin: 0;
+  opacity: 0.8;
+}
+
+.cta-button {
+  margin-top: 20px;
+  padding: 12px 30px;
+  font-size: 1.2rem;
+  color: rgb(10, 1, 1);
+  background-color: #333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #555;
+}
+
+/* Workflow Steps */
+.workflow-steps-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-evenly;
+  gap: 60px;
+  flex-wrap: wrap;
+  padding: 10px;
+  transition: all 0.3s ease;
+}
+
+/* Workflow Step Cards */
+.workflow-step-container {
+  display: flex;
+  align-items: center;
+}
+
+.workflow-step {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  height: 260px; /* Increased card height */
+  width: 160px; /* Increased card width */
+/* background-color: white; */
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.workflow-step:hover {
+  transform: translateY(-8px);
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.gif-container {
+  height: 60%;
+}
+
+.workflow-gif {
+  max-height: 90px;
+  max-width: 90px;
+  object-fit: contain;
+}
+
+.workflow-info {
+  font-size: 0.9rem;
+  padding: 5px;.workflow-step-container {
+    transition: transform 1s ease-in-out; /* Smooth zoom effect */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .enlarged-card {
+    transform: scale(1.1); /* Scale up by 10% */
+  }
+  
+  /* General card styles */
+  .workflow-step {
+    width: 250px;
+    height: 250px;
+    background: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 1s ease-in-out;
+  }
+  
+  color: #fdf9f9;
+}
+
+.step-title {
+  color: #ffffff;
+  margin: 5px 0;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.step-description {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+/* Arrows */
+.arrow-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.arrow-right {
+  width: 20px;
+  height: 20px;
+  border-top: 3px solid #333;
+  border-right: 3px solid #333;
+  transform: rotate(45deg);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .workflow-step {
+    width: 180px; /* Adjusted for smaller screens */
+    height: 220px; /* Adjusted for smaller screens */
+  }
+
+  .workflow-steps-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+
+.workflow-step-container {
+  transition: transform 0.5s ease-in-out;
+}
+
+.enlarged-card {
+  transform: scale(1.1);
+}
+
+.arrow-container {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 20px;
+}
+
+.arrow-right {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 10px solid black;
+  transition: transform 0.5s ease;
+}
+
+.arrow-container.active-arrow .arrow-right {
+  transform: rotate(90deg) translateX(5px);
+  transition: transform 0.3s ease-in-out;
+}
+
+
+
+/* Arrow */
+
+
+.workflow-step-container {
+  position: relative;
+  transition: transform 0.5s ease;
+}
+
+.enlarged-card {
+  transform: scale(1.1);
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  left: 105%; /* Positioning the arrow to the right of the card */
+  transform: translateY(-50%);
+  font-size: 2rem;
+  transition: opacity 0.5s ease;
+}
+
+.hidden {
+  
+  pointer-events: none; /* Prevent interaction when hidden */
+}
+
+.visible {
+  opacity: 1;
+}
+
+
+
+/* Who we are bg img */
+
+.about-area {
+  display: flex;
+  align-items: center; /* Center content vertically */
+  margin-left: 50px;
+}
+
+.about-content {
+  padding: 50px; /* Add some padding to the content */
+}
+
+@media (max-width: 768px) {
+  .about-area {
+    flex-direction: column; /* Stack on smaller screens */
+  }
+
+  .about-content {
+    width: 100%; /* Full width on smaller screens */
+  }
+
+  .about-area > div {
+    width: 100%; /* Full width for the image on smaller screens */
+    height: 200px; /* Set a fixed height for the image */
+  }
 }

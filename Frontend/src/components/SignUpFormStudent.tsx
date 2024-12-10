@@ -1,5 +1,4 @@
 import { FC, useState, useEffect } from "react";
-
 import { useNavigate, Link } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
@@ -8,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import ReportEaseLogo from "../assets/img/logo/Reporteasy_logo.png";
+
 import { toast } from "react-toastify";
 import {
   Select,
@@ -297,274 +298,276 @@ export const SignUpFormStudent: FC = () => {
   };
 
 
-    return (
-      <div className="min-h-screen flex">
-        {/* Left Section: Image and Logo */}
-        <div className="w-1/2 bg-gradient-to-r from-pink-500 to-purple-600 flex flex-col justify-center items-center p-8">
-          <img src="/path-to-logo.png" alt="" className="mb-8 w-20" />
-          <img src={loginImage} alt="Sign Up Illustration" className="w-[80%] max-w-[500px]" />
-        </div>
+  return (
+    <div className="min-h-screen flex relative">
+    {/* Left Section: Image and Logo */}
+    <div className="w-1/2 bg-gradient-to-r from-pink-500 to-purple-600 flex flex-col justify-center items-center p-8 relative">
+      {/* Logo moved to the top-left corner */}
+      <Link to="/" className="absolute top-4 left-4">
+  <img
+    src={ReportEaseLogo} // Replace with the actual path to your logo
+    alt="Logo"
+    className="w-[250px] h-auto animate__animated animate__fadeInDown"
+  />
+</Link>
+
+      
+      {/* Other elements */}
+      <img
+        src="/path-to-logo.png"
+        alt=""
+        className="mb-8 w-20"
+      />
+      <img
+        src={loginImage}
+        alt="Sign Up Illustration"
+        className="w-[80%] max-w-[500px] -mt-40"
+      />
+    </div>
   
-        {/* Right Section: Sign-Up Form */}
-        <div className="w-1/2 p-16 flex flex-col justify-center bg-white">
-          <h2 className="text-4xl font-bold mb-4 text-purple-600 text-center">Sign Up as Student</h2>
-          <p className="text-center text-gray-600 mb-6">
-            Submit your details and join our platform today.
-          </p>
   
-          {/* Form Box with Shadow */}
-          <div className="p-8 shadow-lg rounded-lg bg-white">
-            <form onSubmit={handleSignUp} className="space-y-4">
-              {/* Row 1: First Name and Last Name */}
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <Label htmlFor="first_name">First Name</Label>
-                  <Input
-                      type="text"
-                      name="first_name"
-                      placeholder="First Name"
-                      id="first-name"
-                      value={formData.first_name}
-                      onChange={handleChange}
-                    />
-                    {FirstNameError && (
-                      <p className="text-red-500 text-sm">{FirstNameError}</p>
-                    )}
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="last_name">Last Name</Label>
-                  <Input
-                      type="text"
-                      name="last_name"
-                      placeholder="Last Name"
-                      id="last-name"
-                      value={formData.last_name}
-                      onChange={handleChange}
-                    />
-                    {LastNameError && (
-                      <p className="text-red-500 text-sm">{LastNameError}</p>
-                    )}
-                </div>
+      {/* Right Section: Sign-Up Form */}
+      <div className="w-1/2 p-16 flex flex-col justify-center bg-white">
+        <h2 className="text-4xl font-bold mb-4 text-purple-600 text-center">Sign Up as Student</h2>
+        <p className="text-center text-gray-600 mb-6">
+          Submit your details and join our platform today.
+        </p>
+  
+        {/* Form Box with Shadow */}
+        <div className="p-8 shadow-lg rounded-lg bg-white">
+          <form onSubmit={handleSignUp} className="space-y-4">
+            {/* Row 1: First Name and Last Name */}
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <Label htmlFor="first_name">First Name</Label>
+                <Input
+                  type="text"
+                  name="first_name"
+                  placeholder="First Name"
+                  id="first-name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                />
+                {FirstNameError && (
+                  <p className="text-red-500 text-sm">{FirstNameError}</p>
+                )}
               </div>
-  
-              {/* Row 2: Email and Mobile Number */}
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                      type="text"
-                      name="email"
-                      placeholder="Email"
-                      id="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                    />
-                    {emailError && (
-                      <p className="text-red-500 text-sm">{emailError}</p>
-                    )}
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="mobile_number">Mobile Number</Label>
-                  <Input
-                      type="number"
-                      name="mobile_number"
-                      placeholder="Phone Number"
-                      id="phonenumber"
-                      value={formData.mobile_number}
-                      onChange={handleChange}
-                    />
-                    {phoneError && (
-                      <p className="text-red-500 text-sm">{phoneError}</p>
-                    )}
-                </div>
+              <div className="flex-1">
+                <Label htmlFor="last_name">Last Name</Label>
+                <Input
+                  type="text"
+                  name="last_name"
+                  placeholder="Last Name"
+                  id="last-name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                />
+                {LastNameError && (
+                  <p className="text-red-500 text-sm">{LastNameError}</p>
+                )}
               </div>
+            </div>
   
-              {/* Row 3: Gender and Institute */}
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <Label htmlFor="gender">Gender</Label>
-                  <Select
-                      name="gender"
-                      value={formData.gender}
-                      onValueChange={(value) =>
-                        handleChange({ target: { name: "gender", value } })
-                      }
-                    >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="Male">Male</SelectItem>
-                        <SelectItem value="Female">Female</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="institute">Institute</Label>
-                  <Select
-                      name="institute"
-                      value={formData.institute}
-                      onValueChange={(value) => {
-                        handleChange({ target: { name: "institute", value } });
-                        setEnrollmentKey(""); // Clear enrollment key when changing institute
-                        fetchDepartments(value); // Fetch departments for the selected institute
-                      }}
-                    >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Institute" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
+            {/* Row 2: Email and Mobile Number */}
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  type="text"
+                  name="email"
+                  placeholder="Email"
+                  id="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+                {emailError && (
+                  <p className="text-red-500 text-sm">{emailError}</p>
+                )}
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="mobile_number">Mobile Number</Label>
+                <Input
+                  type="number"
+                  name="mobile_number"
+                  placeholder="Phone Number"
+                  id="phonenumber"
+                  value={formData.mobile_number}
+                  onChange={handleChange}
+                />
+                {phoneError && (
+                  <p className="text-red-500 text-sm">{phoneError}</p>
+                )}
+              </div>
+            </div>
+  
+            {/* Row 3: Gender and Institute */}
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <Label htmlFor="gender">Gender</Label>
+                <Select
+                  name="gender"
+                  value={formData.gender}
+                  onValueChange={(value) =>
+                    handleChange({ target: { name: "gender", value } })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="institute">Institute</Label>
+                <Select
+                  name="institute"
+                  value={formData.institute}
+                  onValueChange={(value) => {
+                    handleChange({ target: { name: "institute", value } });
+                    setEnrollmentKey(""); // Clear enrollment key when changing institute
+                    fetchDepartments(value); // Fetch departments for the selected institute
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Institute" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
                       {institutes.map((institute) => (
-                            <SelectItem
-                              key={institute.institute_name}
-                              value={institute.institute_name}
-                            >
-                              {institute.institute_name}
-                            </SelectItem>
-                          ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
+                        <SelectItem
+                          key={institute.institute_name}
+                          value={institute.institute_name}
+                        >
+                          {institute.institute_name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
   
-              {/* Row 4: Student Registration ID and Department */}
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <Label htmlFor="student_reg_id">Student Registration ID</Label>
-                  <Input
-                      type="text"
-                      name="student_reg_id"
-                      placeholder="Student Registration ID"
-                      id="student_reg_id"
-                      value={formData.student_reg_id}
-                      onChange={handleChange}
-                    />
-                    {studentRegIdError && (
-                      <p className="text-red-500 text-sm">{studentRegIdError}</p>
-                    )}
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="department">Department</Label>
-                  <Select
-                      name="department"
-                      value={formData.department}
-                      onValueChange={(value) => {
-                        handleChange({ target: { name: "department", value } });
-                        fetchPrograms(value); // Fetch programs for the selected department
-                      }}
-                    >
-                      <SelectTrigger className="w-[315px]">
-                        <SelectValue placeholder="Select Department" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Departments</SelectLabel>
-                          {departments.map((department) => (
-                            <SelectItem key={department} value={department}>
-                              {department}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                </div>
+            {/* Row 4: Student Registration ID and Department */}
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <Label htmlFor="student_reg_id">Student Registration ID</Label>
+                <Input
+                  type="text"
+                  name="student_reg_id"
+                  placeholder="Student Registration ID"
+                  id="student_reg_id"
+                  value={formData.student_reg_id}
+                  onChange={handleChange}
+                />
+                {studentRegIdError && (
+                  <p className="text-red-500 text-sm">{studentRegIdError}</p>
+                )}
               </div>
-  
-              {/* Row 5: Program and Current Semester */}
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <Label htmlFor="program">Program</Label>
-                  <Select
-                      name="program"
-                      value={formData.program} // Add this to formData state
-                      onValueChange={(value) =>
-                        handleChange({ target: { name: "program", value } })
-                      }
-                    >
-                      <SelectTrigger className="w-[315px]">
-                        <SelectValue placeholder="Select Program" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Programs</SelectLabel>
-                          {programs.map((program) => (
-                            <SelectItem key={program} value={program}>
-                              {program}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="current_semester">Current Semester</Label>
-                  <Input
-                    type="text"
-                    name="current_semester"
-                    placeholder="Current Semester"
-                    value={formData.current_semester}
-                    onChange={handleChange}
-                  />
-                </div>
+              <div className="flex-1">
+                <Label htmlFor="department">Department</Label>
+                <Select
+                  name="department"
+                  value={formData.department}
+                  onValueChange={(value) => {
+                    handleChange({ target: { name: "department", value } });
+                    fetchPrograms(value); // Fetch programs for the selected department
+                  }}
+                >
+                  <SelectTrigger className="w-[315px]">
+                    <SelectValue placeholder="Select Department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Departments</SelectLabel>
+                      {departments.map((department) => (
+                        <SelectItem key={department} value={department}>
+                          {department}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
   
-              {/* enrollment key  */}
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <Label htmlFor="program">Enrollment Key of Institue</Label>
-                  <Input
-                      type="text"
-                      name="enrollment_key"
-                      placeholder="Enrollment Key"
-                      id="enrollment_key"
-                      value={enrollmentKey}
-                      onChange={(e) => setEnrollmentKey(e.target.value)}
-                    />
-                     {enrollmentKeyError && (
-                      <p className="text-red-500 text-sm">{enrollmentKeyError}</p>
-                    )}
-                </div>
-  
-                <div className="flex-1">
-                  <Label htmlFor="current_semester">Current Semester</Label>
-                  <Input
-                      type="number"
-                      name="current_semester"
-                      placeholder="Current Semester"
-                      id="current_semester"
-                      value={formData.current_semester}
-                      onChange={handleChange}
-                    />
-                    {currentSemesterError && (
-                      <p className="text-red-500 text-sm">
-                        {currentSemesterError}
-                      </p>
-                    )}
-                </div>
-  
-                <div className="flex-1">
-                  <Label htmlFor="current_semester">Username</Label>
-                  <Input
-                      type="text"
-                      name="username"
-                      placeholder="Username"
-                      id="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                    />
-                </div>
+            {/* Row 5: Program and Current Semester */}
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <Label htmlFor="program">Program</Label>
+                <Select
+                  name="program"
+                  value={formData.program}
+                  onValueChange={(value) =>
+                    handleChange({ target: { name: "program", value } })
+                  }
+                >
+                  <SelectTrigger className="w-[315px]">
+                    <SelectValue placeholder="Select Program" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Programs</SelectLabel>
+                      {programs.map((program) => (
+                        <SelectItem key={program} value={program}>
+                          {program}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
+              <div className="flex-1">
+                <Label htmlFor="current_semester">Current Semester</Label>
+                <Input
+                  type="text"
+                  name="current_semester"
+                  placeholder="Current Semester"
+                  value={formData.current_semester}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
   
-              {/* Row 6: Password and Confirm Password */}
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
+            {/* Enrollment Key */}
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <Label htmlFor="enrollment_key">Enrollment Key of Institute</Label>
+                <Input
+                  type="text"
+                  name="enrollment_key"
+                  placeholder="Enrollment Key"
+                  id="enrollment_key"
+                  value={enrollmentKey}
+                  onChange={(e) => setEnrollmentKey(e.target.value)}
+                />
+                {enrollmentKeyError && (
+                  <p className="text-red-500 text-sm">{enrollmentKeyError}</p>
+                )}
+              </div>
+            </div>
+  
+            {/* Row 6: Username, Password and Confirm Password */}
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  id="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="password">Password</Label>
+                <Input
                   id="password"
                   type="password"
                   name="password"
@@ -573,12 +576,12 @@ export const SignUpFormStudent: FC = () => {
                   onChange={handleChange}
                 />
                 {passwordError && (
-                  <p className="text-red-500 text-sm">{passwordError}</p>
+   <p className="text-red-500 text-sm">{passwordError}</p>
                 )}
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="confirm_password">Confirm Password</Label>
-                  <Input
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="confirm_password">Confirm Password</Label>
+                <Input
                   id="confirm_password"
                   type="password"
                   name="confirm_password"
@@ -586,32 +589,39 @@ export const SignUpFormStudent: FC = () => {
                   value={formData.confirm_password}
                   onChange={handleChange}
                 />
-                </div>
               </div>
+            </div> <br />
   
-              <Button type="submit" className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-lg">
-                Sign Up
-              </Button>
-            </form>
-          </div>
+            <Button type="submit" className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-lg">
+              Sign Up
+            </Button>
+          </form>
   
           {/* Additional Information Section */}
           <div className="text-center mt-6">
             <p>OR CONTINUE WITH</p>
-            <button className="bg-red-500 text-white px-4 py-2 mt-4 rounded-md">Google</button>
+            <Button className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-lg hover:bg-blue-700 mt-2">
+              Google
+            </Button>
             <p className="text-gray-500 text-sm mt-4">
               By clicking continue, you agree to our <span className="text-blue-500">Terms of Service</span> and{" "}
               <span className="text-blue-500">Privacy Policy</span>.
             </p>
             <p className="text-gray-500 text-sm mt-4">
-              Already have an account? <span className="text-blue-500 cursor-pointer">Log in</span>
+              Already have an account?{" "}
+              <Link to="/login" className="text-blue-500 cursor-pointer hover:underline">
+                Log in
+              </Link>
             </p>
           </div>
-  
+          
           <footer className="mt-8 text-center text-gray-500 text-sm">
             © 2024 Sashwat All Rights Reserved.
           </footer>
         </div>
       </div>
-    );
+    </div>
+  );
 };
+
+ 

@@ -2,6 +2,7 @@ import { FC, useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
+import ReportEaseLogo from "../assets/img/logo/Reporteasy_logo.png";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -151,7 +152,16 @@ export const SignUpFormAdmin: FC = () => {
   return (
     <div className="flex flex-row min-h-screen bg-gradient-to-r from-purple-600 to-pink-400">
       {/* Left Side - Image */}
-      <div className="flex items-center justify-center w-1/2 bg-gradient-to-r from-purple-700 to-pink-500 animate__animated animate__fadeIn">
+      <div className="w-1/2 bg-gradient-to-r from-pink-500 to-purple-600 flex flex-col justify-center items-center p-8 relative">
+      {/* Logo moved to the top-left corner */}
+      <Link to="/" className="absolute top-4 left-4">
+  <img
+    src={ReportEaseLogo} // Replace with the actual path to your logo
+    alt="Logo"
+    className="w-[250px] h-auto animate__animated animate__fadeInDown"
+  />
+</Link>
+
         <img
           src={loginImage}
           alt="Institute Illustration"

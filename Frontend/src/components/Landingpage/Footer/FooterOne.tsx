@@ -19,23 +19,25 @@ const FooterOne: React.FC = () => {
           </div>
           <div className="footer-top">
             <div className="row">
-              <div className="col-xl-3 col-lg-4 col-md-6">
+              <div className="col-xl-3 col-lg-4 col-md-6"> <br />
                 <div
                   className="footer-widget wow fadeInUp"
                   data-wow-delay=".2s"
                 >
-                  <Link to="/" className="f-logo">
-                    <img src={logoImage} alt="BigTech Logo" />
-                  </Link>
+                 <Link to="/">
+                  <span className="text-2xl font-bold">
+                    <span className="text-blue-500">REPORT</span>
+                        <span className="text-white-700">EASE</span>
+                      </span>
+                  </Link> <br /><br />  
                   <div className="footer-content">
                     <p>
-                      A new way to make the payments easy, reliable and 100%
-                      secure. claritatem itamconse quat. Exerci tationulla
+                    Simplify annual reports, boost transparency, enhance collaboration, and secure data management for educational institutes!
                     </p>
                     <ul className="footer-social">
                       <li>
-                        <a href="#">
-                          <i className="fab fa-youtube"></i>
+                        <a href="https://www.instagram.com/team_sashwat/">
+                          <i className="fab fa-instagram"></i>
                         </a>
                       </li>
                       <li>
@@ -45,14 +47,10 @@ const FooterOne: React.FC = () => {
                       </li>
                       <li>
                         <a href="#">
-                          <i className="fab fa-facebook-f"></i>
+                          <i className="fab fa-linkedin"></i>
                         </a>
                       </li>
-                      <li>
-                        <a href="#">
-                          <i className="fab fa-skype"></i>
-                        </a>
-                      </li>
+                      
                     </ul>
                   </div>
                 </div>
@@ -119,8 +117,7 @@ const FooterOne: React.FC = () => {
                   <h4 className="fw-title">Subscribe Newsletter</h4>
                   <div className="footer-newsletter">
                     <p>
-                      Exerci tation ullamcorper suscipit lobortis nisl aliquip
-                      ex ea commodo
+                    Simplifying reports, enhancing transparency, and securing data for educational institutes!
                     </p>
                     <form action="#">
                       <input
@@ -154,7 +151,7 @@ const FooterOne: React.FC = () => {
                       <Link to="#">Privacy policy</Link>
                     </li>
                     <li>
-                      <Link to="#">Login / Signup</Link>
+                     
                     </li>
                   </ul>
                 </div>
