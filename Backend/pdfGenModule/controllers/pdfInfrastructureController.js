@@ -1,190 +1,318 @@
-const puppeteer = require('puppeteer');
-const userQueries = require('../queries/InfrastructureQueries');
-const fs = require('fs');
-const path = require('path');
-const ejs = require('ejs');
+const puppeteer = require("puppeteer");
+const infrastructureQueries = require("../queries/InfrastructureQueries");
+const fs = require("fs");
+const path = require("path");
+const ejs = require("ejs");
+const crypto = require("crypto");
+const bcrypt = require("bcrypt");
+const { Parser } = require("json2csv");
+const db = require("../../db/dbConnection.js");
+const pdfDirectory = path.join(__dirname, "..", "..", "public", "pdfs");
+const htmlDirectory = path.join(__dirname, "..", "..", "public", "html_reports");
+const credentialsDirectory = path.join(__dirname, "..", "..", "public", "report_credentials");
 
-const pdfDirectory = path.join(__dirname, '..', '..', 'public', 'pdfs');
+// Ensure directories exist
+[pdfDirectory, htmlDirectory, credentialsDirectory].forEach((dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
-// Ensure the PDF directory exists
-if (!fs.existsSync(pdfDirectory)) {
-  fs.mkdirSync(pdfDirectory, { recursive: true }); // Create the directory if it doesn't exist
-}
+// Function to generate a random password
+const generateRandomPassword = () => {
+  return crypto.randomBytes(8).toString("hex");
+};
+
+// Function to save report log
+const saveReportLog = async (reportDetails) => {
+  const { reportType, reportName, userId, year, departmentName, filePath } = reportDetails;
+
+  // Generate random password
+  const rawPassword = generateRandomPassword();
+  const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+  try {
+    // Prepare the query
+    const query = "INSERT INTO report_logs (report_type, report_name, generated_by_user_id, report_year, department_name, access_password, file_path, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    const values = [reportType, reportName, userId, year, departmentName, hashedPassword, filePath, 1];
+
+    // Execute the query
+    const [result] = await db.promise().query(query, values);
+
+    // Generate CSV with password details
+    const csvData = [{
+      report_name: reportName,
+      access_password: rawPassword,
+      generated_at : new Date().toISOString(),
+      report_type: reportType,
+      log_id: result.insertId
+    }];
+
+    const fields = ['report_name', 'access_password', 'generated_at', 'report_type', 'log_id'];
+    const json2csvParser = new Parser({ fields });
+    const csvContent = json2csvParser.parse(csvData);
+
+    // Save CSV file
+    const csvFileName = `report_access_${result.insertId}.csv`;
+    const csvPath = path.join(credentialsDirectory, csvFileName);
+    fs.writeFileSync(csvPath, csvContent);
+
+    return {
+      logId: result.insertId,
+      rawPassword, // Return the raw password for display
+      csvPath: `/report_credentials/${csvFileName}`
+    };
+  } catch (error) {
+    console.error("Error saving report log:", error);
+    throw error;
+  }
+};
 
 const generateInfrastructurePdf = async (req, res) => {
+  console.log('Generating PDF...');
   try {
-    const { options, year, user } = req.body; // Get user details from request
-    // console.log('hey i am inside generatePdf');
-    // console.log('Request body:', req.body);
+    const { options, year, user } = req.body;
 
-    // Generate infrastructure data based on options and year
-    const infrastructureData = await userQueries.getInfrastructureData(options, year);
-    // console.log('Infrastructure data retrieved:', infrastructureData);
-
-    const pdfFileName = `infrastructure_report_${year}.pdf`; // Example file name
-    const pdfFilePath = path.join(pdfDirectory, pdfFileName); // Use the absolute path
-
-    // Use Puppeteer to generate PDF
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-
-    // Check if infrastructure data is not empty before generating the PDF
-    if (infrastructureData.length === 0) {
-      return res.status(404).json({
-        message: 'No infrastructure data found for the specified year and options.',
+    // Validate input
+    if (!options || !year || !user) {
+      return res.status(400).json({
+        message: "Missing required parameters",
+        details: {
+          options: !!options,
+          year: !!year,
+          user: !!user,
+        },
+      });
+    }
+    const userId = user.user_id;
+    console.log('the user id at controller is ',userId)
+    // Fetch infrastructure data
+    let infrastructureData = [];
+    try {
+      infrastructureData = await infrastructureQueries.getInfrastructureData(options, year);
+    } catch (dataError) {
+      console.error("Error fetching infrastructure data:", dataError);
+      return res.status(500).json({
+        message: "Failed to retrieve infrastructure data",
+        error: dataError.message,
       });
     }
 
-    // Fetch institute name based on institute_id
-    const instituteId = user.institute_id; // Get institute_id from user
-    const instituteData = await userQueries.getInstituteName(instituteId);
-    // console.log('the institute data is ', instituteData);
-    const instituteName = instituteData[0]?.institute_name || 'Institute Name'; // Default name if not found
+    if (infrastructureData.length === 0) {
+      return res.status(404).json({
+        message: "No infrastructure data found for the specified year and options.",
+      });
+    }
 
-    // Prepare the HTML content for the PDF
-    const htmlContent = `
-      <html>
-      <head>
-        <style>
-          @page {
-            margin: 50px;
-            border: 1px solid #000; /* Border around each page */
-          }
-          body {
-            font-family: Arial, sans-serif;
-          }
-          .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 10px;
-          }
-          .page-number {
-            position: fixed;
-            bottom: 10px;
-            right: 20px;
-            font-size: 10px;
-            color: #555;
-          }
-        </style>
-      </head>
-      <body>
-        <div style="position: fixed; top: 20px; right: 20px; font-size: 12px; color: #555;">
-          Generated on: ${new Date().toLocaleString()}
-        </div>
-        <div style="page-break-after: always; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 90vh; text-align: center; font-family: Arial, sans-serif; line-height: 1.8;">
-          <h1 style="margin: 0; font-size: 36px; font-weight: bold;">Infrastructure Report for Year: ${year}</h1>
-          <div style="margin-top: 20px; font-size: 18px;">
-            <p style="margin: 5px 0;">Prepared by: ${user.first_name} ${user.last_name}</p>
-            <p style="margin: 5px 0;">Department: Infrastructure Department</p>
-            <p style="margin: 5px 0;">Email: ${user.email}</p>
-          </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th>Budget</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${infrastructureData.map(data => `
-              <tr>
-                <td>${data.description}</td>
-                <td>${data.budget}</td>
-                <td>${data.startdate}</td>
-                <td>${data.enddate}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <div class="footer" style="position: fixed; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 16px; font-weight: bold;">
-          ${instituteName}
-        </div>
-        <div class="page-number">
-          <script type="text/php">
-            if ( isset($pdf) ) {
-              $pdf->page_script('page {PAGE_NUM} of {PAGE_COUNT}');
-            }
-          </script>
-        </div>
-      </body>
-      </html>
-    `;
+    // Fetch institute name
+    let instituteName = "Institute Name";
+    try {
+      const instituteId = user.institute_id;
+      const instituteData = await infrastructureQueries.getInstituteName(instituteId);
+      instituteName = instituteData[0]?.institute_name || instituteName;
+    } catch (instituteError) {
+      console.warn("Error fetching institute name:", instituteError);
+    }
 
-    await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
-    await page.pdf({ path: pdfFilePath, format: 'A4' });
+    const pdfFileName = `infrastructure_report_${year}_${Date.now()}.pdf`;
+    const pdfFilePath = path.join(pdfDirectory, pdfFileName);
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    // Enhanced HTML rendering
+ const htmlContent = await ejs.renderFile(
+      path.join(__dirname, "..", "views", "InfrastructureReportView.ejs"),
+      {
+        infrastructureData,
+        year,
+        user,
+        instituteName,
+      }
+    );
+
+    await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+    await page.pdf({
+      path: pdfFilePath,
+      format: "A4",
+      printBackground: true,
+      margin: {
+        top: "20mm",
+        right: "20mm",
+        bottom: "20mm",
+        left: "20mm",
+      },
+    });
 
     await browser.close();
 
-    // Check if the file exists after generation
-    if (!fs.existsSync(pdfFilePath)) {
-      return res.status(404).json({ message: 'PDF not found after generation' });
+    // Fetch department name based on userId
+    const departmentResult = await infrastructureQueries.getDepartmentByCoordinatorId(userId);
+    console.log("The department results is ", departmentResult);
+    const departmentName = departmentResult[0]?.dept_name; // Use optional chaining to avoid errors
+    console.log("The department name is ", departmentName);
+
+    // Check if departmentName is undefined
+    if (!departmentName) {
+      console.error('Department name is undefined');
+      return res.status(500).json({
+        message: 'Department name could not be retrieved.',
+      });
     }
 
-    // Send the PDF file path or success message to the frontend
-    return res.status(200).json({ message: 'PDF generated successfully', filePath: pdfFileName });
+    // Prepare report details for logging
+    const reportDetails = {
+      reportType: "pdf",
+      reportName: pdfFileName,
+      userId: user.user_id,
+      year,
+      departmentName,
+      filePath: pdfFilePath,
+    };
+
+    // Save report log and generate CSV
+    const { logId, rawPassword, csvPath } = await saveReportLog(reportDetails);
+
+    return res.status(200).json({
+      message: "PDF generated successfully",
+      filePath: pdfFileName,
+      passwordCsvPath: csvPath,
+      logId,
+    });
   } catch (error) {
-    console.error('Error generating PDF:', error);
-    res.status(500).json({ message: 'Error generating PDF' });
+    console.error("Error generating PDF:", error);
+    res.status(500).json({
+      message: "Error generating PDF",
+      error: error.message,
+    });
   }
 };
 
 const generateInfrastructureHtml = async (req, res) => {
   try {
-    // console.log('Inside generateHtml');
-    const { options, year, user } = req.body; // Get user details from request
-    // console.log('Request body:', req.body);
+    const { options, year, user } = req.body;
 
-    // Fetch infrastructure data based on selected options and year
-    const infrastructureData = await userQueries.getInfrastructureData(options, year);
-    console.log('Infrastructure data retrieved:', infrastructureData);
-
-    // Fetch institute name based on institute_id
-    const instituteId = user.institute_id; // Get institute_id from user
-    const instituteData = await userQueries.getInstituteName(instituteId);
-    // console.log('Institute data retrieved:', instituteData);
-    const instituteName = instituteData[0]?.institute_name || 'Institute Name'; // Default name if not found
-
-    const htmlFileName = `infrastructure_report_${year}.html`; // Dynamic file name based on the year
-    const htmlFilePath = path.join(__dirname, '..', '..', 'public', 'html_reports', htmlFileName);
-
-    // Ensure the folder exists to store HTML files, if not, create it
-    const htmlDirectory = path.dirname(htmlFilePath);
-    if (!fs.existsSync(htmlDirectory)) {
-      fs.mkdirSync(htmlDirectory, { recursive: true });
-      // console.log('Directory created:', htmlDirectory); // Log for confirmation
+    // Validate input
+    if (!options || !year || !user) {
+      return res.status(400).json({
+        message: "Missing required parameters",
+        details: {
+          options: !!options,
+          year: !!year,
+          user: !!user,
+        },
+      });
     }
 
-    // Render HTML content using EJS
-    const htmlContent = await ejs.renderFile(
-      path.join(__dirname, '..', 'views', 'InfrastructureReportView.ejs'),
-      {
-        infrastructureData,
-        year,
-        user, // Pass user details for use in EJS
-        instituteName, // Pass institute name
+    // Fetch infrastructure data
+    let infrastructureData = [];
+    try {
+      infrastructureData = await infrastructureQueries.getInfrastructureData(options, year);
+    } catch (dataError) {
+      console.error("Error fetching infrastructure data:", dataError);
+      return res.status(500).json({
+        message: "Failed to retrieve infrastructure data",
+        error: dataError.message,
+      });
+    }
+
+    // Fetch institute name
+    let instituteName = "Institute Name";
+    try {
+      const instituteId = user.institute_id;
+      const instituteData = await infrastructureQueries.getInstituteName(instituteId);
+      instituteName = instituteData[0]?.institute_name || instituteName;
+    } catch (instituteError) {
+      console.warn("Error fetching institute name:", instituteError);
+    }
+
+    // Prepare file path
+    const htmlFileName = `infrastructure_report_${year}_${Date.now()}.html`;
+    const htmlFilePath = path.join(htmlDirectory, htmlFileName);
+
+    // Ensure directory exists
+    try {
+      const htmlDirectory = path.dirname(htmlFilePath);
+      if (!fs.existsSync(htmlDirectory)) {
+        fs.mkdirSync(htmlDirectory, { recursive: true });
       }
-    );
+    } catch (dirError) {
+      console.error("Error creating directory:", dirError);
+      return res.status(500).json({
+        message: "Failed to create report directory",
+        error: dirError.message,
+      });
+    }
 
-    // Write the generated HTML content to a file
-    fs.writeFileSync(htmlFilePath, htmlContent, 'utf-8');
-    // console.log('HTML file generated successfully:', htmlFilePath);
+    // Render HTML content
+    let htmlContent;
+    try {
+      htmlContent = await ejs.renderFile(
+        path.join(__dirname, "..", "views", "InfrastructureReportView.ejs"),
+        {
+          infrastructureData,
+          year,
+          user,
+          instituteName,
+        }
+      );
+    } catch (renderError) {
+      console.error("Error rendering HTML template:", renderError);
+      return res.status(500).json({
+        message: "Failed to generate HTML report",
+        error: renderError.message,
+      });
+    }
 
-    // Return the path for downloading the file
+    // Write HTML file
+    try {
+      fs.writeFileSync(htmlFilePath, htmlContent, "utf-8");
+    } catch (writeError) {
+      console.error("Error writing HTML file:", writeError);
+      return res.status(500).json({
+        message: "Failed to save HTML report",
+        error: writeError.message,
+      });
+    }
+
+    const departmentResult = await infrastructureQueries .getDepartmentByCoordinatorId(user.user_id);
+    console.log("The department name is ", departmentResult);
+    const departmentName = departmentResult[0]?.dept_name; // Use optional chaining to avoid errors
+    console.log("The department name is ", departmentName);
+
+    // Check if departmentName is undefined
+    if (!departmentName) {
+      console.error('Department name is undefined');
+      return res.status(500).json({
+        message: 'Department name could not be retrieved.',
+      });
+    }
+
+    // Prepare report details for logging
+    const reportDetails = {
+      reportType: "html",
+      reportName: htmlFileName,
+      userId: user.user_id,
+      year,
+      departmentName,
+      filePath: htmlFilePath,
+    };
+
+    // Save report log and generate CSV
+    const { logId, rawPassword, csvPath } = await saveReportLog(reportDetails);
+
     return res.status(200).json({
- message: 'HTML generated successfully',
-      filePath: `/html_reports/${htmlFileName}`, // Path relative to the public folder
+      message: "HTML generated successfully",
+      filePath: `/html_reports/${htmlFileName}`,
+      passwordCsvPath: csvPath, // Ensure this is included in the response
     });
   } catch (error) {
-    console.error('Error generating HTML:', error);
-    res.status(500).json({ message: 'Error generating HTML report' });
+    console.error("Unexpected error in generateInfrastructureHtml:", error);
+    res.status(500).json({
+      message: "Unexpected error generating HTML report",
+      error: error.message,
+    });
   }
 };
 
-// Correctly export both functions
 module.exports = { generateInfrastructurePdf, generateInfrastructureHtml };

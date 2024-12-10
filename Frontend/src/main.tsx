@@ -10,7 +10,7 @@ import App from './App.tsx';
 // import './assets/css/style.css';
 // import './assets/css/responsive.css';
 // import 'bootstrap/dist/js/bootstrap.bundle.min.js'
-import "bootstrap/dist/js/bootstrap.bundle.min";
+// import "bootstrap/dist/js/bootstrap.bundle.min";
 import 'react-toastify/dist/ReactToastify.css'
 
 // import './index.css'

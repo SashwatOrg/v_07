@@ -34,7 +34,7 @@ import { jwtDecode } from "jwt-decode";
 import { DataTableDemo } from "./optionsForCustomizedReport/FinanceDataTableDemo"; // Import the DataTableDemo component
 import { Switch } from "@/components/ui/switch"; // Ensure the correct import path for Switch
 import { Progress } from "@/components/ui/progress"; // Import Progress component
-
+import { Input } from "@/components/ui/input";
 interface User {
   email: string | null;
   first_name: string | null;
@@ -63,6 +63,80 @@ const reportOptions: ReportOption[] = [
   { id: "7", description: "Each department wise budget" },
 ];
 
+// ReportAccessDialog Component
+const ReportAccessDialog: React.FC<{
+  logId: number | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccessfulAccess: (filePath: string, reportType?: string) => void;
+}> = ({ logId, isOpen, onClose, onSuccessfulAccess }) => {
+  const [password, setPassword] = useState<string>('');
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
+
+  const handleVerifyPassword = async () => {
+    if (!logId) {
+      toast.error("Invalid report log ID");
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      const response = await fetch('http://localhost:3000/pdf/verify-report-access', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          logId, 
+          password 
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        onSuccessfulAccess(data.filePath, data.reportType);
+        toast.success("Report access verified successfully!");
+        onClose();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Invalid password");
+      }
+    } catch (error) {
+      console.error("Password verification error:", error);
+      toast.error("An error occurred during password verification");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Verify Report Access</DialogTitle>
+          <DialogDescription>
+            Enter the password from the downloaded CSV file to access the report.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col space-y-4">
+          <Input
+            type="password"
+            placeholder="Enter report access password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button 
+            onClick={handleVerifyPassword} 
+            disabled={isVerifying}
+          >
+            {isVerifying ? "Verifying..." : "Verify Password"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export const GenerateFinancialReport: FC = () => {
   const location = useLocation(); // Get location to access state
   const { user } = location.state || {}; // Access the user object from state
@@ -75,6 +149,8 @@ export const GenerateFinancialReport: FC = () => {
   const [showReportTypeDialog, setShowReportTypeDialog] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false); // Add state for loading
   const [progress, setProgress] = useState<number>(0); // State for progress
+  const [reportLogId, setReportLogId] = useState<number | null>(null);
+  const [isReportAccessDialogOpen, setIsReportAccessDialogOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -104,6 +180,7 @@ export const GenerateFinancialReport: FC = () => {
           institute_id: decoded.institute_id,
           type_id: decoded.type_id,
           gender: decoded.gender,
+          user_id: decoded.id,
         };
         setCurrentUser (userDetails);
       }
@@ -139,6 +216,7 @@ export const GenerateFinancialReport: FC = () => {
         last_name: currentUser?.last_name,
         institute_id: currentUser?.institute_id,
         email: currentUser?.email,
+        user_id: currentUser ?.userid,
       },
       format,
     };
@@ -169,17 +247,22 @@ export const GenerateFinancialReport: FC = () => {
       console.log('The response is:', response);
       if (response.ok) {
         const data = await response.json();
-        console.log("Response data:", data);
-        if (format === "pdf") {
-          const filePath = data.filePath;
-          window.open(`http://localhost:3000/pdfs/${filePath}`, '_blank'); // Open PDF in a new tab
-        } else if (format === "html") {
-          const filePath = data.filePath;
-          const downloadLink = document.createElement("a");
-          downloadLink.href = `http://localhost:3000${filePath}`;
-          downloadLink.download = filePath.split('/').pop(); // Set file name for download
-          downloadLink.click(); // Trigger the download
+        const filePath = data.filePath;
+  
+        // Store log ID for potential future use
+        setReportLogId(data.logId);
+  
+        // Open password verification dialog
+        setIsReportAccessDialogOpen(true);
+  
+        // Download Password CSV
+        if (data.passwordCsvPath) {
+          const csvLink = document.createElement("a");
+          csvLink.href = `http://localhost:3000${data.passwordCsvPath}`;
+          csvLink.download = "report_access_credentials.csv";
+          csvLink.click();
         }
+  
         toast.success("Report generated successfully!", {
           className: "custom-toast",
           autoClose: 1000,
@@ -213,58 +296,60 @@ export const GenerateFinancialReport: FC = () => {
     e.preventDefault();
     setShowReportTypeDialog(true);
   };
+  const handleSuccessfulAccess = async (filePath: string, reportType?: string) => {
+    try {
+      const token = Cookies.get("token");
+      const newTab = window.open('about:blank', '_blank');
 
+      const response = await fetch(filePath, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': reportType === 'pdf' ? 'application/pdf' : 'text/html'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('File fetch error:', { 
+          status: response.status, 
+          statusText: response.statusText,
+          errorText 
+        });
+        throw new Error(`Failed to fetch file: ${errorText}`);
+      }
+
+      // HTML handling
+      if (reportType === 'html') {
+        const htmlContent = await response.text();
+        if (newTab) {
+          newTab.document.open();
+          newTab.document.write(htmlContent);
+          newTab.document.close();
+        }
+      } else {
+        // PDF handling
+        const blob = await response.blob();
+        const fileURL = URL.createObjectURL(blob);
+        if (newTab) {
+          newTab.location.href = fileURL;
+        }
+      }
+    } catch (error) {
+      console.error("Detailed error accessing report:", error);
+      toast.error(`An error occurred: ${error.message}`);
+    } finally {
+      setReportLogId(null);
+      setIsReportAccessDialogOpen(false);
+    }
+  };
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
       <Sidebar user={currentUser } activePage="generate-finance" />
       <div className="flex flex-col">
-        <header className="flex h-14 items-center justify-between gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 sticky top-0">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
-              <nav className="grid gap-2 text-lg font-medium">
-                <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-                  <Package2 className="h-6 w-6" />
-                  <span className="sr-only">Acme Inc</span>
-                </Link>
-                <Link to="/" className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground">
-                  <Home className="h-5 w-5" />
-                  Dashboard
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
-          <div className="flex items-center gap-4 ml-auto">
-            <ModeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon" className="rounded-full">
-                  {currentUser ?.photoURL ? (
-                    <img src={currentUser.photoURL} alt="UserAvatar" className="h-9 w-9 rounded-full" />
-                  ) : (
-                    <CircleUser  className="h-5 w-5" />
-                  )}
-                  <span className="sr-only">Toggle user menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{currentUser ?.username || "My Account"}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/profile")}>Profile Settings</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Generate Financial Report</h1>
+            <h1 className="text-2xl text-primary font-bold">Generate Finance Report</h1>
           </div>
           <div className="flex flex-col items-center justify-center">
             <form onSubmit={handleSubmit} className="w-full max-w-md">
@@ -274,25 +359,24 @@ export const GenerateFinancialReport: FC = () => {
               </div>
               <p className="mb-4 text-gray-600">
                 {isCustomized 
-                  ? "You are generating a customized report. Please select the options below." 
-                  : "You are generating the default financial report."}
+                  ? "You are generating a customized finance report. Please select the options below." 
+                  : "You are generating the default finance report."}
               </p>
               <div className="mb-4">
                 <Label className="mr-2">Select Year:</Label>
                 <select
-  value={selectedYear}
-  onChange={(e) => setSelectedYear(e.target.value)}
-  className="border rounded p-2 bg-white text-black dark:bg-gray-800 dark:text-white"
->
-  {yearOptions.map((year) => (
-    <option key={year} value={year}>
-      {year}
-    </option>
-  ))}
-</select>
-
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="border rounded p-2 bg-white text-black dark:bg-gray-800 dark:text-white"
+                >
+                  {yearOptions.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
               </div>
-              {isCustomized && <DataTableDemo setSelectedOptions={setSelectedOptions} />} {/* Integrate DataTableDemo here */}
+              {isCustomized && <DataTableDemo setSelectedOptions={setSelectedOptions} />}
               <Button type="submit" className="mt-4">
                 Generate Report
               </Button>
@@ -309,7 +393,7 @@ export const GenerateFinancialReport: FC = () => {
                 <DialogHeader>
                   <DialogTitle>Select Report Format</DialogTitle>
                   <DialogDescription>
-                    Please choose the format for the report to download.
+                    Please choose the format for the event report to download.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="flex justify-between">
@@ -319,25 +403,12 @@ export const GenerateFinancialReport: FC = () => {
               </DialogContent>
             </Dialog>
 
-            {/* Alert dialog for confirmation */}
-            <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Alert</DialogTitle>
-                  <DialogDescription>
-                    You need to log in again to continue. Do you want to log out?
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-end">
-                  <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
-                    No
-                  </Button>
-                  <Button variant="primary" onClick={handleLogout}>
-                    Yes
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <ReportAccessDialog
+              logId={reportLogId}
+              isOpen={isReportAccessDialogOpen}
+              onClose={() => setIsReportAccessDialogOpen(false)}
+              onSuccessfulAccess={handleSuccessfulAccess}
+            />
           </div>
         </main>
       </div>

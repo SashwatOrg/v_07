@@ -206,7 +206,7 @@ export const ManageData: FC<ManageDataProps> = ({ user, activePage }) => {
       {deptType === "Academic" && (
         <>
           <Link
-            to="/add-course"
+            to="/instructor/create-course"
             className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
               activePage === "add-course" ? "bg-muted text-primary" : "text-muted-foreground"
             }`}

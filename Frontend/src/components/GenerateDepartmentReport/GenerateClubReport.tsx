@@ -3,7 +3,7 @@
 import { FC, useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  CircleUser,
+  CircleUser ,
   Home,
   Menu,
   Package2,
@@ -34,13 +34,88 @@ import { jwtDecode } from "jwt-decode";
 import { ClubDataTableDemo } from "./optionsForCustomizedReport/ClubDataTableDemo";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 
+// ReportAccessDialog Component
+const ReportAccessDialog: React.FC<{
+  logId: number | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccessfulAccess: (filePath: string, reportType?: string) => void;
+}> = ({ logId, isOpen, onClose, onSuccessfulAccess }) => {
+  const [password, setPassword] = useState<string>('');
+  const [isVerifying, setIsVerifying] = useState<boolean>( false);
+
+  const handleVerifyPassword = async () => {
+    if (!logId) {
+      toast.error("Invalid report log ID");
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      const response = await fetch('http://localhost:3000/pdf/verify-report-access', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          logId, 
+          password 
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        onSuccessfulAccess(data.filePath, data.reportType);
+        toast.success("Report access verified successfully!");
+        onClose();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Invalid password");
+      }
+    } catch (error) {
+      console.error("Password verification error:", error);
+      toast.error("An error occurred during password verification");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Verify Report Access</DialogTitle>
+          <DialogDescription>
+            Enter the password from the downloaded CSV file to access the report.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col space-y-4">
+          <Input
+            type="password"
+            placeholder="Enter report access password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button 
+            onClick={handleVerifyPassword} 
+            disabled={isVerifying}
+          >
+            {isVerifying ? "Verifying..." : "Verify Password"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 // Enhanced Report Option Interface
 interface ReportOption {
   id: string;
   description: string;
   tooltip?: string;
 }
+
 
 // Comprehensive Report Options
 const REPORT_OPTIONS: ReportOption[] = [
@@ -81,25 +156,14 @@ const REPORT_OPTIONS: ReportOption[] = [
   }
 ];
 
-// User Interface
-interface User {
-  email: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  username: string | null;
-  photoURL?: string | null;
-  institute_id: number | null;
-  type_id: number | null;
-  is_active?: boolean;
-  gender: string;
-}
 
+// Main Component
 export const GenerateClubReport: FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   // State Management
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser , setCurrentUser ] = useState<User | null>(null);
   const [isCustomized, setIsCustomized] = useState<boolean>(false);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>(() => {
@@ -109,6 +173,8 @@ export const GenerateClubReport: FC = () => {
   const [showReportTypeDialog, setShowReportTypeDialog] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [reportLogId, setReportLogId] = useState<number | null>(null);
+  const [isReportAccessDialogOpen, setIsReportAccessDialogOpen] = useState<boolean>(false);
 
   // Authentication and User Retrieval
   useEffect(() => {
@@ -137,8 +203,9 @@ export const GenerateClubReport: FC = () => {
         institute_id: decoded.institute_id,
         type_id: decoded.type_id,
         gender: decoded.gender,
+        user_id: decoded.user_id, // Ensure user_id is included
       };
-      setCurrentUser(userDetails);
+      setCurrentUser (userDetails);
     } catch (err) {
       navigate("/login");
     }
@@ -150,7 +217,7 @@ export const GenerateClubReport: FC = () => {
     navigate("/login");
   };
 
-  // Report Generation Handler
+  // Updated Report Generation Handler
   const handleGenerateReport = async (format: string) => {
     const token = Cookies.get("token");
     if (!token) {
@@ -161,27 +228,36 @@ export const GenerateClubReport: FC = () => {
     const endpoint = format === "pdf" 
       ? "/pdf/generate-club-pdf" 
       : "/pdf/generate-club-html";
-      const yearLowerLimit = selectedYear.split('-')[0];
+    const yearLowerLimit = selectedYear.split('-')[0];
+
     const body = {
       options: isCustomized 
         ? selectedOptions 
         : REPORT_OPTIONS.map(option => option.id),
-        year: yearLowerLimit,
+      year: yearLowerLimit,
       user: {
-        first_name: currentUser?.first_name,
-        last_name: currentUser?.last_name,
-        institute_id: currentUser?.institute_id,
-        email: currentUser?.email,
+        first_name: currentUser ?.first_name,
+        last_name: currentUser ?.last_name,
+        institute_id: currentUser ?.institute_id,
+ email: currentUser  ?.email,
+        user_id: currentUser  ?.user_id, // Ensure user_id is included
       },
       format,
     };
 
     try {
       setIsLoading(true);
-      setProgress(50);
-      console.log('Request Body:', body);
-      console.log('Full URL:', `http://localhost:3000${endpoint}`);
-      
+      setProgress(0);
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            return 100;
+          }
+          return prev + 10;
+        });
+      }, 500);
+
       const response = await fetch(`http://localhost:3000${endpoint}`, {
         method: "POST",
         headers: {
@@ -190,51 +266,99 @@ export const GenerateClubReport: FC = () => {
         },
         body: JSON.stringify(body),
       });
-      console.log('Response Status:', response.status);
-    console.log('Response Headers:', Object.fromEntries(response.headers));
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Response Data:', data);
-        const filePath = format === "pdf" 
-          ? `http://localhost:3000/pdfs/${data.filePath}`
-          : `http://localhost:3000${data.filePath}`;
+        const filePath = data.filePath;
 
-        if (format === "pdf") {
-          window.open(filePath, "_blank");
-        } else {
-          const link = document.createElement("a");
-          link.href = filePath;
-          link.download = data.filePath.split("/").pop();
-          link.click();
+        // Store log ID for potential future use
+        setReportLogId(data.logId);
+
+        // Open password verification dialog
+        setIsReportAccessDialogOpen(true);
+
+        // Download Password CSV
+        if (data.passwordCsvPath) {
+          const csvLink = document.createElement("a");
+          csvLink.href = `http://localhost:3000${data.passwordCsvPath}`;
+          csvLink.download = "report_access_credentials.csv";
+          csvLink.click();
         }
 
-        toast.success("Report generated successfully!");
-        setProgress(100);
+        toast.success("Report generated successfully!", {
+          className: "custom-toast",
+          autoClose: 1000,
+        });
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || "Failed to generate report.");
       }
     } catch (err) {
       console.error("Error during fetch:", err);
-      toast.error("An error occurred while generating the report.");
+      toast.error("An error occurred while generating the report.", {
+        className: "custom-toast",
+        autoClose: 1000,
+      });
     } finally {
       setShowReportTypeDialog(false);
       setIsLoading(false);
+      setProgress(100);
     }
   };
+
   const handleToggleCustomized = () => {
-    setIsCustomized(prev => !prev);
-    
-    // Reset selected options when switching
-    if (!isCustomized) {
-      // When switching to customized, clear selections
-      setSelectedOptions([]);
-    } else {
-      // When switching to default, select all options
-      setSelectedOptions(REPORT_OPTIONS.map(option => option.id));
+    setIsCustomized(!isCustomized);
+  };
+
+
+  const handleSuccessfulAccess = async (filePath: string, reportType?: string) => {
+    try {
+      const token = Cookies.get("token");
+      const newTab = window.open('about:blank', '_blank');
+
+      const response = await fetch(filePath, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': reportType === 'pdf' ? 'application/pdf' : 'text/html'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('File fetch error:', { 
+          status: response.status, 
+          statusText: response.statusText,
+          errorText 
+        });
+        throw new Error(`Failed to fetch file: ${errorText}`);
+      }
+
+      // HTML handling
+      if (reportType === 'html') {
+        const htmlContent = await response.text();
+        if (newTab) {
+          newTab.document.open();
+          newTab.document.write(htmlContent);
+          newTab.document.close();
+        }
+      } else {
+        // PDF handling
+        const blob = await response.blob();
+        const fileURL = URL.createObjectURL(blob);
+        if (newTab) {
+          newTab.location.href = fileURL;
+        }
+      }
+    } catch (error) {
+      console.error("Detailed error accessing report:", error);
+      toast.error(`An error occurred: ${error.message}`);
+    } finally {
+      setReportLogId(null);
+      setIsReportAccessDialogOpen(false);
     }
   };
+
   // Year Options Generation
   const yearOptions = Array.from({ length: 24 }, (_, i) => {
     const year = 2000 + i;
@@ -258,7 +382,7 @@ export const GenerateClubReport: FC = () => {
   };
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px 1fr] lg:grid-cols-[230px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
       <Sidebar user={currentUser } activePage="generate-club" />
       <div className="flex flex-col">
         <header className="flex h-14 items-center justify-between gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 sticky top-0">
@@ -357,13 +481,20 @@ export const GenerateClubReport: FC = () => {
                   <DialogDescription>
                     Please choose the format for the report to download.
                   </DialogDescription>
- </DialogHeader>
+                </DialogHeader>
                 <div className="flex justify-between">
                   <Button onClick={() => handleGenerateReport("pdf")}>PDF</Button>
                   <Button onClick={() => handleGenerateReport("html")}>HTML</Button>
                 </div>
               </DialogContent>
             </Dialog>
+
+            <ReportAccessDialog
+              logId={reportLogId}
+              isOpen={isReportAccessDialogOpen}
+              onClose={() => setIsReportAccessDialogOpen(false)}
+              onSuccessfulAccess={handleSuccessfulAccess}
+            />
           </div>
         </main>
       </div>

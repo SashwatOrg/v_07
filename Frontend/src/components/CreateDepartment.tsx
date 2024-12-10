@@ -108,6 +108,7 @@ export const CreateDepartment: FC = () => {
         throw new Error("Network response was not ok");
       }
       const departments = await response.json();
+      // console.log('the institue id is ',user?.institute_id);
       return departments;
     } catch (error) {
       console.error("Error fetching departments:", error);

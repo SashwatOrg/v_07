@@ -435,14 +435,20 @@ const generateStudentFacultyHtml = async (req, res) => {
         fs.writeFileSync(htmlFilePath, htmlContent, 'utf-8');
 
         // Improved department name determination
-        let departmentName = 'All Departments';    
-        if (studentFacultyData.length > 0) {
-            if (studentFacultyData[0]?.dept_name) {
-                departmentName = studentFacultyData[0].dept_name;
-            } else if (options.length < 6) {
-                departmentName = 'Selected Departments';
-            }
-        }
+
+        const departmentResult = await studentFacultyQueries.getDepartmentByCoordinatorId(userId);
+        console.log('the department name is ', departmentResult);
+        const departmentName = departmentResult[0].dept_name; // Use the dept_name directly
+        console.log('the department name is ', departmentName);
+
+        // let departmentName = 'All Departments';    
+        // if (studentFacultyData.length > 0) {
+        //     if (studentFacultyData[0]?.dept_name) {
+        //         departmentName = studentFacultyData[0].dept_name;
+        //     } else if (options.length < 6) {
+        //         departmentName = 'Selected Departments';
+        //     }
+        // }
         
         const reportDetails = {
             reportType: 'html',
