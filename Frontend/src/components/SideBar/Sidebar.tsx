@@ -3,11 +3,11 @@ import { SidebarHeader } from './SidebarHeader';
 import { SidebarNavigation } from './SidebarNavigation';
 import { AddDataDialog } from './AddDataDialog';
 import { ProfileSection } from './ProfileSection';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { EnrollCourses } from './EnrollCourses';
 import { Home, FileInput, FileSpreadsheet, Layout } from 'lucide-react';
 import { ManageData } from './ManageData';
-
+import Profile from '../profile';
 interface SidebarProps {
   activePage: string;
   user: {
@@ -22,6 +22,7 @@ interface SidebarProps {
 export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
   // console.log("i am on side bar ...here the user is ", user);
   // const [
+    const navigate = useNavigate();
   const [Programs, setHasPrograms] = useState(false);
   useEffect(() => {
     const checkPrograms = async () => {
@@ -294,8 +295,9 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
             </>
           )}
         </nav>
-        <div className="mt-auto pl-0 p-2 ">
+        <div className="mt-auto pl-0 p-2 " onClick={() => navigate(`/profile/${user?.userid}`)}>
           <ProfileSection user={user} />
+
         </div>
       </div>
     </div>

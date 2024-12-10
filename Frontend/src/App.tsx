@@ -113,7 +113,7 @@ const App: React.FC = () => {
           <Route path="/generate-placement-report" element={<GeneratePlacementReport/>} />
           <Route path="/support" element={<Support />} />
           <Route
-            path="/profile/:userid"
+            path="/profile/:username"
             element={
               <Profile
                 user={{

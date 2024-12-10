@@ -203,7 +203,7 @@ app.post("/verify", (req, res) => {
 
       // If OTP is valid, update the user's verification status
       db.query(
-        "UPDATE User SET isVerified = 1, otp = NULL WHERE email_id = ?",
+        "UPDATE user SET isVerified = 1, otp = NULL WHERE email_id = ?",
         [emailId],
         (err) => {
           if (err) {
@@ -396,6 +396,10 @@ app.post("/loginMe", (req, res) => {
 
     const user = results[0];
     console.log("the user befiore decoding ", user);
+    
+    if (user.isVerified !== 1) {
+      return res.status(403).json({ message: "User is not verified" });
+    }
     const token = jwt.sign(
       {
         id: user.user_id,
@@ -1055,4 +1059,110 @@ app.get("/api/media", (req, res) => {
     }
     res.status(200).json(results);
   });
+});
+
+const crypto = require("crypto"); 
+app.post("/send-reset-link", (req, res) => {
+  const { userId } = req.body;
+  console.log("userId is ", userId);
+  let email="";
+  const query = "SELECT email_id FROM user WHERE user_id = ?";
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    email = results[0].email_id;
+    console.log("email is ", results[0].email_id);
+    const otp = crypto.randomInt(100000, 999999); // Generate a 6-digit OTP
+
+    // Store OTP in the database or cache (with expiry)
+    const otpQuery = `UPDATE user 
+SET otp = ? 
+WHERE email_id = ?;`;
+    // const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+    db.query(otpQuery, [otp,email], (otpErr) => {
+      if (otpErr)
+        return res.status(500).json({ error: "Failed to store OTP." });
+
+      // Send OTP via email
+      sendOtp(email, otp);
+      res.status(200).json({ email });
+    });
+  });
+});
+
+app.post("/verify-otp", (req, res) => {
+  const { userId, otp } = req.body;
+  let email="";
+  const query = "SELECT email_id FROM user WHERE user_id = ?";
+  
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    email = results[0].email_id;
+    console.log("email is .....", results[0].email_id);
+  });
+  // const email=
+  console.log("email is ", email);
+  const query1 =
+    "SELECT * FROM user WHERE user_id = ? AND otp = ? AND isVerified = 0";
+    console.log("email in ")
+  db.query(query1, [userId, otp], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    if (results.length === 0) {
+      return res.status(400).json({ error: "Invalid or expired OTP." });
+    }
+
+    res.status(200).json({ message: "OTP verified." });
+  });
+});
+
+app.post("/reset-password", (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  const hashedPassword = crypto
+    .createHash("md5")
+    .update(newPassword)
+    .digest("hex"); // Use bcrypt for production
+
+  const query = "UPDATE user SET password = ? WHERE user_id = ?";
+  db.query(query, [hashedPassword, userId], (err) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    res.status(200).json({ message: "Password updated successfully." });
+  });
+});
+
+
+
+
+app.delete("/api/delete-account", async (req, res) => {
+  const db1=db.promise();
+  const userId = req.body.userId; // Assume user ID is sent in the body
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  try {
+    // Delete user from the database
+    const result1 = await db1.query("DELETE FROM photourl WHERE user_id = ?", [userId]);
+    const result = await db1.query("DELETE FROM user WHERE user_id = ?", [userId]);
+
+    if (result.rowCount === 0 && result1.rowCount==0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });

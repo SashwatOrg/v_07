@@ -4,6 +4,8 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { StatsCard } from './StatsCard';
 import { Component } from './visuals/PieInteractive';
+import AccountSection from "./profile";
+
 import {
   CircleUser,
   Home,
@@ -178,7 +180,8 @@ export const Dashboard: FC = () => {
 
   return (
     <>
-      <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
+      {/* <AccountSection handleLogout={handleLogout} /> */}
+      <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr] bg-customBackground">
         <Sidebar user={user} activePage="dashboard" />
         <div className="flex flex-col">
           <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
@@ -255,7 +258,9 @@ export const Dashboard: FC = () => {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => navigate(`/profile/${user?.userid}`)}
+                 onClick={() =>
+                  navigate(`/profile/${user?.username}`, { state: { userid: user?.userid } })
+                }
                 >
                   Profile Settings
                 </DropdownMenuItem>

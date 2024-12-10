@@ -106,7 +106,9 @@ const Header: React.FC<HeaderProps> = () => {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => navigate(`/profile/${user?.userid}`)}
+                   onClick={() =>
+                    navigate(`/profile/${user?.username}`, { state: { userid: user?.userid } })
+                  }
                 >
                   Profile Settings
                 </DropdownMenuItem>

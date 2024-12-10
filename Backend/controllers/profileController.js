@@ -32,6 +32,7 @@ const uploadProfilePhoto = async (req, res) => {
 
     // Get the userId from the request (this should be passed by the frontend)
     const userId = req.body.userid;
+    const username = req.body.username;
     // const userId = parseInt(req.body.userId, 10);
     console.log(userId);
     console.log(req.body);
@@ -45,11 +46,11 @@ const uploadProfilePhoto = async (req, res) => {
     // const query = 'INSERT INTO photourl (user_id, url) VALUES (?, ?) ON DUPLICATE KEY UPDATE url = ?';
     // await db.query(query, [userId, fileUrl, fileUrl]);
     const query = `
-    INSERT INTO photourl (user_id, url)
+    INSERT INTO photourl (username, url)
     SELECT ?, ?
-    WHERE EXISTS (SELECT 1 FROM user WHERE user_id = ?)
+    WHERE EXISTS (SELECT 1 FROM user WHERE username = ?)
     ON DUPLICATE KEY UPDATE url = ?;`;
-    await db.query(query, [userId, fileUrl, userId, fileUrl]);
+    await db.query(query, [username, fileUrl, username, fileUrl]);
 
     // Respond with success
     res
