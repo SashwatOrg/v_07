@@ -307,12 +307,12 @@ export const CreateAchievement: FC = () => {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Achievements</h1>
+            <h1 className="text-2xl text-sidebar font-bold">Achievements</h1>
           </div>
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-row gap-4 items-center justify-center">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" className="mb-4 border-2">Add Achievement</Button>
+                <Button variant="outline" className="mb-4 border-2 hover:border-sidebar">Add Achievement</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[725px]">
                 <DialogHeader>
@@ -426,7 +426,7 @@ export const CreateAchievement: FC = () => {
               {/* Bulk Achievement Dialog */}
               <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" className="mb-4 border-2">
+                <Button variant="outline" className="mb-4 border-2 hover:border-sidebar">
                   Bulk Achievement
                 </Button>
               </DialogTrigger>

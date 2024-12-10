@@ -156,6 +156,8 @@ const deleteClubRoutes = require("./routes/deleteClubRoutes");
 const getClubRoutes = require("./routes/getClubRoutes");
 const getUsersRoutes = require("./routes/getUsersRoutes");
 const toggleUserStatus = require("./routes/toggleUserStatusRoutes");
+const getActivityLog = require("./routes/activityLogRoutes");
+const facultyDashRoutes = require("./routes/facultyDashRoutes");
 
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
@@ -212,6 +214,8 @@ app.use("/api", putProgChangesRoutes);
 app.use("/api", deleteProgramRoutes);
 app.use("/api", getUsersRoutes);
 app.use("/api", toggleUserStatus);
+app.use("/api", getActivityLog);
+app.use("/api", facultyDashRoutes);
 //HK add Courses
 
 
@@ -908,7 +912,7 @@ app.get("/courses", (req, res) => {
       SELECT c.course_name,c.course_id
       FROM course c
       JOIN program p ON c.program_id = p.prog_id
-      JOIN department d ON p.Depart_id = d.Dept_id
+      JOIN department d ON p.Dept_id = d.Dept_id
       JOIN faculty f ON d.Dept_id = f.Dept_id
       WHERE f.Faculty_id = ?;
     `;

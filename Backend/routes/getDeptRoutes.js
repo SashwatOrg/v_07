@@ -3,6 +3,6 @@ const router = express.Router();
 const { getDepartments } = require('../controllers/getDeptController');
 
 // Route to get all departments
-router.get('/departments', getDepartments);
+router.get('/departments/:institute_id', getDepartments);
 
 module.exports = router;

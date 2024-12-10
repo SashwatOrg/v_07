@@ -44,7 +44,7 @@ export function EventCard({
   const [updatedEventName, setUpdatedEventName] = useState(event_name);
   const [updatedEventDescription, setUpdatedEventDescription] = useState(event_description);
   const [updatedEventType, setUpdatedEventType] = useState(event_type);
-  const [updatedEventDate, setUpdatedEventDate] = useState(event_date);
+  const [updatedEventDate, setUpdatedEventDate] = useState(new Date(event_date).toISOString().split("T")[0]);
 
   const handleUpdate = () => {
     onUpdate({
@@ -67,18 +67,18 @@ export function EventCard({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
           <Card
-            style={{ width, height }}
-            className="relative rounded-lg border bg-card text-card-foreground shadow-sm cursor-pointer"
+            // style={{ width, height }}
+            className="w-auto relative rounded-lg border bg-card text-card-foreground shadow-sm cursor-pointer hover:shadow-xl hover:border-2 hover:border-sidebar w-auto"
           >
             <CardHeader>
-              <CardTitle className="text-center tracking-tight text-lg font-medium">
+              <CardTitle className="text-center tracking-tight text-lg font-medium text-sidebar">
                 {event_name}
               </CardTitle>
             </CardHeader>
             <CardFooter className="flex flex-col items-start p-2">
               <div className="text-sm">
                 <p><b>Type:</b> {event_type}</p>
-                <p><b>Date:</b> {event_date}</p>
+                <p><b>Date:</b> {new Date(event_date).toISOString().split("T")[0]}</p>
               </div>
             </CardFooter>
             <div className="absolute top-2 right-2">

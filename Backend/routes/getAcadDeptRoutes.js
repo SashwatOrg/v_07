@@ -8,8 +8,3 @@ router.get('/acadDepartmentNames/:institute_id', getAcadDepartmentNames);
 
 
 module.exports = router;
-
-
-
-
-

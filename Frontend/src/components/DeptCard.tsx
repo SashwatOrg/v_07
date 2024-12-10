@@ -106,10 +106,10 @@ DeptCardProps) {
         <DialogTrigger asChild>
           <Card
             // style={{ width, height }}
-            className="relative rounded-lg border bg-card text-card-foreground shadow-sm cursor-pointer shadow-sm hover:shadow-xl hover:border-2 hover:border-black w-auto"
+            className="relative rounded-lg border bg-card text-card-foreground shadow-sm cursor-pointer hover:shadow-xl hover:border-2 hover:border-sidebar w-auto"
           >
             <CardHeader>
-              <CardTitle className="text-center tracking-tight text-lg font-medium">
+              <CardTitle className="text-center tracking-tight text-lg font-medium text-sidebar">
                 {dept_name}
               </CardTitle>
             </CardHeader>

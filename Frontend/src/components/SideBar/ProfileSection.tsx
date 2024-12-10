@@ -10,7 +10,7 @@ interface ProfileSectionProps {
 
 export const ProfileSection: FC<ProfileSectionProps> = ({ user }) => (
   <div className="mt-auto pl-0 p-2">
-    <a href="/profile" className="flex items-center px-4 mb-2 mx-2 ml-5">
+    <a href={`/profile/${user?.username}`} className="flex items-center px-4 mb-2 mx-2 ml-5">
       {user?.photoURL ? (
         <img
           src={user.photoURL}
@@ -20,9 +20,9 @@ export const ProfileSection: FC<ProfileSectionProps> = ({ user }) => (
       ) : (
         <CircleUser className="h-10 w-10" />
       )}
-      <div className="ml-3 block text-sm font-semibold text-gray-800">
+      <div className="ml-3 block text-sm font-semibold text-gray-800 dark:text-white">
         {user?.username || "My Account"}
-        <span className="block text-xs text-gray-700">Edit Profile</span>
+        <span className="block text-xs text-gray-700 dark:text-gray-200">Edit Profile</span>
       </div>
     </a>
   </div>

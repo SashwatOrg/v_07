@@ -373,7 +373,7 @@ export const ManageInstitute: FC = () => {
                 <div className="h-10 w-10">
               <img src={Institute} alt="Institute" />
               </div>
-              <h2 className="text-2xl font-bold tracking-tight pt-2">
+              <h2 className="text-2xl font-bold tracking-tight pt-2 text-sidebar">
                 Manage Institute
               </h2>
               </div>
@@ -382,14 +382,14 @@ export const ManageInstitute: FC = () => {
               </p>
               <Separator />
             </div>
-            <h2 className="text-xl font-medium p-2 font-extrabold">Institute Details</h2>
+            <h2 className="text-xl font-medium p-2 font-extrabold text-lighter">Institute Details</h2>
             <Separator className="shrink-0 bg-border h-[1px] my-2 w-1/2" />
 
 
             <div className="mt-4">
               <Label
                 htmlFor="instname"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-neutral-200 pt-2"
+                className="block text-sm font-medium leading-6 text-lighter dark:text-lighter pt-2"
               >
                 Institute Name
               </Label>
@@ -415,7 +415,7 @@ export const ManageInstitute: FC = () => {
             <div className="mt-4">
               <Label
                 htmlFor="addrl1"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-neutral-200"
+                className="block text-sm font-medium leading-6 text-lighter dark:text-lighter"
               >
                 Address Line 1
               </Label>
@@ -437,7 +437,7 @@ export const ManageInstitute: FC = () => {
               <div className="flex-1 sm:col-span-3 mr-3">
                 <Label
                   htmlFor="subdist"
-                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-neutral-200"
+                  className="block text-sm font-medium leading-6 text-lighter dark:text-lighter"
                 >
                   Sub-district
                 </Label>
@@ -458,7 +458,7 @@ export const ManageInstitute: FC = () => {
               <div className="flex-1 sm:col-span-3">
                 <Label
                   htmlFor="district"
-                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-neutral-200"
+                  className="block text-sm font-medium leading-6 text-lighter dark:text-lighter"
                 >
                   District
                 </Label>
@@ -481,7 +481,7 @@ export const ManageInstitute: FC = () => {
               <div className="flex-1 sm:col-span-3 mr-3">
                 <Label
                   htmlFor="state"
-                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-neutral-200"
+                  className="block text-sm font-medium leading-6 text-lighter dark:text-lighter"
                 >
                   State
                 </Label>
@@ -494,7 +494,7 @@ export const ManageInstitute: FC = () => {
               <div className="flex-1 sm:col-span-3">
                 <Label
                   htmlFor="country"
-                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-neutral-200"
+                  className="block text-sm font-medium leading-6 text-lighter dark:text-lighter"
                 >
                   Country
                 </Label>

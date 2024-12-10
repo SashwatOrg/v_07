@@ -49,10 +49,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
           {/* Dashboard Link  */}
           <Link
             to={`/dashboard/${user?.username}`}
-            className={`mt-4 flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            className={`mt-4 flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
               activePage === 'dashboard'
-                ? 'bg-muted text-primary'
-                : 'text-muted-foreground'
+                ? 'bg-sidebar text-white border-black hover:text-white'
+                : 'text-muted-foreground hover:text-primary'
             }`}
           >
             <Home className="h-4 w-4" />
@@ -65,10 +65,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
               {user?.institute_id === null ? (
                 <Link
                   to="/admin/create-institute"
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                     activePage === 'create-institute'
-                      ? 'bg-muted text-primary'
-                      : 'text-muted-foreground'
+                      ? 'bg-sidebar text-white border-black hover:text-white'
+                      : 'text-muted-foreground hover:text-primary'
                   }`}
                 >
                   <FileInput className="h-4 w-4" />
@@ -78,10 +78,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                 <>
                   <Link
                     to="/admin/manage-institute"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                       activePage === 'manage-institute'
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground'
+                        ? 'bg-sidebar text-white border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     <FileInput className="h-4 w-4" />
@@ -90,10 +90,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                   {/* {hasPrograms && (
                     <Link
                       to="/admin/manage-programs"
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                         activePage === "manage-programs"
-                          ? "bg-muted text-primary"
-                          : "text-muted-foreground"
+                          ? "bg-sidebar text-white border-black hover:text-white"
+                          : "text-muted-foreground hover:text-primary"
                       }`}
                     >
                       <FileSpreadsheet className="h-4 w-4" />
@@ -102,10 +102,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                   )} */}
                   <Link
                     to="/admin/create-department"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                       activePage === 'create-department'
-                        ? 'bg-muted text-primary'
-                        : ' text-muted-foreground'
+                        ? 'bg-sidebar text-white  border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     <Layout className="h-4 w-4" />
@@ -113,10 +113,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                   </Link>
                   <Link
                     to="/create-event"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                       activePage === 'create-event'
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground'
+                        ? 'bg-sidebar text-white border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
@@ -124,10 +124,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                   </Link>
                   <Link
                     to="/admin/create-program"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                      activePage === 'create-event'
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground'
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
+                      activePage === 'create-programs'
+                        ? 'bg-sidebar text-white border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
@@ -136,21 +136,21 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
 
                   <Link
                     to="/admin/add-research"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                       activePage === 'create-research'
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground'
+                        ? 'bg-sidebar text-white border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
                     Research
                   </Link>
                   <Link
-                    to="/add-placement"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                    to="/add-opportunity"
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                       activePage === 'create-opportunity'
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground'
+                        ? 'bg-sidebar text-white border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
@@ -158,10 +158,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                   </Link>
                   <Link
                     to="/admin/create-infrastructure"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                       activePage === 'create-infrastructure'
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground'
+                        ? 'bg-sidebar text-white border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
@@ -169,10 +169,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                   </Link>
                   <Link
                     to="/admin/create-achievement"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                       activePage === 'create-achievement'
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground'
+                        ? 'bg-sidebar text-white border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
@@ -180,10 +180,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                   </Link>
                   <Link
                     to="/admin/create-club"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                       activePage === 'create-club'
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground'
+                        ? 'bg-sidebar text-white border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
@@ -202,23 +202,22 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
               <AddDataDialog user={user} />
               <Link
                 to="/instructor/create-course"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                   activePage === 'add-data'
-                    ? 'bg-muted text-primary'
-                    : 'text-muted-foreground'
+                    ? 'bg-sidebar text-white border-black hover:text-white'
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
               >
                 <FileInput className="h-4 w-4" />
                 Create Courses
               </Link>
 
-              {/* Feedback Link */}
               <Link
                 to="/feedback"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                   activePage === 'feedback'
-                    ? 'bg-muted text-primary'
-                    : 'text-muted-foreground'
+                    ? 'bg-sidebar text-white border-black hover:text-white'
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
               >
                 <FileInput className="h-4 w-4" />
@@ -227,10 +226,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
 
               <Link
                 to="/faculty/create-achievement"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                   activePage === 'create-achievement'
-                    ? 'bg-muted text-primary'
-                    : 'text-muted-foreground'
+                    ? 'bg-sidebar text-white border-black hover:text-white'
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
               >
                 <FileSpreadsheet className="h-4 w-4" />
@@ -239,10 +238,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
 
               <Link
                 to="/faculty/add-research"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                   activePage === 'create-research'
-                    ? 'bg-muted text-primary'
-                    : 'text-muted-foreground'
+                    ? 'bg-sidebar text-white border-black hover:text-white'
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
               >
                 <FileSpreadsheet className="h-4 w-4" />
@@ -258,10 +257,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
 
               <Link
                 to={`/byStudent/feedback`}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                   activePage === 'feedback'
-                    ? 'bg-muted text-primary'
-                    : 'text-muted-foreground'
+                    ? 'bg-sidebar text-white border-black hover:text-white'
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
               >
                 <FileInput className="h-4 w-4" />
@@ -270,10 +269,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
 
               <Link
                 to="/student/create-achievement"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                   activePage === 'create-achievement'
-                    ? 'bg-muted text-primary'
-                    : 'text-muted-foreground'
+                    ? 'bg-sidebar text-white border-black hover:text-white'
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
               >
                 <FileSpreadsheet className="h-4 w-4" />
@@ -282,10 +281,10 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
 
               <Link
                 to="/student/add-research"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                   activePage === 'create-research'
-                    ? 'bg-muted text-primary'
-                    : 'text-muted-foreground'
+                    ? 'bg-sidebar text-white border-black hover:text-white'
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
               >
                 <FileSpreadsheet className="h-4 w-4" />

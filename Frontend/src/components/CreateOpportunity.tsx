@@ -214,12 +214,12 @@ export const CreateOpportunity: FC = () => {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Add Opportunity</h1>
+            <h1 className="text-2xl text-sidebar font-bold">Add Opportunity</h1>
           </div>
           <div className="flex flex-col items-center justify-center">
           <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" className="mb-4 border-2">Add Opportunity</Button>
+                <Button variant="outline" className="mb-4 border-2 hover:border-sidebar">Add Opportunity</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[725px]">
                 <DialogHeader>

@@ -36,15 +36,7 @@ import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem,SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DeptCard } from "./DeptCard";
 
 interface User {
@@ -91,6 +83,42 @@ export const CreateDepartment: FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = Cookies.get("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const decoded: any = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        alert("Session expired. Please login again.");
+        Cookies.remove("token");
+        navigate("/login");
+        return;
+      }
+
+      const userDetails: User = {
+        username: decoded.username,
+        first_name: decoded.first_name,
+        last_name: decoded.last_name,
+        email: decoded.email,
+        institute_id: decoded.institute_id,
+        type_id: decoded.type_id,
+        gender: decoded.gender,
+        is_active: true,
+      };
+
+      setUser(userDetails);
+    } catch (err) {
+      console.log(err);
+      navigate("/login");
+    }
+  }, [navigate]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -101,19 +129,28 @@ export const CreateDepartment: FC = () => {
     }));
   };
 
-  async function fetchDepartments() {
-    try {
-      const response = await fetch("http://localhost:3000/api/departments");
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        console.log(user?.institute_id);
+        if(!user?.institute_id)
+          return;
+        const response = await fetch(`http://localhost:3000/api/departments/${user?.institute_id}`);
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const departments = await response.json();
+        setDepartments(departments);
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+        return [];
       }
-      const departments = await response.json();
-      return departments;
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-      return [];
-    }
-  }
+    };
+
+    fetchDepartments();
+
+  }, [user?.institute_id]);
+  
 
   const handleUpdateDepartment = async (updatedData) => {
     try {
@@ -177,49 +214,6 @@ export const CreateDepartment: FC = () => {
       toast.error("An error occurred while deleting the department.");
     }
   };
-
-  useEffect(() => {
-    const token = Cookies.get("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    try {
-      const decoded: any = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-
-      if (decoded.exp < currentTime) {
-        alert("Session expired. Please login again.");
-        Cookies.remove("token");
-        navigate("/login");
-        return;
-      }
-
-      const userDetails: User = {
-        username: decoded.username,
-        first_name: decoded.first_name,
-        last_name: decoded.last_name,
-        email: decoded.email,
-        institute_id: decoded.institute_id,
-        type_id: decoded.type_id,
-        gender: decoded.gender,
-        is_active: true,
-      };
-
-      setUser(userDetails);
-    } catch (err) {
-      console.log(err);
-      navigate("/login");
-    }
-
-    const loadDepartments = async () => {
-      const deptData = await fetchDepartments();
-      setDepartments(deptData);
-    };
-
-    loadDepartments();
-  }, [navigate]);
 
   const handleDeptTypeChange = (value: string) => {
     setDeptType(value);
@@ -469,12 +463,12 @@ export const CreateDepartment: FC = () => {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Departments</h1>
+            <h1 className="text-2xl text-sidebar font-bold">Departments</h1>
           </div>
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-row gap-4 items-center justify-center">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="mb-4 border-2">
+                <Button variant="outline" className="mb-4 border-2 hover:border-sidebar">
                   Create Department
                 </Button>
               </DialogTrigger>
@@ -692,7 +686,7 @@ export const CreateDepartment: FC = () => {
             </Dialog>
             <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="mb-4 border-2">
+                <Button variant="outline" className="mb-4 border-2 hover:border-sidebar">
                   Bulk Create
                 </Button>
               </DialogTrigger>

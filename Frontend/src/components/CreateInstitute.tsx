@@ -312,7 +312,7 @@ export const CreateInstitute: FC = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>
-                {user?.displayName || "My Account"}
+                {user?.username || "My Account"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate("/profile")}>
@@ -325,7 +325,7 @@ export const CreateInstitute: FC = () => {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">
+            <h1 className="text-2xl text-sidebar font-bold">
               Create Institute
             </h1>
           </div>
@@ -468,7 +468,7 @@ export const CreateInstitute: FC = () => {
                   >
                     No
                   </Button>
-                  <Button variant="primary" onClick={handleLogout}>
+                  <Button variant='default' onClick={handleLogout}>
                     Yes
                   </Button>
                 </div>

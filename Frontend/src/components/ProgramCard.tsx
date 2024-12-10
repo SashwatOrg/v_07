@@ -64,10 +64,10 @@ export function ProgramCard({
         <DialogTrigger asChild>
           <Card
             style={{ width, height }}
-            className="relative rounded-lg border bg-card text-card-foreground shadow-sm cursor-pointer"
+            className="relative rounded-lg border bg-card text-card-foreground shadow-sm cursor-pointer hover:shadow-xl hover:border-2 hover:border-sidebar w-auto"
           >
             <CardHeader>
-              <CardTitle className="text-center tracking-tight text-lg font-medium">
+              <CardTitle className="text-center tracking-tight text-lg font-medium text-sidebar">
                 {program_name}
               </CardTitle>
             </CardHeader>

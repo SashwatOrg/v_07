@@ -2,6 +2,7 @@ const db = require('../db/dbConnection');
 
 // Controller function to get all departments
 const getDepartments = async (req, res) => {
+  const { institute_id } = req.params;
   const sql = `
     SELECT 
       d.dept_id AS department_id,
@@ -16,11 +17,12 @@ const getDepartments = async (req, res) => {
       department d
     LEFT JOIN 
       user u ON d.coordinator_id = u.user_id
+      WHERE d.institute_id = ?
   `;
 
   try {
     const departments = await new Promise((resolve, reject) => {
-      db.query(sql, (err, results) => {
+      db.query(sql, [institute_id], (err, results) => {
         if (err) return reject(err);
         resolve(results);
       });

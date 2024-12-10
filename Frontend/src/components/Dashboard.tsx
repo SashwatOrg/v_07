@@ -28,7 +28,21 @@ import ModeToggle from './mode-toggle';
 import { Sidebar } from './SideBar/Sidebar';
 import PolarAreaChart from "./visuals/PolarChart";
 import PlacementChart from './visuals/PlacementChart';
-
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
+import { Minus, Plus } from "lucide-react"
+import { Bar, BarChart, ResponsiveContainer } from "recharts"
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from 'react-toastify';
+import ActivityLog from './ActivityLog';
 
 interface User {
   userid: number | null;
@@ -45,96 +59,108 @@ interface User {
   gender: string;
 }
 
+const data = [
+  {
+    goal: 400,
+  },
+  {
+    goal: 300,
+  },
+  {
+    goal: 200,
+  },
+  {
+    goal: 300,
+  },
+  {
+    goal: 200,
+  },
+  {
+    goal: 278,
+  },
+  {
+    goal: 189,
+  },
+  {
+    goal: 239,
+  },
+  {
+    goal: 300,
+  },
+  {
+    goal: 200,
+  },
+  {
+    goal: 278,
+  },
+  {
+    goal: 189,
+  },
+  {
+    goal: 349,
+  },
+]
+
+const graphOptions = [
+  { id: 'pie', label: 'Pie Chart - Department-wise student count', component: PieInteractive },
+  { id: 'polar', label: 'Polar Area Chart - Count of clubs with types', component: PolarAreaChart },
+  { id: 'placement', label: 'Bar Graph - Career opportunities count with types', component: PlacementChart },
+];
 
 export const Dashboard: FC = () => {
   const { username } = useParams();
   const navigate = useNavigate();
-
+  
 
   // User state
   const [user, setUser] = useState<User | null>(null);
   console.log(user);
   const [notificationCount, setNotificationCount] = useState(0);
   const [userType, setUserType] = useState<number | null>(null);
-
+  const [goal, setGoal] = useState(350)
+  const [selectedGraphs, setSelectedGraphs] = useState<string[]>([]);
+ 
+  function onClick(adjustment: number) {
+    setGoal(Math.max(200, Math.min(400, goal + adjustment)))
+  }
 
   const fetchPhotoURL = async (userid: number | null) => {
     console.log(userid);
 
-
     if (!userid) return;
-
 
     try {
       // const response = await fetch(`/api/get-photo-url?user_id=${userId}`);
-
 
       const response = await fetch(
         `http://localhost:3000/api/user-photo/${userid}`
       );
 
-
       const data = await response.json();
-
 
       console.log(data.photoURL);
 
-
       if (response.ok && data.photoURL) {
         // setUser((prevUser) => ({
-
-
         //   ...prevUser,
-
-
         //   photoURL: data.photoUrl,
-
-
         // }));
-
-
         console.log('data.photoUrl', data.photoURL);
-
-
         setUser((prevUser) => ({
           ...(prevUser ?? {
             photoURL: null,
-
-
             institute_id: null,
-
-
             userid: null,
-
-
             email: null,
-
-
             first_name: null,
-
-
             last_name: null,
-
-
             username: null,
-
-
             department: null,
-
-
             type_id: null,
-
-
             gender: null,
-
-
             is_active: false,
-
-
             mobile: null,
           }), // Default empty values for user
-
-
           photoURL: data.photoURL,
         }));
 
@@ -156,7 +182,6 @@ export const Dashboard: FC = () => {
       const decoded: any = jwtDecode(token);
       const currentTime = Date.now() / 1000;
 
-
       if (decoded.exp < currentTime) {
         alert('Session expired. Please login again.');
         Cookies.remove('token');
@@ -166,7 +191,6 @@ export const Dashboard: FC = () => {
         navigate('/login');
         return;
       }
-
 
       // Assuming the decoded token has these fields
       const userDetails: User = {
@@ -184,10 +208,8 @@ export const Dashboard: FC = () => {
         mobile: decoded.mobile_number,
       };
 
-
       // console.log('the user details',userDetails);
       // console.log("DataType of type_id is:", typeof user?.type_id);
-
 
       setUser(userDetails);
       setNotificationCount(decoded.notificationCount || 0); // Set notification count if available
@@ -197,6 +219,33 @@ export const Dashboard: FC = () => {
     }
   }, [username, navigate]);
 
+  useEffect(() => {
+    const savedGraphs = localStorage.getItem('selectedGraphs');
+    if (savedGraphs) {
+      setSelectedGraphs(JSON.parse(savedGraphs));
+    }
+  }, []);
+
+  // Save user selections to local storage
+  const saveSelections = () => {
+    localStorage.setItem('selectedGraphs', JSON.stringify(selectedGraphs));
+    toast.success("Visualizations updated!", {
+      className: "custom-toast",
+      autoClose: 1200,
+    });
+  };
+
+  // Handle graph selection
+  const toggleGraphSelection = (id: string) => {
+    setSelectedGraphs((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((graphId) => graphId !== id);
+      } else if (prev.length < 6) {
+        return [...prev, id];
+      }
+      return prev; // Limit to 6 selections
+    });
+  };
 
   const handleLogout = async () => {
     Cookies.remove('token'); // Remove the token on logout
@@ -251,16 +300,55 @@ export const Dashboard: FC = () => {
             </Sheet>
             <div className="w-full flex-1">
               <form>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search or Type a Job"
-                    className="h-10 px-3 mr-50 ring-offset -background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed py-2 ps-10 pe-16 block w-1/2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-200 focus:ring-0 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-600"
-                  />
-                  <div className="absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-3 text-gray-400">
-                    <Command className="absolute flex-shrink-0 size-3 text-gray-400 dark:text-white/60" />
-                  </div>
+                <div className='text-right'>
+                <Drawer>
+                  <DrawerTrigger asChild>
+                    <Button variant="default">Customize Visualizations</Button>
+                  </DrawerTrigger>
+                  <DrawerContent className='h-[80vh] overflow-auto'>
+                  <ScrollArea className="p-4">
+                    <div className="mx-auto w-full h-auto">
+                      <DrawerHeader>
+                        <DrawerTitle>Graphs & Charts</DrawerTitle>
+                        <DrawerDescription>Select all the visualizations you'd like on your dashboard</DrawerDescription>
+                      </DrawerHeader>
+                      <div className="flex flex-col gap-2">
+                        {graphOptions.map(({ id, label }) => (
+                          <div
+                            key={id}
+                            className={`flex items-center justify-between p-2 border rounded cursor-pointer hover:bg-gray-200 ${selectedGraphs.includes(id) ? 'bg-gray-300' : ''}`}
+                            onClick={() => toggleGraphSelection(id)}
+                          >
+                            <span>{label }</span>
+                            {selectedGraphs.includes(id) && <span>✔️</span>}
+                          </div>
+                        ))}
+                      </div>
+                      <DrawerHeader>
+                        <DrawerTitle>Statistics</DrawerTitle>
+                        <DrawerDescription>Select all the statistics you'd like on your dashboard</DrawerDescription>
+                      </DrawerHeader>
+                      <div className="pl-3 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                        {user?.type_id === 1 && (
+                          <>
+                            {/* Admin-specific cards */}
+                            <StatsCard title="Programs Offered" entity="programs" username={user?.username} />
+                            <StatsCard title="Total Departments" entity="departments" username={user?.username} />
+                            <StatsCard title="Faculty Count" entity="faculty" username={user?.username} />
+                            <StatsCard title="Total Students" entity="students" username={user?.username}/>
+                            <StatsCard title="Total Clubs" entity="clubs" username={user?.username}/>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex justify-end mt-4">
+                        <DrawerClose asChild>
+                        <Button variant="default" onClick={saveSelections}>Save visualizations</Button>
+                        </DrawerClose>
+                      </div>
+                    </div>
+                    </ScrollArea>
+                  </DrawerContent>
+                </Drawer>
                 </div>
               </form>
             </div>
@@ -308,7 +396,7 @@ export const Dashboard: FC = () => {
           </header>
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             <div className="flex items-center">
-              <h1 className="text-2xl text-primary font-bold">
+              <h1 className="text-2xl text-sidebar font-bold">
                 Welcome,{' '}
                 {`${user?.first_name || ''} ${user?.last_name || ''}`.trim() ||
                   'User'}
@@ -319,10 +407,12 @@ export const Dashboard: FC = () => {
               {user?.type_id === 1 && (
                 <>
                   {/* Admin-specific cards */}
-                  <StatsCard title="Programs Offered" entity="departments" username={user?.username} />
-                  <StatsCard title="Total Departments" entity="programs" username={user?.username} />
+                  <StatsCard title="Programs Offered" entity="programs" username={user?.username} />
+                  <StatsCard title="Total Departments" entity="departments" username={user?.username} />
                   <StatsCard title="Faculty Count" entity="faculty" username={user?.username} />
                   <StatsCard title="Total Students" entity="students" username={user?.username}/>
+                  <StatsCard title="Total Clubs" entity="clubs" username={user?.username}/>
+                  <StatsCard title="Total Events" entity="events" username={user?.username}/>
                 </>
               )}
               {user?.type_id === 2 && (
@@ -331,17 +421,16 @@ export const Dashboard: FC = () => {
                   <StatsCard title="Tasks Assigned" entity="departments" username={user?.username} />
                   <StatsCard title="Ongoing Programs" entity="departments" username={user?.username}  />
                   <div className="col-span-full">
-                    <PieInteractive />
+                    <PieInteractive institute_id={user.institute_id}/>
                   </div>
                 </>
               )}
               {user?.type_id === 3 && (
                 <>
-                  {/* Faculty-specific cards */}
                   <StatsCard title="Classes Taken" entity="departments" username={user?.username} />
                   <StatsCard title="Research Papers" entity="departments" username={user?.username} />
                   <div className="col-span-full">
-                    <PieInteractive />
+                    <PieInteractive institute_id={user.institute_id}/>
                   </div>
                 </>
               )}
@@ -351,16 +440,16 @@ export const Dashboard: FC = () => {
                   <StatsCard title="Subjects Enrolled" entity="departments" username={user?.username} />
                   <StatsCard title="Assignments Due" entity="departments" username={user?.username}/>
                   <div className="col-span-full">
-                    <PieInteractive />
+                    <PieInteractive institute_id={user.institute_id}/>
                   </div>
                 </>
               )}
             </div>
-            <div className="flex-1 bg-white rounded-lg shadow-xl mt-4 p-8">
-                    <h4 className="text-xl text-gray-900 font-bold">Activity log</h4>
+            <ActivityLog institute_id={user?.institute_id}/>
+            {/* <div className="flex-1 bg-white rounded-lg shadow-xl mt-4 p-8 dark:bg-black">
+                    <h4 className="text-xl text-gray-900 font-bold dark:text-gray-500">Activity log</h4>
                     <div className="relative px-4">
                         <div className="absolute h-full border border-dashed border-opacity-20 border-secondary"></div>
-
 
                         <div className="flex items-center w-full my-6 -ml-1.5">
                             <div className="w-1/12 z-10">
@@ -371,7 +460,6 @@ export const Dashboard: FC = () => {
                                 <p className="text-xs text-gray-500">3 min ago</p>
                             </div>
                         </div>
-
 
                         <div className="flex items-center w-full my-6 -ml-1.5">
                             <div className="w-1/12 z-10">
@@ -384,7 +472,6 @@ export const Dashboard: FC = () => {
                             </div>
                         </div>
 
-
                         <div className="flex items-center w-full my-6 -ml-1.5">
                             <div className="w-1/12 z-10">
                                 <div className="w-3.5 h-3.5 bg-blue-600 rounded-full"></div>
@@ -394,7 +481,6 @@ export const Dashboard: FC = () => {
                                 <p className="text-xs text-gray-500">57 min ago</p>
                             </div>
                         </div>
-
 
                         <div className="flex items-center w-full my-6 -ml-1.5">
                             <div className="w-1/12 z-10">
@@ -406,7 +492,6 @@ export const Dashboard: FC = () => {
                                 <p className="text-xs text-gray-500">1 hour ago</p>
                             </div>
                         </div>
-
 
                         <div className="flex items-center w-full my-6 -ml-1.5">
                             <div className="w-1/12 z-10">
@@ -429,14 +514,14 @@ export const Dashboard: FC = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
             <div className="col-span-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               {user?.institute_id && user.type_id === 1 && (
                 <>
-                  <PieInteractive institute_id={user.institute_id} />
-                  <PolarAreaChart institute_id={user.institute_id} />
-                  <PlacementChart institute_id={user.institute_id} />
+                  {selectedGraphs.includes('pie') && <PieInteractive institute_id={user?.institute_id} />}
+                  {selectedGraphs.includes('polar') && <PolarAreaChart institute_id={user?.institute_id} />}
+                  {selectedGraphs.includes('placement') && <PlacementChart institute_id={user?.institute_id} />}
                 </>
               )}
             </div>
@@ -446,8 +531,3 @@ export const Dashboard: FC = () => {
     </>
   );
 };
-
-
-
-
-
