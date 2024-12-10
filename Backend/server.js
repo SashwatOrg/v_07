@@ -129,6 +129,7 @@ const updatepassRoutes=require("./routes/updatepassRoutes");
 
 app.use('/api',updatepassRoutes);
 app.use("/api", uploadRoutes);
+app.use("/api",profileRoutes);
 app.use("/api", updateRoutes);
 app.use("/api", programRoutes);
 app.use("/api", createInstituteRoutes);
@@ -1005,7 +1006,7 @@ app.use('/api', userRoutes);
 // app.use('/api',updatepassRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Use the profile routes
-app.use('/api', profileRoutes);
+// app.use('/api', profileRoutes);
 
 
 

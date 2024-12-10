@@ -4,6 +4,6 @@ const bcrypt = require("bcrypt");
 const router = express.Router();
 
 // Route for updating password
-router.post('/update-password', updatePassword);
+router.post('/updatepassword', updatePassword);
 
 module.exports = router;

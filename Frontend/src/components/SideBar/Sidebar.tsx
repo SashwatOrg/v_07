@@ -295,7 +295,9 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
             </>
           )}
         </nav>
-        <div className="mt-auto pl-0 p-2 " onClick={() => navigate(`/profile/${user?.userid}`)}>
+        <div className="mt-auto pl-0 p-2 " onClick={() =>
+                  navigate(`/profile/${user?.username}`, { state: { userid: user?.userid } })
+                }>
           <ProfileSection user={user} />
 
         </div>

@@ -149,6 +149,7 @@ const Profile: React.FC<ProfileProps> = ({
 
   const handleUpdatePassword = async () => {
     const userId = userid; // Replace this with the logged-in user's ID
+    console.log("userId is ", userId);
     const currentPassword = document.querySelector(
       'input[placeholder="Current Password"]'
     ).value;
@@ -163,10 +164,12 @@ const Profile: React.FC<ProfileProps> = ({
       alert("New password and confirm password do not match.");
       return;
     }
-
+    console.log("newPassword is ", newPassword);
+    console.log("currentPassword is ", currentPassword);
+    console.log("userId is ", userId);
     try {
       const response = await fetch(
-        "http://localhost:3000/api/update-password",
+        "http://localhost:3000/api/updatepassword",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
