@@ -34,7 +34,9 @@ import { jwtDecode } from "jwt-decode";
 import { AcademicDataTableDemo } from "./optionsForCustomizedReport/AcademicDataTable"; // Import the AcademicDataTableDemo component
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 
+// User interface
 interface User {
   email: string | null;
   first_name: string | null;
@@ -45,8 +47,84 @@ interface User {
   type_id: number | null;
   is_active: boolean;
   gender: string;
+  userid: number | null;
 }
 
+// ReportAccessDialog Component
+const ReportAccessDialog: React.FC<{
+  logId: number | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccessfulAccess: (filePath: string, reportType?: string) => void;
+}> = ({ logId, isOpen, onClose, onSuccessfulAccess }) => {
+  const [password, setPassword] = useState<string>('');
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
+
+  const handleVerifyPassword = async () => {
+    if (!logId) {
+      toast.error("Invalid report log ID");
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      const response = await fetch('http://localhost:3000/pdf/verify-report-access', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          logId, 
+          password 
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        onSuccessfulAccess(data.filePath, data.reportType);
+        toast.success("Report access verified successfully!");
+        onClose();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Invalid password");
+      }
+    } catch (error) {
+      console.error("Password verification error:", error);
+      toast.error("An error occurred during password verification");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Verify Report Access</DialogTitle>
+          <DialogDescription>
+            Enter the password from the downloaded CSV file to access the report.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col space-y-4">
+          <Input
+            type="password"
+            placeholder="Enter report access password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button 
+            onClick={handleVerifyPassword} 
+            disabled={isVerifying}
+          >
+            {isVerifying ? "Verifying..." : "Verify Password"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Main Component
 export const GenerateAcademicReport: FC = () => {
   const location = useLocation();
   const { user } = location.state || {};
@@ -59,6 +137,8 @@ export const GenerateAcademicReport: FC = () => {
   const [showReportTypeDialog, setShowReportTypeDialog] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [reportLogId, setReportLogId] = useState<number | null>(null);
+  const [isReportAccessDialogOpen, setIsReportAccessDialogOpen] = useState<boolean>(false);
 
   // Define report options related to academic data
   const reportOptions = [
@@ -101,6 +181,7 @@ export const GenerateAcademicReport: FC = () => {
           institute_id: decoded.institute_id,
           type_id: decoded.type_id,
           gender: decoded.gender,
+          userid: decoded.id,
         };
         setCurrentUser (userDetails);
       }
@@ -135,6 +216,7 @@ export const GenerateAcademicReport: FC = () => {
         last_name: currentUser ?.last_name,
         institute_id: currentUser ?.institute_id,
         email: currentUser ?.email,
+        user_id: currentUser ?.userid,
       },
       format,
     };
@@ -152,14 +234,17 @@ export const GenerateAcademicReport: FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        if (format === "pdf") {
-          window.open(`http://localhost:3000/pdfs/${data.filePath}`, "_blank");
-        } else if (format === "html") {
-          const link = document.createElement("a");
-          link.href = `http://localhost:3000${data.filePath}`;
-          link.download = data.filePath.split("/").pop();
-          link.click();
+        setReportLogId(data.logId); // Store log ID for password verification
+        setIsReportAccessDialogOpen(true); // Open password verification dialog
+
+        // Download Password CSV
+        if (data.passwordCsvPath) {
+          const csvLink = document.createElement("a");
+          csvLink.href = `http://localhost:3000${data.passwordCsvPath}`;
+          csvLink.download = "report_access_credentials.csv";
+          csvLink.click();
         }
+
         toast.success("Report generated successfully!");
       } else {
         const errorData = await response.json();
@@ -192,6 +277,54 @@ export const GenerateAcademicReport: FC = () => {
       setSelectedOptions(reportOptions.map(option => option.id)); // Select all options by default
     }
     setShowReportTypeDialog(true);
+  };
+
+  const handleSuccessfulAccess = async (filePath: string, reportType?: string) => {
+    try {
+      const token = Cookies.get("token");
+      const newTab = window.open('about:blank', '_blank');
+
+      const response = await fetch(filePath, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': reportType === 'pdf' ? 'application/pdf' : 'text/html'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('File fetch error:', { 
+          status: response.status, 
+          statusText: response.statusText,
+          errorText 
+        });
+        throw new Error(`Failed to fetch file: ${errorText}`);
+      }
+
+      // HTML handling
+      if (reportType === 'html') {
+        const htmlContent = await response.text();
+        if (newTab) {
+          newTab.document.open();
+          newTab.document.write(htmlContent);
+          newTab.document.close();
+        }
+      } else {
+        // PDF handling
+        const blob = await response.blob();
+        const fileURL = URL.createObjectURL(blob);
+        if (newTab) {
+          newTab.location.href = fileURL;
+        }
+      }
+    } catch (error) {
+      console.error("Detailed error accessing report:", error);
+      toast.error(`An error occurred: ${error.message}`);
+    } finally {
+      setReportLogId(null);
+      setIsReportAccessDialogOpen(false);
+    }
   };
 
   return (
@@ -231,9 +364,9 @@ export const GenerateAcademicReport: FC = () => {
                   )}
                   <span className="sr-only">Toggle user menu</span>
                 </Button>
-              </ DropdownMenuTrigger>
+              </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{currentUser  ?.username || "My Account"}</DropdownMenuLabel>
+                <DropdownMenuLabel>{currentUser ?.username || "My Account"}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/profile")}>Profile Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -302,6 +435,13 @@ export const GenerateAcademicReport: FC = () => {
                 </div>
               </DialogContent>
             </Dialog>
+
+            <ReportAccessDialog
+              logId={reportLogId}
+              isOpen={isReportAccessDialogOpen}
+              onClose={() => setIsReportAccessDialogOpen(false)}
+              onSuccessfulAccess={handleSuccessfulAccess}
+            />
 
             <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
               <DialogContent>
