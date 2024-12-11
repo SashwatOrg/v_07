@@ -11,6 +11,7 @@ const FooterOne: React.FC = () => {
           <div className="footer-scroll-wrap">
             <button
               className="scroll-to-target"
+              
               data-target="html"
               onClick={scrollToTop}
             >
@@ -19,38 +20,40 @@ const FooterOne: React.FC = () => {
           </div>
           <div className="footer-top">
             <div className="row">
-              <div className="col-xl-3 col-lg-4 col-md-6">
+              <div className="col-xl-3 col-lg-4 col-md-6"> <br />
                 <div
                   className="footer-widget wow fadeInUp"
                   data-wow-delay=".2s"
                 >
-                  <Link to="/" className="f-logo">
-                    <img src={logoImage} alt="BigTech Logo" />
-                  </Link>
+                 <Link to="/">
+                  <span className="text-2xl font-bold">
+                    <span className="text-blue-500">MINISTRY OF </span>
+                        <span className="text-white-700">AYUSH</span>
+                      </span>
+                  </Link> <br /><br />  
                   <div className="footer-content">
                     <p>
-                      A new way to make the payments easy, reliable and 100%
-                      secure. claritatem itamconse quat. Exerci tationulla
+                    Simplify annual reports, boost transparency, enhance collaboration, and secure data management for educational institutes!
                     </p>
                     <ul className="footer-social">
                       <li>
-                        <a href="#">
-                          <i className="fab fa-youtube"></i>
+                        <a href="https://www.instagram.com/ministryofayush/">
+                          <i className="fab fa-instagram"></i>
                         </a>
                       </li>
                       <li>
-                        <a href="#">
+                        <a href="https://x.com/moayush">
                           <i className="fab fa-twitter"></i>
                         </a>
                       </li>
                       <li>
-                        <a href="#">
-                          <i className="fab fa-facebook-f"></i>
+                        <a href="https://www.facebook.com/moayush">
+                          <i className="fab fa-facebook"></i>
                         </a>
                       </li>
                       <li>
-                        <a href="#">
-                          <i className="fab fa-skype"></i>
+                        <a href="https://www.youtube.com/@MinistryofAYUSHofficial/videos?themeRefresh=1">
+                          <i className="fab fa-youtube"></i>
                         </a>
                       </li>
                     </ul>
@@ -119,13 +122,12 @@ const FooterOne: React.FC = () => {
                   <h4 className="fw-title">Subscribe Newsletter</h4>
                   <div className="footer-newsletter">
                     <p>
-                      Exerci tation ullamcorper suscipit lobortis nisl aliquip
-                      ex ea commodo
+                    Simplifying reports, enhancing transparency, and securing data for educational institutes!
                     </p>
                     <form action="#">
                       <input
                         type="email"
-                        placeholder="sashwat2704@gmail.com"
+                        placeholder="ministryofayush@gmail.com"
                         required
                       />
                       <button type="submit">
@@ -141,7 +143,8 @@ const FooterOne: React.FC = () => {
             <div className="row align-items-center">
               <div className="col-lg-6">
                 <div className="copyright-text">
-                  <p>Copyright &copy; 2024. All Rights Reserved Sashwat</p>
+                  <p>Copyright &copy; Ministry of Ayush. All Rights Reserved
+</p>
                 </div>
               </div>
               <div className="col-lg-6 d-none d-sm-block">
@@ -154,7 +157,7 @@ const FooterOne: React.FC = () => {
                       <Link to="#">Privacy policy</Link>
                     </li>
                     <li>
-                      <Link to="#">Login / Signup</Link>
+                     
                     </li>
                   </ul>
                 </div>

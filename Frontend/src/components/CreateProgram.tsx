@@ -46,6 +46,8 @@ import {
 import { ProgramCard } from "./ProgramCard";
 
 
+
+
 interface User {
   email: string | null;
   first_name: string | null;
@@ -59,6 +61,8 @@ interface User {
 }
 
 
+
+
 interface ProgramCardProps {
   program_id: number;
   prog_name: string;
@@ -67,6 +71,8 @@ interface ProgramCardProps {
   duration: number;
   semester_count: number
 }
+
+
 
 
 export const CreateProgram: FC = () => {
@@ -81,6 +87,10 @@ export const CreateProgram: FC = () => {
   const [programs, setPrograms] = useState<ProgramCardProps[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const navigate = useNavigate();
+
+
+
+
 
 
 
@@ -108,10 +118,16 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
     if (user?.institute_id) {
       fetchDepartments();
     }
   }, [user?.institute_id]);
+
+
 
 
   useEffect(() => {
@@ -134,16 +150,24 @@ export const CreateProgram: FC = () => {
     };
 
 
+
+
     // Initial fetch
     fetchPrograms();
+
+
 
 
     // Polling interval for continuous updating
     // const interval = setInterval(fetchDepartments, 30000);
 
 
+
+
     // return () => clearInterval(interval); // Cleanup on unmount
   }, [user?.institute_id]); // Re-run if user or institute_id changes
+
+
 
 
   const handleUpdateProgram = async (updatedData) => {
@@ -170,6 +194,8 @@ export const CreateProgram: FC = () => {
         });
 
 
+
+
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || 'Failed to update program.');
@@ -181,9 +207,13 @@ export const CreateProgram: FC = () => {
   };  
 
 
+
+
   const handleDeleteProgram = async (data) => {
     try {
       const prog_id = data.program_id;
+
+
 
 
       const token = Cookies.get('token');
@@ -202,6 +232,8 @@ export const CreateProgram: FC = () => {
         });
 
 
+
+
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || 'Failed to delete program.');
@@ -211,6 +243,8 @@ export const CreateProgram: FC = () => {
       toast.error('An error occurred while deleting the program.');
     }
   };
+
+
 
 
   useEffect(() => {
@@ -223,9 +257,17 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
     try {
       const decoded: any = jwtDecode(token);
       const currentTime = Date.now() / 1000;
+
+
+
+
 
 
 
@@ -236,6 +278,10 @@ export const CreateProgram: FC = () => {
         navigate("/login");
         return;
       }
+
+
+
+
 
 
 
@@ -253,6 +299,10 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
       setUser(userDetails);
     } catch (err) {
       navigate("/login");
@@ -263,8 +313,16 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+
+
+
 
 
 
@@ -278,9 +336,17 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
     try {
       const username = user?.username;
       console.log(username, program, duration, intake, semesters);
+
+
+
+
 
 
 
@@ -296,6 +362,10 @@ export const CreateProgram: FC = () => {
           body: JSON.stringify({ dept, program, duration, intake, semesters }),
         }
       );
+
+
+
+
 
 
 
@@ -324,14 +394,26 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
   const handleBulkUpload = async () => {
     if (!file) return;
 
 
 
 
+
+
+
+
     const formData = new FormData();
     formData.append("file", file);
+
+
+
+
 
 
 
@@ -344,6 +426,10 @@ export const CreateProgram: FC = () => {
           body: formData,
         }
       );
+
+
+
+
 
 
 
@@ -367,11 +453,19 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const uploadedFile = e.target.files[0];
       const allowedExtensions = [".csv", ".xlsx"]; // Allow both .csv and .xlsx
       const maxSize = 5 * 1024 * 1024; // 5 MB
+
+
+
+
 
 
 
@@ -388,11 +482,19 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
       // Check if the uploaded file exceeds the maximum size
       if (uploadedFile.size > maxSize) {
         toast.error("File size exceeds 5 MB.");
         return;
       }
+
+
+
+
 
 
 
@@ -405,9 +507,17 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
   const handleToggleUploadType = () => {
     setUploadType(uploadType === "single" ? "bulk" : "single");
   };
+
+
+
+
 
 
 
@@ -436,6 +546,10 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
   const handleTemplateDownload = () => {
     fetch(`http://localhost:3000/api/bulk-program/template`)
       .then((res) => {
@@ -457,9 +571,13 @@ export const CreateProgram: FC = () => {
 
 
 
+
+
+
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
-      <Sidebar user={user} activePage="create-program" />
+      <Sidebar user={user} activePage="create-programs" />
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 sticky top-0">
           <Sheet>
@@ -543,12 +661,12 @@ export const CreateProgram: FC = () => {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Programs</h1>
+            <h1 className="text-2xl text-sidebar font-bold">Programs</h1>
           </div>
           <div className="flex flex-col items-center justify-center">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" className="mb-4 border-2">
+                <Button variant="outline" className="mb-4 border-2 hover:border-sidebar">
                   Create Program
                 </Button>
               </DialogTrigger>
@@ -731,6 +849,16 @@ export const CreateProgram: FC = () => {
     </div>
   );
 };
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -49,6 +49,7 @@ export const LoginForm: FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+
     try {
       console.log('the details sent are', username, password);
       const response = await fetch('http://localhost:3000/api/loginMe', {
@@ -59,16 +60,21 @@ export const LoginForm: FC = () => {
         body: JSON.stringify({ username, password }),
       });
 
+
       const data = await response.json();
+      const email=data.email;
+      console.log(email);
       console.log('the response from back i s',data)
       if (response.ok) {
+       
         Cookies.set('token', data.token, { expires: 0.5 });
         console.log('success',username)
-        toast.success('Login successful!', {
-          className: 'custom-toast',
-          autoClose: 1000,
-          onClose: () => navigate(`/dashboard/${username}`),
-        });
+        navigate(`/Verify/${email}`)
+        // toast.success('Login successful!', {
+        //   className: 'custom-toast',
+        //   autoClose: 1000,
+        //   onClose: () => navigate(`/input-otp/${email}`),
+        // });
       } else {
         setError(data.message || 'Login failed');
         toast.error('Invalid Credentials!', {
@@ -80,6 +86,11 @@ export const LoginForm: FC = () => {
       setError('An error occurred. Please try again later.');
     }
   };
+
+
+
+
+
 
   return (
     <div className="flex flex-row h-screen w-screen">

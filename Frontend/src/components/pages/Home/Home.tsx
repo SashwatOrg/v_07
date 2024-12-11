@@ -8,6 +8,8 @@ import WhoWeAre from "../../Landingpage/WhoWeAre/WhoWeAre";
 import WhyChooseUs from "../../Landingpage/WhyChooseUs/WhyChooseUs";
 import LayoutOne from "../../../layouts/LayoutOne";
 import aboutImg from "../../../assets/img/images/about_img01.png";
+import MOA from "@/components/Landingpage/MOA/MOA";
+// import './../../../assets'
  // Image path import
 
 const Home: React.FC = () => {
@@ -22,6 +24,7 @@ const Home: React.FC = () => {
         <div className="area-bg">
           <Roadmap />
         </div>
+        <MOA/>
         <TeamOne />
         <ContactOne />
       </main>

@@ -4,6 +4,9 @@ interface TeamMember {
   src: string;
   name: string;
   designation: string;
+  linkedin: string;
+  github: string;
+  instagram: string;
 }
 
 interface TeamOneItemProps {
@@ -22,22 +25,17 @@ const TeamOneItem: React.FC<TeamOneItemProps> = ({ item }) => {
 
         <ul className="team-social">
           <li>
-            <a href="/">
-              <i className="fab fa-youtube"></i>
+            <a href={item.linkedin} target="_blank" rel="noopener noreferrer">
+              <i className="fab fa-linkedin"></i>
             </a>
           </li>
           <li>
-            <a href="/">
-              <i className="fab fa-twitter"></i>
+            <a href={item.github} target="_blank" rel="noopener noreferrer">
+              <i className="fab fa-github"></i>
             </a>
           </li>
           <li>
-            <a href="/">
-              <i className="fab fa-facebook-f"></i>
-            </a>
-          </li>
-          <li>
-            <a href="/">
+            <a href={item.instagram} target="_blank" rel="noopener noreferrer">
               <i className="fab fa-instagram"></i>
             </a>
           </li>

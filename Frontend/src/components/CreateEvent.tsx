@@ -47,6 +47,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { EventCard } from './EventCard';
+
 
 // Comprehensive Interfaces
 interface User {
@@ -61,15 +63,18 @@ interface User {
   gender: string;
 }
 
+
 interface Department {
   dept_id: number;
   dept_name: string;
 }
 
+
 interface Club {
   club_id: number;
   club_name: string;
 }
+
 
 // Event Type Enum for Strict Typing
 enum EventTypeEnum {
@@ -79,11 +84,23 @@ enum EventTypeEnum {
   Other = 'Other'
 }
 
+
 // Host Type Enum
 enum HostTypeEnum {
   Department = 'Department',
   Club = 'Club'
 }
+
+
+interface EventCardProps {
+  event_id: number;
+  event_name: string;
+  event_description: string;
+  event_type: string;
+  event_date: string;
+  dept_id: number;
+}
+
 
 export const CreateEvent: FC = () => {
   // State Management with Improved Typing
@@ -100,13 +117,15 @@ export const CreateEvent: FC = () => {
   const [uploadType, setUploadType] = useState<'single' | 'bulk'>('single');
   const [file, setFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  const [events, setEvents] = useState<EventCardProps[]>([]);
   const navigate = useNavigate();
+
 
   // Comprehensive Data Fetching
   useEffect(() => {
     const fetchDepartmentsAndClubs = async () => {
       if (!user?.institute_id) return;
+
 
       try {
         // Fetch Departments
@@ -114,14 +133,16 @@ export const CreateEvent: FC = () => {
           `http://localhost:3000/api/departmentNames/${user.institute_id}`
         );
         const departmentData: Department[] = await departmentResponse.json();
-        
+       
         // Ensure departments have valid structure
         const validDepartments = departmentData.map((dept, index) => ({
           dept_id: dept.dept_id || index + 1,
           dept_name: dept.dept_name
         }));
 
+
         setDepartments(validDepartments);
+
 
         // Fetch Clubs
         const clubResponse = await fetch(
@@ -135,8 +156,10 @@ export const CreateEvent: FC = () => {
       }
     };
 
+
     fetchDepartmentsAndClubs();
   }, [user?.institute_id]);
+
 
   // User Authentication
   useEffect(() => {
@@ -146,9 +169,11 @@ export const CreateEvent: FC = () => {
       return;
     }
 
+
     try {
       const decoded: any = jwtDecode(token);
       const currentTime = Date.now() / 1000;
+
 
       if (decoded.exp < currentTime) {
         toast.error('Session expired. Please login again.');
@@ -156,6 +181,7 @@ export const CreateEvent: FC = () => {
         navigate('/login');
         return;
       }
+
 
       const userDetails: User = {
         username: decoded.username,
@@ -169,28 +195,130 @@ export const CreateEvent: FC = () => {
         photoURL: null,
       };
 
+
       setUser(userDetails);
     } catch (err) {
       navigate('/login');
     }
   }, [navigate]);
 
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        console.log(user?.institute_id);
+        if(!user?.institute_id)
+          return;
+        const response = await fetch(`http://localhost:3000/api/events/${user?.institute_id}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const eventsData = await response.json();
+        console.log(eventsData);
+        setEvents(eventsData);
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        setEvents([]);
+      }
+    };
+
+
+    fetchEvents();
+
+
+    // Polling interval for continuous updating
+    // const interval = setInterval(fetchDepartments, 30000);
+
+
+    // return () => clearInterval(interval); // Cleanup on unmount
+  }, [user?.institute_id]); // Re-run if user or institute_id changes
+
+
+  const handleUpdateEvent = async (updatedData) => {
+    try {
+      console.log(updatedData);
+      const event_id = updatedData.event_id;
+      const event_name = updatedData.event_name;
+      const event_description = updatedData.event_description;
+      const event_type = updatedData.event_type;
+      const event_date = updatedData.event_date;
+      console.log("SentData:", event_id, event_name, event_description, event_type, event_date);
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/update-event/${event_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({event_name, event_description, event_type, event_date}),
+      });
+ 
+      if (response.ok) {
+        toast.success('Event updated successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to update event.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while updating the event.');
+    }
+  };  
+
+
+  const handleDeleteEvent = async (data) => {
+    try {
+      const event_id = data.event_id;
+
+
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:3000/api/delete-event/${event_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+ 
+      if (response.ok) {
+        toast.success('Event deleted successfully!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
+
+
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to delete Event.');
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('An error occurred while deleting the Event.');
+    }
+  };  
+
+
   // Event Submission Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+ 
     // Validation
     if (!eventName || !eventDesc || !eventType || !eventDate || !host) {
       toast.error('Please fill in all required fields');
       return;
     }
-  
+ 
     const token = Cookies.get('token');
     if (!token) {
       navigate('/login');
       return;
     }
-  
+ 
     try {
       const submitData: any = {
         eventName,
@@ -199,7 +327,7 @@ export const CreateEvent: FC = () => {
         eventDate: new Date(eventDate).toISOString(),
         year: new Date(eventDate).getFullYear(),
       };
-  
+ 
       // Handle Department or Club selection
       if (host === HostTypeEnum.Department) {
         if (!selectedDepartment) {
@@ -214,7 +342,7 @@ export const CreateEvent: FC = () => {
         }
         submitData.clubId = selectedClub;
       }
-  
+ 
       const response = await fetch(
         `http://localhost:3000/api/create-event/${user?.institute_id}`,
         {
@@ -226,6 +354,7 @@ export const CreateEvent: FC = () => {
           body: JSON.stringify(submitData),
         }
       );
+
 
       if (response.ok) {
         toast.success('Event created successfully!', {
@@ -241,6 +370,7 @@ export const CreateEvent: FC = () => {
     }
   };
 
+
   // Reset Form
   const resetForm = () => {
     setEventName('');
@@ -254,13 +384,16 @@ export const CreateEvent: FC = () => {
     setErrorMessage(null);
   };
 
+
   // File Upload Handlers
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
     if (!uploadedFile) return;
 
+
     const allowedExtension = '.xlsx';
     const maxSize = 5 * 1024 * 1024; // 5 MB
+
 
     if (!uploadedFile.name.endsWith(allowedExtension)) {
       setErrorMessage('Invalid file type. Please upload an .xlsx file.');
@@ -274,11 +407,14 @@ export const CreateEvent: FC = () => {
     setErrorMessage(null);
   };
 
+
   const handleUpload = async () => {
     if (!file) return;
 
+
     const formData = new FormData();
     formData.append('file', file);
+
 
     try {
       const res = await fetch(
@@ -289,7 +425,9 @@ export const CreateEvent: FC = () => {
         }
       );
 
+
       if (!res.ok) throw new Error('Upload failed');
+
 
       toast.success('Events uploaded successfully!');
       setFile(null); // Reset file after successful upload
@@ -298,6 +436,7 @@ export const CreateEvent: FC = () => {
       toast.error(err.message);
     }
   };
+
 
   const handleDownload = () => {
     fetch(`http://localhost:3000/api/events/download-data`)
@@ -321,6 +460,7 @@ export const CreateEvent: FC = () => {
       .catch((err) => console.error('Download error:', err));
   };
 
+
   const handleTemplateDownload = () => {
     fetch(`http://localhost:3000/api/events/download-template`)
       .then((res) => {
@@ -338,6 +478,7 @@ export const CreateEvent: FC = () => {
       })
       .catch((err) => console.error('Template download error:', err));
   };
+
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
@@ -415,12 +556,12 @@ export const CreateEvent: FC = () => {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Create Event</h1>
+            <h1 className="text-2xl text-sidebar font-bold">Create Event</h1>
           </div>
           <div className="flex flex-col items-center justify-center">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" className="mb-4 border-2">
+                <Button variant="outline" className="mb-4 border-2 hover:border-sidebar">
                   Manage Event Data
                 </Button>
               </DialogTrigger>
@@ -505,6 +646,7 @@ export const CreateEvent: FC = () => {
                       </Select>
                     </div>
 
+
                     {/* Conditional rendering for department selection */}
                     {host === HostTypeEnum.Department && (
                       <div className="grid grid-cols-4 items-center gap-4">
@@ -533,6 +675,7 @@ export const CreateEvent: FC = () => {
                       </div>
                     )}
 
+
                     {/* Conditional rendering for club selection */}
                     {host === HostTypeEnum.Club && (
                       <div className="grid grid-cols-4 items-center gap-4">
@@ -560,6 +703,7 @@ export const CreateEvent: FC = () => {
                         </Select>
                       </div>
                     )}
+
 
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="edate" className="text-left">
@@ -634,8 +778,26 @@ export const CreateEvent: FC = () => {
               </DialogContent>
             </Dialog>
           </div>
+          <div className="pl-3 grid gap-x-5 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-12 lg:gap-y-12">
+              {events.map(event => (
+                  <EventCard
+                    event_id={event.event_id}
+                    event_name={event.event_name}
+                    event_description={event.event_description}
+                    event_type={event.event_type}
+                    event_date={event.event_date}
+                    dept_id={event.dept_id}
+                    onUpdate={handleUpdateEvent}
+                    onDelete={handleDeleteEvent}
+                    />
+              ))}
+          </div>
         </main>
       </div>
     </div>
   );
 };
+
+
+
+

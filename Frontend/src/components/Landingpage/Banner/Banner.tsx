@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import shape01 from "../../../assets/img/banner/banner_shape01.png"; // Ensure this path is correct
+import shape01 from "../../../assets/img/banner/logo.png"; // Ensure this path is correct
+import shape02 from "../../../assets/img/banner/SIH_LOGO.png"; // Add the right-side image path
 import CountDownOne from "../CountDown/CountDownOne";
 
 interface BannerProps {
@@ -35,7 +36,8 @@ const Banner: React.FC<BannerProps> = (props) => {
   return (
     <section className="banner-area banner-bg">
       <div className="banner-shape-wrap">
-        <img src={shape01} alt="Banner Shape" className="img-one" />
+        <img src={shape01} alt="Banner Shape Left" className="img-one" />
+        <img src={shape02} alt="Banner Shape Right" className="img-two" /> {/* Right-side image */}
       </div>
       <br />
       <br />
@@ -45,7 +47,7 @@ const Banner: React.FC<BannerProps> = (props) => {
           <div className="col-lg-10">
             <div className="banner-content text-center">
               <h2 className="title">
-                WELCOME TO <span>REPORTEASE</span>
+                 <span>MINISTRY OF AYUSH</span> <br /> REPORT GENERATOR PORTAL
               </h2>
             </div>
             <div className="banner-progress-wrap">
@@ -77,7 +79,7 @@ const Banner: React.FC<BannerProps> = (props) => {
               <CountDownOne />
             </div>
           </div>
-        </div>
+        </div> <br /><br /><br /><br /><br /><br />
       </div>
     </section>
   );

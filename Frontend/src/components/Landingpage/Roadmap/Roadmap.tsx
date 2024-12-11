@@ -11,62 +11,63 @@ interface RoadmapItemType {
 const Roadmap: React.FC = () => {
   const roadmap_items: RoadmapItemType[] = [
     {
-      roadmapTitle: "Phase 1: Q4 2024",
-      title: "Concept",
+      roadmapTitle: "Phase 1 ",
+      title: "User Onboarding",
       info: [
-        "Define goals and scope.",
-        "Research existing solutions.",
-        "Identify features: security, collaboration, automation.",
+        "Setup user registration & login.",
+        "Implement role-based access.",
       ],
     },
     {
-      roadmapTitle: "Phase 2: Q1 2025",
-      title: "Design",
+      roadmapTitle: "Phase 2 ",
+      title: "Role-based Data Management",
       info: [
-        "Design system architecture with RBAC and encryption.",
-        "Create a prototype for report customization.",
-        "Define APIs for data integration.",
+        "Define roles for users.",
+        "Enable feedback collection.",
       ],
     },
     {
-      roadmapTitle: "Phase 3: Q2 2025",
-      title: "Development",
+      roadmapTitle: "Phase 3 ",
+      title: "Report Workflow Implementation",
       info: [
-        "Build portal with secure authentication (OAuth 2.0, 2FA).",
-        "Add collaboration and version control modules.",
-        "Use AWS services for storage and processing.",
+        "Create reporting system.",
+        "Enable feedback integration.",
       ],
     },
     {
-      roadmapTitle: "Phase 4: Q3 2025",
-      title: "Testing",
+      roadmapTitle: "Phase 4 ",
+      title: "Notification System",
       info: [
-        "Beta test with students, coordinators, and admins.",
-        "Test data visualization and reports.",
-        "Check performance and scalability.",
+        "Implement real-time notifications.",
+        "Alert stakeholders about updates.",
       ],
     },
     {
-      roadmapTitle: "Phase 5: Q4 2025",
-      title: "Launch",
+      roadmapTitle: "Phase 5  ",
+      title: "Encryption & Access Control",
       info: [
-        "Launch the Annual Report Portal.",
-        "Add NLP summaries and AI chatbot.",
-        "Gather feedback and refine features.",
+        "Secure data with encryption.",
+        "Enhance role-based security.",
       ],
     },
     {
-      roadmapTitle: "Phase 6: Q1 2026",
-      title: "Expansion",
+      roadmapTitle: "Phase 6 ",
+      title: "Stakeholder Report Submission",
       info: [
-        "Add more data integrations.",
-        "Implement analytics dashboards.",
-        "Optimize for scaling to other institutes.",
+        "Securely submit reports.",
+        "Automate validation & feedback.",
+      ],
+    },
+    {
+      roadmapTitle: "Phase 7 ",
+      title: "Final Deployment & Scalability",
+      info: [
+        "Scale system for multiple institutions.",
+        "Gather user feedback and optimize.",
       ],
     },
   ];
 
-  // Ensuring the ref is typed as HTMLDivElement
   const scrollRef = useHorizontalScroll() as React.RefObject<HTMLDivElement>;
 
   return (
@@ -98,7 +99,7 @@ const Roadmap: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> 
     </section>
   );
 };

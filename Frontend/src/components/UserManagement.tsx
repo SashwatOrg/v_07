@@ -161,15 +161,15 @@ export const UserManagement = () => {
     fetchData()
   }, [])
 
-  const mapRole = (role: string | null) => {
+  const mapRole = (role: number | null) => {
     switch (role) {
-      case "1":
+      case 1:
         return "Admin"
-      case "2":
+      case 2:
         return "Coordinator"
-      case "3":
+      case 3:
         return "Faculty"
-      case "4":
+      case 4:
         return "Student"
       default:
         return "Unknown" 

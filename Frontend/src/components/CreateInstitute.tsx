@@ -114,6 +114,26 @@ export const CreateInstitute: FC = () => {
     console.log("Selected Framework:", selectedValue);
     setState(selectedValue);
   };
+  const [domainName, setDomainName] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setDomainName(value);
+
+
+    // Validation logic
+    if (!value.includes("@")) {
+      setErrorMessage("The domain must include '@'.");
+    } else {
+      setErrorMessage(""); // Clear error if valid
+    }
+  };
+
+
+
+
 
   const MyCombobox = () => {
     return (
@@ -413,6 +433,23 @@ export const CreateInstitute: FC = () => {
                         className="col-span-3"
                       />
                     </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <label htmlFor="domain" className="text-left">
+                        Enter Domain Name
+                      </label>
+                      <input
+                        id="domain"
+                        required
+                        value={domainName}
+                        onChange={handleInputChange}
+                        placeholder="@gmail.com"
+                        className="col-span-3 border p-2 rounded"
+                      />
+                    </div>
+
+
+
 
                     <div className="grid gap-2">
                       <div className="flex items-center pt-2">

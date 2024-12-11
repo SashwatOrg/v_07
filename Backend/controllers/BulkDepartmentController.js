@@ -6,6 +6,7 @@ const md5 = require("md5");
 
 // Generate Department Template
 const generateDepartmentTemplate = (filePath) => {
+  console.log('the tempoelate is hereee',filePath)
   try {
     const headers = [
       {
@@ -32,6 +33,7 @@ const generateDepartmentTemplate = (filePath) => {
 
 // Controller to handle template download
 const downloadDepartmentTemplate = (req, res) => {
+  console.log('the tempoelate is hereee baba')
   try {
     const filePath = path.join(__dirname, "../department_template.xlsx");
     generateDepartmentTemplate(filePath);

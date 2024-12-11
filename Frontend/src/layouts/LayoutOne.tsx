@@ -2,7 +2,16 @@ import React, { ReactNode, useState, useEffect } from "react";
 import FooterOne from "../components/Landingpage/Footer/FooterOne";
 import HeaderOne from "../components/Landingpage/Header/HeaderOne";
 import PageLoader from "../components/Landingpage/PageLoader/PageLoader";
-
+// import "bootstrap/dist/js/bootstrap.bundle.min";
+// import 'react-toastify/dist/ReactToastify.css'
+// import './assets/css/bootstrap.min.css';
+// import './assets/css/animate.min.css';
+// import './assets/css/fontawesome-all.min.css';
+// import './assets/css/react-odometer-theme.css';
+// import './assets/css/default.css';
+// import './assets/css/style.css';
+// import './assets/css/responsive.css';
+// import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 // Define the type for props to include 'children'
 interface LayoutOneProps {
   children: ReactNode;

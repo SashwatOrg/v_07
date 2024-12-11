@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import cn from "classnames";
 // Update image path here
-import logoImage from "../../../assets/img/logo/logo.png"; // Adjust the path as needed
+import ReportEaseLogo from "../../../assets/img/logo/logo.png"; // Adjust the path as needed
 import $ from "jquery";
 import { handleClickScroll } from "../../../lib/helpers";
 
@@ -84,12 +84,6 @@ const HeaderOne: React.FC = () => {
 
               <div className="menu-wrap">
                 <nav className={"menu-nav"}>
-                  <div className="logo">
-                    <Link to={"/"}>
-                      <img src={logoImage} alt="BigTech Logo" />
-                    </Link>
-                  </div>
-
                   <div className={cn("navbar-wrap main-menu d-none d-lg-flex")}>
                     <ul className={"navigation"}>
                       <li
@@ -119,9 +113,9 @@ const HeaderOne: React.FC = () => {
                         <Link
                           to="#sales"
                           className={"section-link"}
-                          onClick={() => handleClickScroll("sales")}
+                          onClick={() => handleClickScroll("workflow")}
                         >
-                          Sales
+                          Flow
                         </Link>
                       </li>
                       <li className={isActiveLink("#roadmap")}>
@@ -133,6 +127,7 @@ const HeaderOne: React.FC = () => {
                           Roadmap
                         </Link>
                       </li>
+                      
                       <li className={isActiveLink("#contact")}>
                         <Link
                           to="#contact"
@@ -146,23 +141,7 @@ const HeaderOne: React.FC = () => {
                   </div>
                   <div className={cn("header-action", "d-none d-md-block")}>
                     <ul>
-                      <li className={"header-lang"}>
-                        <span className={"selected-lang"}>ENG</span>
-                        <ul className={"lang-list"}>
-                          <li>
-                            <Link to="#">IND</Link>
-                          </li>
-                          <li>
-                            <Link to="#">BNG</Link>
-                          </li>
-                          <li>
-                            <Link to="#">TUR</Link>
-                          </li>
-                          <li>
-                            <Link to="#">CIN</Link>
-                          </li>
-                        </ul>
-                      </li>
+                      
                       <li className={"header-btn"}>
                         <Link to="/login" className="btn">
                           LOGIN
@@ -190,6 +169,16 @@ const HeaderOne: React.FC = () => {
                 </nav>
               </div>
 
+              <div className="logo" style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: "-160px", marginLeft : "-100px", overflow: "hidden", height: "300px", width: "300px" }}>
+                    <img 
+                      src={ReportEaseLogo} 
+                      alt="ReportEase Logo" 
+                      style={{ height: "300px", width: "100%", objectFit: "contain", transition: "all 0.2s ease-in-out" }} 
+                    />
+                  </div>
+
+              
+
               {/* Mobile Menu */}
               <div className={"mobile-menu"}>
                 <nav className={"menu-box"}>
@@ -198,7 +187,7 @@ const HeaderOne: React.FC = () => {
                   </div>
                   <div className={"nav-logo"}>
                     <Link to="/">
-                      <img src={logoImage} alt="BigTech Logo" title="" />
+                      <img src={ReportEaseLogo} alt="BigTech Logo" title="" />
                     </Link>
                   </div>
 

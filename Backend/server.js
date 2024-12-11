@@ -156,7 +156,16 @@ const deleteClubRoutes = require("./routes/deleteClubRoutes");
 const getClubRoutes = require("./routes/getClubRoutes");
 const getUsersRoutes = require("./routes/getUsersRoutes");
 const toggleUserStatus = require("./routes/toggleUserStatusRoutes");
+const BulkDepartment = require('./routes/BulkDepartmentRoutes.js')
+const getActivityLog = require("./routes/activityLogRoutes");
+const accessControlRoutes = require("./routes/accessControlRoutes.js");
+const getUsernameByEmail=require("./routes/getEmailRoute");
+const updatepassRoutes=require("./routes/updatepassRoutes");
 
+
+
+
+app.use("/api",updatepassRoutes)
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
 app.use("/api", programRoutes);
@@ -212,6 +221,10 @@ app.use("/api", putProgChangesRoutes);
 app.use("/api", deleteProgramRoutes);
 app.use("/api", getUsersRoutes);
 app.use("/api", toggleUserStatus);
+app.use("/api/departments",BulkDepartment)
+app.use("/api", getActivityLog);
+app.use("/api", accessControlRoutes);
+app.use('/api',getUsernameByEmail);
 //HK add Courses
 
 
@@ -771,8 +784,6 @@ app.get("/programs", (req, res) => {
 });
 
 app.post("/register/institute-student", async (req, res) => {
-  // Destructure values from req.body
-
   const {
     username,
     first_name,
@@ -789,7 +800,6 @@ app.post("/register/institute-student", async (req, res) => {
     student_reg_id,
   } = req.body;
 
-  // Log each value with a descriptive label
   console.log("Username:", username);
   console.log("First Name:", first_name);
   console.log("Last Name:", last_name);
@@ -801,75 +811,84 @@ app.post("/register/institute-student", async (req, res) => {
   console.log("Department:", department);
   console.log("Program:", program);
   console.log("Current Semester:", current_semester);
-  console.log("stud_reg:", student_reg_id);
-  try {
-    // Step 1: Get the institute_id based on the institute name
-    const [instituteRows] = await db
-      .promise()
-      .query("SELECT institute_id FROM institute WHERE institute_name = ?", [
-        institute,
-      ]);
+  console.log("Student Reg ID:", student_reg_id);
 
-    if (instituteRows.length === 0) {
-      return res.status(404).json({ message: "Institute not found" });
+  const connection = await db.promise(); // Get a database connection
+
+  try {
+    await connection.beginTransaction(); // Start transaction
+
+    // Step 1: Validate institute
+    const [instituteResult] = await connection.query(
+      "SELECT institute_id, institute_domain FROM institute WHERE institute_name = ?",
+      [institute]
+    );
+
+    if (instituteResult.length === 0) {
+      return res.status(404).send("Institute not found!");
     }
 
-    // Hash the password (use bcrypt for security, not md5)
-    const hashedPassword = md5(password); // Replace with bcrypt for more security
-    const institute_id = instituteRows[0].institute_id;
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    // Step 2: Insert the user into the user table
-    const [userRows] = await db
-      .promise()
-      .query(
-        "INSERT INTO user (username, first_name, last_name, email_id, mobile_number, password, gender, type_id, institute_id, is_active,otp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)",
-        [
-          username,
-          first_name,
-          last_name,
-          email,
-          mobile_number,
-          hashedPassword, // Make sure to hash this password before saving it
-          gender,
-          usertype, // Assuming usertype is the type_id
-          institute_id,
-          1,
-          otp, // is_active set to 1
-        ]
-      );
-      sendOtp(email,otp)
-    // Step 3: Get the user_id of the newly created user
-    const user_id = userRows.insertId; // This will give you the ID of the newly inserted user
+    const { institute_id, institute_domain } = instituteResult[0];
 
-    // Step 4: Get the program_id based on the program name
-    const [programRows] = await db
-      .promise()
-      .query("SELECT prog_id FROM program WHERE prog_name = ?", [program]);
+    // Step 2: Validate email against institute domain
+    if (!email.includes(institute_domain)) {
+      return res
+        .status(400)
+        .send("Please register with a verified institute email ID.");
+    }
+
+    // Step 3: Hash the password
+    const hashedPassword = md5(password); // Replace with bcrypt for better security
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Step 4: Insert user into the user table
+    const [userRows] = await connection.query(
+      "INSERT INTO user (username, first_name, last_name, email_id, mobile_number, password, gender, type_id, institute_id, is_active, otp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        username,
+        first_name,
+        last_name,
+        email,
+        mobile_number,
+        hashedPassword,
+        gender,
+        usertype,
+        institute_id,
+        1,
+        otp,
+      ]
+    );
+    const user_id = userRows.insertId; // Get the inserted user's ID
+    sendOtp(email, otp);
+
+    // Step 5: Validate program
+    const [programRows] = await connection.query(
+      "SELECT prog_id FROM program WHERE prog_name = ?",
+      [program]
+    );
 
     if (programRows.length === 0) {
-      return res.status(404).json({ message: "Program not found" });
+      throw new Error("Program not found");
     }
 
     const program_id = programRows[0].prog_id;
 
-    // Step 5: Insert the student into the student table
-    await db
-      .promise()
-      .query(
-        "INSERT INTO student (user_id, program_id, current_semester,stud_reg) VALUES (?, ?, ?,?)",
-        [user_id, program_id, current_semester, student_reg_id]
-      );
+    // Step 6: Insert student into the student table
+    await connection.query(
+      "INSERT INTO student (user_id, program_id, current_semester, stud_reg) VALUES (?, ?, ?, ?)",
+      [user_id, program_id, current_semester, student_reg_id]
+    );
 
-      return res.status(200).send("OTP sent successfully");
-
-    // Step 6: Respond with success
-    // res.status(201).json({
-    //   message: "User  registered and student record created successfully",
-    //   user_id,
-    // });
+    // Commit the transaction if all operations are successful
+    await connection.commit();
+    return res.status(200).send("OTP sent successfully");
   } catch (error) {
+    // Rollback the transaction in case of an error
+    await connection.rollback();
     console.error("Error during registration:", error);
     res.status(500).json({ message: "Internal server error" });
+  } finally {
+    // Release the connection back to the pool
   }
 });
 
@@ -1042,3 +1061,110 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Use the profile routes
 app.use('/api', profileRoutes);
 
+
+
+const crypto = require("crypto"); 
+app.post("/send-reset-link", (req, res) => {
+  const { userId } = req.body;
+  console.log("userId is ", userId);
+  let email="";
+  const query = "SELECT email_id FROM user WHERE user_id = ?";
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    email = results[0].email_id;
+    console.log("email is ", results[0].email_id);
+    const otp = crypto.randomInt(100000, 999999); // Generate a 6-digit OTP
+
+    // Store OTP in the database or cache (with expiry)
+    const otpQuery = `UPDATE user 
+SET otp = ? 
+WHERE email_id = ?;`;
+    // const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+    db.query(otpQuery, [otp,email], (otpErr) => {
+      if (otpErr)
+        return res.status(500).json({ error: "Failed to store OTP." });
+
+      // Send OTP via email
+      sendOtp(email, otp);
+      res.status(200).json({ email });
+    });
+  });
+});
+
+app.post("/verify-otp", (req, res) => {
+  const { userId, otp } = req.body;
+  let email="";
+  const query = "SELECT email_id FROM user WHERE user_id = ?";
+  
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    email = results[0].email_id;
+    console.log("email is .....", results[0].email_id);
+  });
+  // const email=
+  console.log("email is ", email);
+  const query1 =
+    "SELECT * FROM user WHERE user_id = ? AND otp = ? AND isVerified = 0";
+    console.log("email in ")
+  db.query(query1, [userId, otp], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    if (results.length === 0) {
+      return res.status(400).json({ error: "Invalid or expired OTP." });
+    }
+
+    res.status(200).json({ message: "OTP verified." });
+  });
+});
+
+app.post("/reset-password", (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  const hashedPassword = crypto
+    .createHash("md5")
+    .update(newPassword)
+    .digest("hex"); // Use bcrypt for production
+
+  const query = "UPDATE user SET password = ? WHERE user_id = ?";
+  db.query(query, [hashedPassword, userId], (err) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+
+    res.status(200).json({ message: "Password updated successfully." });
+  });
+});
+
+
+
+
+app.delete("/api/delete-account", async (req, res) => {
+  const db1=db.promise();
+  const userId = req.body.userId; // Assume user ID is sent in the body
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  try {
+    // Delete user from the database
+    const result1 = await db1.query("DELETE FROM photourl WHERE user_id = ?", [userId]);
+    const result = await db1.query("DELETE FROM user WHERE user_id = ?", [userId]);
+
+    if (result.rowCount === 0 && result1.rowCount==0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});

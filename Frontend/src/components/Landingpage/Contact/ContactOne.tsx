@@ -13,7 +13,7 @@ const ContactOne: React.FC = () => {
       icon: "fa-envelope",
       content: (
         <>
-          sashwat2704@gmail.com
+         ministryofayush@gmail.com
         </>
       ),
     },
@@ -21,8 +21,8 @@ const ContactOne: React.FC = () => {
       icon: "fa-phone",
       content: (
         <>
-          +84 0977425031
-          <br /> +998 765 775 34
+          +91 87670 34269
+          <br /> +91 79725 91242
         </>
       ),
     },

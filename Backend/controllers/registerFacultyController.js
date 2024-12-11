@@ -34,6 +34,39 @@ const registerFaculty = async (req, res) => {
   // console.log("faculty reg is ", faculty_reg_id);
 
   try {
+    const [Result] = await db
+    .promise()
+    .query(
+      "SELECT  institute_domain FROM institute WHERE institute_name = ?",
+      [institute]
+    );
+
+
+  if (Result.length === 0) {
+    return res.status(404).send("Institute not found!");
+  }
+
+
+  const {  institute_domain } =
+    Result[0];
+    console.log(institute_domain)
+
+
+  // Validate email against institute domain
+  if (!email.includes(institute_domain)) {
+    return res
+      .status(400)
+      .send("Please register with a verified institute email ID.");
+  }
+
+
+
+
+
+
+  
+    
+    
     // Hash the password (use bcrypt for security, not md5)
     const hashedPassword = md5(password); // Replace with bcrypt for more security
 

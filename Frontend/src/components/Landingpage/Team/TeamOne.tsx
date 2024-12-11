@@ -1,10 +1,10 @@
 import React from "react";
 import img01 from "../../../assets/img/team/01.png";
-import img02 from "../../../assets/img/team/team_img02.png";
-import img03 from "../../../assets/img/team/team_img03.png";
-import img04 from "../../../assets/img/team/team_img04.png";
-import img06 from "../../../assets/img/team/team_img06.png";
-import img07 from "../../../assets/img/team/team_img07.png";
+import img02 from "../../../assets/img/team/02.png";
+import img03 from "../../../assets/img/team/03.png";
+import img04 from "../../../assets/img/team/06.png";
+import img07 from "../../../assets/img/team/04.png";
+import img06 from "../../../assets/img/team/05.png";
 import TeamOneItem from "./TeamOneItem";
 
 interface TeamMember {
@@ -18,38 +18,38 @@ const TeamOne: React.FC = () => {
   const team_members: TeamMember[] = [
     {
       src: img01,
-      name: "Cameron Williamson",
-      designation: "Founder & CO",
+      name: "Viraj Mandlik",
+      designation: "Team Leader",
       alt: "Cameron Williamson, Founder & CO",
     },
     {
       src: img02,
-      name: "Eleanor Pena",
-      designation: "Head of Design",
+      name: "Guru Dahiphale",
+      designation: "Frontend Developer",
       alt: "Eleanor Pena, Head of Design",
     },
     {
       src: img03,
-      name: "Bessie Cooper",
-      designation: "Vp People",
+      name: "VIshal Kesharvani",
+      designation: "Cloud Engineer",
       alt: "Bessie Cooper, VP People",
     },
     {
       src: img04,
-      name: "Darlene Robertson",
-      designation: "Product Manager",
+      name: "Hanumant Kakde",
+      designation: "Backend Developer",
       alt: "Darlene Robertson, Product Manager",
     },
     {
       src: img06,
-      name: "Courtney Henry",
-      designation: "Founder",
+      name: "Parth Kulkarni",
+      designation: "Database Management",
       alt: "Courtney Henry, Founder",
     },
     {
       src: img07,
-      name: "Ronald Richards",
-      designation: "Account Manager",
+      name: "Siddhi Chhapre",
+      designation: "Backend Developer",
       alt: "Ronald Richards, Account Manager",
     },
   ];
@@ -81,3 +81,4 @@ const TeamOne: React.FC = () => {
 };
 
 export default TeamOne;
+

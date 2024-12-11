@@ -2,7 +2,7 @@
 
 
 import React, { useEffect,useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes,useNavigate,useParams } from 'react-router-dom';
 import { Accordion_styles } from './components/Accordion_styles';
 import { Page } from './components/AuthenticationPage';
 import { Dashboard } from './components/Dashboard';
@@ -46,22 +46,36 @@ import { GenerateStudentAndFacultyAdministrationReport } from './components/Gene
 import { GenerateAcademicReport } from './components/GenerateDepartmentReport/GenerateAcademicReport';
 import ReportVersionSelector from './components/ReportVersionSelector';
 import { UserManagement } from './components/UserManagement';
+import {AccessPage} from './components/AccessPage';
+import { UserManagePage } from './components/UserManagePage';
+import {Verify} from './components/otp';
+
 
 
 
 const App: React.FC = () => {
 
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
- 
+  const navigate = useNavigate();
+  const { username } = useParams<{ username: string }>(); 
   const handleUpdateUserPhoto = (photoURL: string) => {
     setUserPhoto(photoURL); // Update the state with the new photo URL
     console.log("User photo updated:", photoURL);
   };
 
 
-  const handleCloseProfile = () => {
-    <Route path="/dashboard/:username" element={<Dashboard />} />
-    // navigate("/dashboard"); // Redirect to the dashboard or another page when profile is closed
+  console.log('the handle close profile ')
+  // const handleCloseProfile = () => {
+  //   <Route path="/dashboard/:username" element={<Dashboard />} />
+  //   // navigate("/dashboard"); // Redirect to the dashboard or another page when profile is closed
+  // };
+
+  // const handleCloseProfile = () => {
+  //   navigate("/dashboard"); // Use navigate to redirect to the dashboard
+  // };
+
+  const handleCloseProfile = (username: string) => {
+    navigate(`/dashboard/${username}`); // Redirect to the dashboard with the username
   };
 
 
@@ -127,7 +141,17 @@ const App: React.FC = () => {
           <Route path="/generate-studentandfacultyadministration-report" element={<GenerateStudentAndFacultyAdministrationReport/>} />
           <Route path="/generate-academic-report" element={<GenerateAcademicReport/>} />
           <Route path="/view-reports/:institute_id" element={<ReportVersionSelector />} /> <Route path="/support" element={<Support />} />
-          <Route path="/user-management" element={<UserManagement />} />
+          {/* <Route path="/user-management" element={<UserManagement />} /> */}
+          <Route path="/user-management" element={<UserManagePage />} />
+          <Route path="/access-control" element={<AccessPage/>} />
+          <Route path="/Verify/:email" element={<Verify/>} />
+
+
+
+
+
+
+
           <Route
             path="/profile/:userid"
             element={
@@ -135,7 +159,7 @@ const App: React.FC = () => {
                 user={{
                   userId: null,
                   mobile: null,
-                  username: null,
+                  username: username || null,
                   type_id: null,
                   first_name: null,
                   institute_id: null,

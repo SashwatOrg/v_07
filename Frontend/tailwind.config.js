@@ -15,6 +15,8 @@ theme: {
 		colors: {
 			background: 'hsl(var(--background))',
 			foreground: 'hsl(var(--foreground))',
+			sidebar: '#8A2BE2',
+            lighter: '#9A4BED',
 			card: {
 				DEFAULT: 'hsl(var(--card))',
 				foreground: 'hsl(var(--card-foreground))'

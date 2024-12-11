@@ -4,7 +4,7 @@ const db = require("../db/dbConnection");
 const secretKey = "your_secret_key";
 
 const md5 = require("md5");
-
+const sendOtp = require("../utils/sendOtp");
 // User Registration
 exports.register = async (req, res) => {
   const {
@@ -112,7 +112,24 @@ exports.login = async (req, res) => {
       secretKey,
       { expiresIn: "12h" }
     );
+    const email=user.email_id;
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(email);
+    sendOtp(email,otp);
 
-    res.status(200).json({ token });
+
+    const updateQuery = "UPDATE `user` SET otp = ? WHERE email_id = ?";
+    db.query(updateQuery, [otp, email], (updateErr) => {
+      if (updateErr) {
+        console.error("Error updating OTP:", updateErr);
+        return res.status(500).json({ message: "Error updating OTP in database" });
+      }
+
+
+      console.log("OTP sent and updated in the database for email:", email);});
+
+
+
+    res.status(200).json({ token ,email});
   });
 };

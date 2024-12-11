@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "./ui/input";
 
-export function InputOTPWithSeparator() {
+export function InputOTPWithSeparator() { 
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();

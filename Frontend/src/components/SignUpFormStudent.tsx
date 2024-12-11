@@ -501,7 +501,7 @@ export const SignUpFormStudent: FC = () => {
                       </SelectContent>
                     </Select>
                 </div>
-                <div className="flex-1">
+                {/* <div className="flex-1">
                   <Label htmlFor="current_semester">Current Semester</Label>
                   <Input
                     type="text"
@@ -510,7 +510,7 @@ export const SignUpFormStudent: FC = () => {
                     value={formData.current_semester}
                     onChange={handleChange}
                   />
-                </div>
+                </div> */}
               </div>
   
               {/* enrollment key  */}
