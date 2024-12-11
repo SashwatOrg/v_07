@@ -114,6 +114,7 @@ const generateStudentFacultyPdf = async (req, res) => {
 
         // Check if departmentName is undefined
         if (!departmentName) {
+            console.log('the error in department name')
             console.error('Department name is undefined');
             return res.status(500).json({
                 message: 'Department name could not be retrieved.',

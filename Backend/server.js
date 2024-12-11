@@ -8,6 +8,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const fs = require("fs");
 const app = express();
+const pdfRoutes = require("./pdfGenModule/routes/allPdfAndHtmlRoutes.js")
 const corsOptions = {
   origin: 'http://localhost:5173', // Specify the frontend URL here
   methods: ['GET', 'POST', "PUT", "DELETE"],
@@ -59,7 +60,7 @@ app.use((err, req, res, next) => {
     error: err.message
   });
 });
-// app.use("/pdf", pdfRoutes);
+app.use("/pdf", pdfRoutes);
 app.use(
   cors({
     origin: ["http://localhost:5173"],

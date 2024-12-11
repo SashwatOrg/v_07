@@ -154,7 +154,7 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                     }`}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
-                    Add Placement Data
+                    Add Opportunites Data
                   </Link>
                   <Link
                     to="/admin/create-infrastructure"
