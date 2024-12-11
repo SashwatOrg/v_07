@@ -34,7 +34,7 @@ import { jwtDecode } from "jwt-decode";
 import { InfrastructureDataTableDemo } from "./optionsForCustomizedReport/InfrastructureDataTableDemo"; // Import the InfrastructureDataTableDemo component
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
-
+import { Input } from "@/components/ui/input";
 interface User {
   email: string | null;
   first_name: string | null;
@@ -46,6 +46,81 @@ interface User {
   is_active: boolean;
   gender: string;
 }
+
+// ReportAccessDialog Component
+// ReportAccessDialog Component
+const ReportAccessDialog: React.FC<{
+  logId: number | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccessfulAccess: (filePath: string, reportType?: string) => void;
+}> = ({ logId, isOpen, onClose, onSuccessfulAccess }) => {
+  const [password, setPassword] = useState<string>('');
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
+
+  const handleVerifyPassword = async () => {
+    if (!logId) {
+      toast.error("Invalid report log ID");
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      const response = await fetch('http://localhost:3000/pdf/verify-report-access', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          logId, 
+          password 
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        onSuccessfulAccess(data.filePath, data.reportType);
+        toast.success("Report access verified successfully!");
+        onClose();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Invalid password");
+      }
+    } catch (error) {
+      console.error("Password verification error:", error);
+      toast.error("An error occurred during password verification");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Verify Report Access</DialogTitle>
+          <DialogDescription>
+            Enter the password from the downloaded CSV file to access the report.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col space-y-4">
+          <Input
+            type="password"
+            placeholder="Enter report access password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button 
+            onClick={handleVerifyPassword} 
+            disabled={isVerifying}
+          >
+            {isVerifying ? "Verifying..." : "Verify Password"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export const GenerateInfrastructureReport: FC = () => {
   const location = useLocation();
@@ -59,6 +134,8 @@ export const GenerateInfrastructureReport: FC = () => {
   const [showReportTypeDialog, setShowReportTypeDialog] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [reportLogId, setReportLogId] = useState<number | null>(null);
+  const [isReportAccessDialogOpen, setIsReportAccessDialogOpen] = useState<boolean>(false);
 
   // Define report options related to infrastructure
   const reportOptions = [
@@ -98,6 +175,7 @@ let token1="";
           institute_id: decoded.institute_id,
           type_id: decoded.type_id,
           gender: decoded.gender,
+          user_id: decoded.id,
         };
         setCurrentUser (userDetails);
       }
@@ -117,31 +195,41 @@ let token1="";
   };
 
   const handleGenerateReport = async (format: string) => {
-    const token = Cookies.get(" token");
-    // console.log('the token is',token1);
-    // if (!token1) {
-    //   navigate("/login");
-    //   return;
-    // }
-
+    const token = Cookies.get("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+  
     const endpoint = format === "pdf" ? "/pdf/generate-infrastructure-pdf" : "/pdf/generate-infrastructure-html";
-
+    const yearLowerLimit = selectedYear.split("-")[0];
+  
     const body = {
-      options: isCustomized ? selectedOptions : reportOptions.map(option => option.id),
-      year: selectedYear.split('-')[0], // Extract the year from the selected year range
+      options: isCustomized ? selectedOptions : reportOptions.map((option) => option.id),
+      year: yearLowerLimit,
       user: {
         first_name: currentUser ?.first_name,
         last_name: currentUser ?.last_name,
         institute_id: currentUser ?.institute_id,
         email: currentUser ?.email,
+        user_id: currentUser ?.userid,
       },
       format,
     };
-
-    console.log("Sending options to backend:", body.options); // Log selected options
-
+  
     try {
       setIsLoading(true);
+      setProgress(0);
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            return 100;
+          }
+          return prev + 10;
+        });
+      }, 500);
+  
       const response = await fetch(`http://localhost:3000${endpoint}`, {
         method: "POST",
         headers: {
@@ -150,25 +238,43 @@ let token1="";
         },
         body: JSON.stringify(body),
       });
-
+  
       if (response.ok) {
         const data = await response.json();
-        if (format === "pdf") {
-          window.open(`http://localhost:3000/pdfs/${data.filePath}`, "_blank");
-        } else if (format === "html") {
-          const link = document.createElement("a");
-          link.href = `http://localhost:3000${data.filePath}`;
-          link.download = data.filePath.split("/").pop();
-          link.click();
+        const filePath = data.filePath;
+        setReportLogId(data.logId); // Set the log ID for later use
+  
+        // Download Password CSV
+        if (data.passwordCsvPath) {
+          const csvLink = document.createElement("a");
+          csvLink.href = `http://localhost:3000${data.passwordCsvPath}`;
+          csvLink.download = "report_access_credentials.csv";
+          csvLink.click();
+  
+          // Show the password in a toast notification
+           // toast.success(`Report generated successfully! Access password: ${data.rawPassword}`, {
+          //   className: "custom-toast",
+          //   autoClose: 10000, // Show for 10 seconds
+          // });
+  
+          // Open the password verification dialog
+          setIsReportAccessDialogOpen(true); // Open the dialog
         }
-        toast.success("Report generated successfully!");
+  
+        toast.success("Report generated successfully!", {
+          className: "custom-toast",
+          autoClose: 1000,
+        });
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || "Failed to generate report.");
       }
     } catch (err) {
       console.error("Error during fetch:", err);
-      toast.error("An error occurred while generating the report.");
+      toast.error("An error occurred while generating the report.", {
+        className: "custom-toast",
+        autoClose: 1000,
+      });
     } finally {
       setShowReportTypeDialog(false);
       setIsLoading(false);
@@ -183,69 +289,67 @@ let token1="";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isCustomized) {
-      // Only set selected options if in customized mode
-      if (selectedOptions.length === 0) {
-        toast.error("Please select at least one option for the customized report.");
-        return;
-      }
-    } else {
-      setSelectedOptions(reportOptions.map(option => option.id)); // Select all options by default
-    }
     setShowReportTypeDialog(true);
   };
+
+ 
+const handleSuccessfulAccess = async (filePath: string, reportType?: string) => {
+  try {
+    const token = Cookies.get("token");
+    const newTab = window.open('about:blank', '_blank');
+
+    const response = await fetch(filePath, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': reportType === 'pdf' ? 'application/pdf' : 'text/html'
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('File fetch error:', { 
+        status: response.status, 
+        statusText: response.statusText,
+        errorText 
+      });
+      throw new Error(`Failed to fetch file: ${errorText}`);
+    }
+
+    // HTML handling
+    if (reportType === 'html') {
+      const htmlContent = await response.text();
+      if (newTab) {
+        newTab.document.open();
+        newTab.document.write(htmlContent);
+        newTab.document.close();
+      }
+    } else {
+      // PDF handling
+      const blob = await response.blob();
+      const fileURL = URL.createObjectURL(blob);
+      if (newTab) {
+        newTab.location.href = fileURL;
+      }
+    }
+  } catch (error) {
+    console.error("Detailed error accessing report:", error);
+    toast.error(`An error occurred: ${error.message}`);
+  } finally {
+
+
+    setReportLogId(null);
+    setIsReportAccessDialogOpen(false);
+  };
+};
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
       <Sidebar user={currentUser } activePage="generate-infrastructure" />
       <div className="flex flex-col">
-        <header className="flex h-14 items-center justify-between gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 sticky top-0">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
-              <nav className="grid gap-2 text-lg font-medium">
-                <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-                  <Package2 className="h-6 w-6" />
-                  <span className="sr-only">Acme Inc</span>
-                </Link>
-                <Link to="/" className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground">
-                  <Home className="h-5 w-5" />
-                  Dashboard
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
-          <div className="flex items-center gap-4 ml-auto">
-            <ModeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon" className="rounded-full">
-                  {currentUser ?.photoURL ? (
-                    <img src={currentUser .photoURL} alt="User  Avatar" className="h-9 w-9 rounded-full" />
-                  ) : (
-                    <CircleUser  className="h-5 w-5" />
-                  )}
-                  <span className="sr-only ">Toggle user menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{currentUser  ?.username || "My Account"}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/profile")}>Profile Settings</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Generate Infrastructure Report</h1>
+            <h1 className="text-2xl text-primary font-bold">Generate Event Report</h1>
           </div>
           <div className="flex flex-col items-center justify-center">
             <form onSubmit={handleSubmit} className="w-full max-w-md">
@@ -255,8 +359,8 @@ let token1="";
               </div>
               <p className="mb-4 text-gray-600">
                 {isCustomized 
-                  ? "You are generating a customized report. Please select the options below." 
-                  : "You are generating the default report."}
+                  ? "You are generating a customized event report. Please select the options below." 
+                  : "You are generating the default event report."}
               </p>
               <div className="mb-4">
                 <Label className="mr-2">Select Year:</Label>
@@ -272,13 +376,8 @@ let token1="";
                   ))}
                 </select>
               </div>
-              {isCustomized && (
-                <InfrastructureDataTableDemo 
-                  setSelectedOptions={setSelectedOptions} 
-                  isCustomized={isCustomized} 
-                />
-              )}
-              <Button type="submit" className="mt-4 ">
+              {isCustomized && <InfrastructureDataTableDemo setSelectedOptions={setSelectedOptions} />}
+              <Button type="submit" className="mt-4">
                 Generate Report
               </Button>
             </form>
@@ -294,7 +393,7 @@ let token1="";
                 <DialogHeader>
                   <DialogTitle>Select Report Format</DialogTitle>
                   <DialogDescription>
-                    Please choose the format for the report to download.
+                    Please choose the format for the event report to download.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="flex justify-between">
@@ -304,24 +403,12 @@ let token1="";
               </DialogContent>
             </Dialog>
 
-            <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Alert</DialogTitle>
-                  <DialogDescription>
-                    You need to log in again to continue. Do you want to log out?
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-end">
-                  <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
-                    No
-                  </Button>
-                  <Button variant="primary" onClick={handleLogout}>
-                    Yes
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <ReportAccessDialog
+              logId={reportLogId}
+              isOpen={isReportAccessDialogOpen}
+              onClose={() => setIsReportAccessDialogOpen(false)}
+              onSuccessfulAccess={handleSuccessfulAccess}
+            />
           </div>
         </main>
       </div>

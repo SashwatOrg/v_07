@@ -36,11 +36,17 @@ const getInfrastructureData = async (options, year) => {
 
     return results;
 };
-
+const getDepartmentByCoordinatorId= async (coordinatorId) => {
+    console.log('the user id ',coordinatorId)
+    const query = `SELECT dept_name FROM department WHERE coordinator_id = ?`;
+    const result = await db.promise().query(query, [coordinatorId]);
+    console.log("Splendor is ...",result[0])
+    return result[0];
+  };
 const getInstituteName = async (instituteId) => {
     const query = `SELECT institute_name FROM institute WHERE institute_id = ?`;
     const [rows] = await db.promise().query(query, [instituteId]);
     return rows;
 };
 
-module.exports = { getInfrastructureData, getInstituteName };
+module.exports = { getInfrastructureData, getInstituteName,getDepartmentByCoordinatorId };
