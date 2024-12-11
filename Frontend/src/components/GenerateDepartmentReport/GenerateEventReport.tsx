@@ -171,16 +171,17 @@ export const GenerateEventReport: FC = () => {
     setIsCustomized(!isCustomized);
   };
 
+
   const handleGenerateReport = async (format: string) => {
     const token = Cookies.get("token");
     if (!token) {
       navigate("/login");
       return;
     }
-
+  
     const endpoint = format === "pdf" ? "/pdf/generate-event-pdf" : "/pdf/generate-event-html";
     const yearLowerLimit = selectedYear.split('-')[0];
-
+  
     const body = {
       options: isCustomized ? selectedOptions : ["1", "2", "3", "4", "5", "6", "7", "8"],
       year: yearLowerLimit,
@@ -193,7 +194,7 @@ export const GenerateEventReport: FC = () => {
       },
       format,
     };
-
+  
     try {
       setIsLoading(true);
       setProgress(0);
@@ -206,7 +207,7 @@ export const GenerateEventReport: FC = () => {
           return prev + 10;
         });
       }, 500);
-      console.log('the data sending from front event is ',body)
+  
       const response = await fetch(`http://localhost:3000${endpoint}`, {
         method: "POST",
         headers: {
@@ -215,17 +216,17 @@ export const GenerateEventReport: FC = () => {
         },
         body: JSON.stringify(body),
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         const filePath = data.filePath;
-
+  
         // Store log ID for potential future use
         setReportLogId(data.logId);
-
+  
         // Open password verification dialog
         setIsReportAccessDialogOpen(true);
-
+  
         // Download Password CSV
         if (data.passwordCsvPath) {
           const csvLink = document.createElement("a");
@@ -233,7 +234,7 @@ export const GenerateEventReport: FC = () => {
           csvLink.download = "report_access_credentials.csv";
           csvLink.click();
         }
-
+  
         toast.success("Report generated successfully!", {
           className: "custom-toast",
           autoClose: 1000,
@@ -250,11 +251,12 @@ export const GenerateEventReport: FC = () => {
       });
     } finally {
       setShowReportTypeDialog(false);
+      setShowReportTypeDialog(false);
       setIsLoading(false);
       setProgress(100);
     }
-  };
-
+  };  
+  
   const yearOptions = Array.from({ length: 24 }, (_, i) => {
     const year = 2000 + i;
     return `${year}-${year + 1}`;

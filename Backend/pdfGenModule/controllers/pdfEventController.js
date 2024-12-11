@@ -209,7 +209,14 @@ const generateEventPdf = async (req, res) => {
 const generateEventHtml = async (req, res) => {
   try {
     const { options, year, user } = req.body;
-
+ // Extract user ID safely
+ const userId = user.user_id;
+console.log('the user is at the event controller is ',userId)
+ if (!userId) {
+     return res.status(400).json({
+         message: 'User  ID is required but not provided',
+     });
+ }
     // Validate input
     if (!options || !year || !user) {
       return res.status(400).json({ 
@@ -293,9 +300,29 @@ const generateEventHtml = async (req, res) => {
       });
     }
 
+    const departmentResult = await eventQueries.getDepartmentByCoordinatorId(userId);
+    console.log('the department name is ', departmentResult);
+    const departmentName = departmentResult[0].dept_name; // Use the dept_name directly
+    console.log('the department name is ', departmentName);
+
+
+    // Prepare report details for logging
+    const reportDetails = {
+      reportType: 'html',
+      reportName: htmlFileName,
+      userId: user.user_id,
+      year,
+      departmentName,
+      filePath: htmlFilePath
+    };
+
+    // Save report log and generate CSV
+    const { logId, rawPassword, csvPath } = await saveReportLog(reportDetails);
+
     return res.status(200).json({
       message: 'HTML generated successfully',
       filePath: `/html_reports/${htmlFileName}`,
+      passwordCsvPath: csvPath, // Ensure this is included in the response
       eventCount: eventData.length
     });
   } catch (error) {
