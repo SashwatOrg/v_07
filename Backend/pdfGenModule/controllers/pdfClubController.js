@@ -3,16 +3,88 @@ const clubQueries = require('../queries/ClubQueries');
 const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
+const { Parser } = require('json2csv');
+const db = require("../../db/dbConnection.js");
 
 const pdfDirectory = path.join(__dirname, '..', '..', 'public', 'pdfs');
 const htmlDirectory = path.join(__dirname, '..', '..', 'public', 'html_reports');
+const credentialsDirectory = path.join(__dirname, '..', '..', 'public', 'report_credentials');
 
 // Ensure directories exist
-[pdfDirectory, htmlDirectory].forEach(dir => {
+[pdfDirectory, htmlDirectory, credentialsDirectory].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
 });
+
+// Function to generate a random password
+const generateRandomPassword = () => {
+  return crypto.randomBytes(8).toString('hex');
+};
+
+// Function to save report log
+const saveReportLog = async (reportDetails) => {
+  const { reportType, reportName, userId, year, departmentName, filePath } = reportDetails;
+
+  // Generate random password
+  const rawPassword = generateRandomPassword();
+  const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+  // Check for existing reports to determine the version
+  const versionQuery = `
+      SELECT MAX(version) AS max_version 
+      FROM report_logs 
+      WHERE department_name = ? AND report_year = ?
+  `;
+  const [versionResult] = await db.promise().query(versionQuery, [departmentName, year]);
+  const newVersion = (versionResult[0]?.max_version || 0) + 1; // Increment version
+
+  // Insert into report_logs
+  const insertQuery = `
+      INSERT INTO report_logs 
+      (report_type, report_name, generated_by_user_id, report_year, 
+       department_name, access_password, file_path, version) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const [result] = await db.promise().query(insertQuery, [
+      reportType, 
+      reportName, 
+      userId, 
+      year, 
+      departmentName, 
+      hashedPassword, 
+      filePath,
+      newVersion // Include the new version
+  ]);
+
+  // Generate CSV with password details
+  const csvData = [{
+      report_name: reportName,
+      access_password: rawPassword,
+      generated_at: new Date().toISOString(),
+      report_type: reportType,
+      log_id: result.insertId
+  }];
+
+  const fields = ['report_name', 'access_password', 'generated_at', 'report_type', 'log_id'];
+  const json2csvParser = new Parser({ fields });
+  const csvContent = json2csvParser.parse(csvData);
+
+  // Save CSV file
+  const csvFileName = `report_access_${result.insertId}.csv`;
+  const csvPath = path.join(credentialsDirectory, csvFileName);
+
+  fs.writeFileSync(csvPath, csvContent);
+
+  return {
+      logId: result.insertId,
+      rawPassword,
+      csvPath: `/report_credentials/${csvFileName}`
+  };
+};
 
 const generateClubPdf = async (req, res) => {
   try {
@@ -28,7 +100,7 @@ const generateClubPdf = async (req, res) => {
       });
     }
 
-    // Fetch institute and additional details
+    // Fetch institute name
     const instituteNameResult = await clubQueries.getInstituteName(user.institute_id);
     const instituteName = instituteNameResult[0]?.institute_name || 'Institute Name';
 
@@ -48,7 +120,7 @@ const generateClubPdf = async (req, res) => {
             const summary = await clubQueries.getClubEventSummary(club.club_id, year);
             return {
               clubName: club.club_name,
-              summary: summary[0] || {
+              summary : summary[0] || {
                 total_events: 0,
                 total_budget: 0,
                 avg_budget: 0,
@@ -89,121 +161,7 @@ const generateClubPdf = async (req, res) => {
     try {
       const page = await browser.newPage();
 
-      // Define the inline CSS
-      const inlineCSS = `
-        <style>
-          :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --text-color: #333;
-            --background-color: #f4f6f7;
-          }
-
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-
-          body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--background-color);
-          }
-
-          .report-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-          }
-
-          .report-header {
-            text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 2px solid var(--primary-color);
-          }
-
-          .report-header h1 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-          }
-
-          .report-metadata {
-            display: flex;
-            justify-content: space-between;
-            margin: 15px 0;
-            font-size: 0.9em;
-            color: #666;
-          }
-
-          .section-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px;
-            margin-top: 20px;
-            text-align: center;
-            font-weight: bold;
-          }
-
-          .club-summary-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-          }
-
-          .stat-box {
-            background-color: #f1f1f1;
-            padding: 15px;
-            text-align: center;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-          }
-
-          .club-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-          }
-
-          .club-table th {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px;
-            text-align: left;
-          }
-
-          .club-table td {
-            padding: 10px;
-            border: 1px solid #ddd;
-          }
-
-          .club-table tr:nth-child(even) {
-            background-color: #f2f2f2;
-          }
-
-          .no-data {
-            text-align: center;
-            color: #777;
-            padding: 20px;
-            background-color: #f9f9f9;
-          }
-
-          .report-footer {
-            text-align: center;
-            padding: 15px;
-            background-color: var(--primary-color);
-            color: white;
-            font-size: 0.9em;
-            margin-top: 20px;
-          }
-        </style>
-      `;
-
-      // Render HTML content with inline CSS
+      // Render HTML content
       const htmlContent = await ejs.renderFile(
         path.join(__dirname, '..', 'views', 'ClubReportView.ejs'),
         {
@@ -212,8 +170,7 @@ const generateClubPdf = async (req, res) => {
           user,
           instituteName,
           additionalData,
-          options,
-          inlineCSS // Pass the inline CSS to the template
+          options
         }
       );
 
@@ -234,9 +191,35 @@ const generateClubPdf = async (req, res) => {
       await browser.close();
     }
 
+    // Prepare report details for logging
+    const departmentResult = await clubQueries.getDepartmentByCoordinatorId(user.user_id);
+    const departmentName = departmentResult[0]?.dept_name || 'Department Name';
+
+    // Check if departmentName is undefined
+    if (!departmentName) {
+      console.error('Department name is undefined');
+      return res.status(500).json({
+        message: 'Department name could not be retrieved.',
+      });
+    }
+
+    // Save report log and generate CSV
+    const reportDetails = {
+      reportType: 'pdf',
+      reportName: pdfFileName,
+      userId: user.user_id,
+      year,
+      departmentName,
+      filePath: pdfFilePath
+    };
+
+    const { logId, rawPassword, csvPath } = await saveReportLog(reportDetails);
+
     return res.status(200).json({ 
       message: 'PDF generated successfully', 
-      filePath: pdfFileName 
+      filePath: pdfFileName,
+      passwordCsvPath: csvPath,
+      logId
     });
 
   } catch (error) {
@@ -263,7 +246,7 @@ const generateClubHtml = async (req, res) => {
       });
     }
 
-    // Fetch institute and additional details
+    // Fetch institute name
     const instituteNameResult = await clubQueries.getInstituteName(user.institute_id);
     const instituteName = instituteNameResult[0]?.institute_name || 'Institute Name';
 
@@ -289,8 +272,7 @@ const generateClubHtml = async (req, res) => {
                 avg_budget: 0,
                 event_types: 'No Events',
                 first_event: null,
-                last_event: null
-              }
+                last_event: null }
             };
           } catch (error) {
             console.error(`Error fetching summary for ${club.club_name}:`, error);
@@ -331,9 +313,35 @@ const generateClubHtml = async (req, res) => {
     // Write HTML file
     fs.writeFileSync(htmlFilePath, htmlContent, 'utf-8');
 
+    // Prepare report details for logging
+    const departmentResult = await clubQueries.getDepartmentByCoordinatorId(user.user_id);
+    const departmentName = departmentResult[0]?.dept_name || 'Department Name';
+
+    // Check if departmentName is undefined
+    if (!departmentName) {
+      console.error('Department name is undefined');
+      return res.status(500).json({
+        message: 'Department name could not be retrieved.',
+      });
+    }
+
+    // Save report log and generate CSV
+    const reportDetails = {
+      reportType: 'html',
+      reportName: htmlFileName,
+      userId: user.user_id,
+      year,
+      departmentName,
+      filePath: htmlFilePath
+    };
+
+    const { logId, rawPassword, csvPath } = await saveReportLog(reportDetails);
+
     return res.status(200).json({
       message: 'HTML generated successfully',
       filePath: `/html_reports/${htmlFileName}`,
+      passwordCsvPath: csvPath,
+      logId
     });
 
   } catch (error) {
@@ -341,7 +349,7 @@ const generateClubHtml = async (req, res) => {
     res.status(500).json({ 
       message: 'Error generating Club HTML report',
       error: error.toString(),
-       stack: error.stack
+      stack: error.stack
     });
   }
 };

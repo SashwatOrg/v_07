@@ -239,7 +239,7 @@ app.post("/verify", (req, res) => {
     return res.status(400).send("OTP are required");
   }
 
-  // console.log("email",email);
+  console.log("email",emailId);
   db.query(
     "SELECT * FROM user WHERE  email_id = ? AND otp = ?",
     [emailId, otp],

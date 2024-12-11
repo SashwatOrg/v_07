@@ -209,10 +209,18 @@ const getClubEventSummary = async (clubId, year) => {
     return rows;
 };
 
+const getDepartmentByCoordinatorId= async (coordinatorId) => {
+    const query = `SELECT dept_name FROM department WHERE coordinator_id = ?`;
+    const result = await db.promise().query(query, [coordinatorId]);
+    console.log("Splendor is ...",result[0])
+    return result[0];
+  };
+
 module.exports = { 
     getClubData, 
     getClubFaculties,
     getInstituteName,
     getClubsByDepartment,
-    getClubEventSummary 
+    getClubEventSummary,
+    getDepartmentByCoordinatorId
 };
