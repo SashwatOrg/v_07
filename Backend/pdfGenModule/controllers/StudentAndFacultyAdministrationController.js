@@ -435,14 +435,20 @@ const generateStudentFacultyHtml = async (req, res) => {
         fs.writeFileSync(htmlFilePath, htmlContent, 'utf-8');
 
         // Improved department name determination
-        let departmentName = 'All Departments';    
-        if (studentFacultyData.length > 0) {
-            if (studentFacultyData[0]?.dept_name) {
-                departmentName = studentFacultyData[0].dept_name;
-            } else if (options.length < 6) {
-                departmentName = 'Selected Departments';
-            }
-        }
+
+        const departmentResult = await studentFacultyQueries.getDepartmentByCoordinatorId(userId);
+        console.log('the department name is ', departmentResult);
+        const departmentName = departmentResult[0].dept_name; // Use the dept_name directly
+        console.log('the department name is ', departmentName);
+
+        // let departmentName = 'All Departments';    
+        // if (studentFacultyData.length > 0) {
+        //     if (studentFacultyData[0]?.dept_name) {
+        //         departmentName = studentFacultyData[0].dept_name;
+        //     } else if (options.length < 6) {
+        //         departmentName = 'Selected Departments';
+        //     }
+        // }
         
         const reportDetails = {
             reportType: 'html',
@@ -476,6 +482,105 @@ const generateStudentFacultyHtml = async (req, res) => {
 
 
 
+// const generateStudentFacultyHtml = async (req, res) => {
+//   try {
+//     const { options, year, user } = req.body;
+//     console.log('Generating Student and Faculty HTML', { year, options, user });
+
+//     // Extract user ID safely
+//     const userId = user.user_id || user.institute_id;
+
+//     if (!userId) {
+//       return res.status(400).json({
+//         message: 'User ID is required but not provided',
+//       });
+//     }
+
+//     // Fetch student and faculty data based on selected options
+//     const studentFacultyData = await studentFacultyQueries.getStudentAndFacultyData(options, year);
+    
+//     if (studentFacultyData.length === 0) {
+//       return res.status(404).json({
+//         message: 'No student and faculty data found for the specified year and options.',
+//       });
+//     }
+
+//     // Fetch institute details
+//     const instituteNameResult = await studentFacultyQueries.getInstituteName(user.institute_id);
+//     const instituteName = instituteNameResult[0]?.institute_name || 'Institute Name';
+
+//     // Additional data fetching based on options
+//     const additionalData = {};
+
+//     // Fetch achievement types if option 3 is selected
+//     if (options.includes('3')) {
+//       additionalData.achievementTypes = await studentFacultyQueries.getAchievementTypes(year);
+//     }
+
+//     // Fetch research funding analysis if option 4 is selected
+//     if (options.includes('4')) {
+//       additionalData.researchFundingAnalysis = await studentFacultyQueries.getResearchFundingAnalysis(year);
+//     }
+
+//     // Generate unique filename
+//     const timestamp = Date.now();
+//     const htmlFileName = `student_faculty_report_${year}_${timestamp}.html`;
+//     const htmlFilePath = path.join(htmlDirectory, htmlFileName);
+
+//     // Render HTML content
+//     const htmlContent = await ejs.renderFile(
+//       path.join(__dirname, '..', 'views', 'StudentAndFacultyAdministrationReportView.ejs'),
+//       {
+//         studentFacultyData,
+//         year,
+//         user,
+//         instituteName,
+//         additionalData,
+//         options
+//       }
+//     );
+
+//     // Write HTML file
+//     fs.writeFileSync(htmlFilePath, htmlContent, 'utf-8');
+
+//      // Improved department name determination
+//      let departmentName = 'All Departments';    
+//      if (studentFacultyData.length > 0) {
+//        if (studentFacultyData[0]?.dept_name) {
+//          departmentName = studentFacultyData[0].dept_name;
+//        } else if (options.length < 6) {
+//          departmentName = 'Selected Departments';
+//        }
+//      }
+    
+//     const reportDetails = {
+//       reportType: 'html',
+//       reportName: htmlFileName,
+//       userId: userId, // Use the safely extracted user ID
+//       year,
+//       departmentName,
+//       filePath: htmlFilePath
+//     };
+
+//     // Save report log and generate CSV
+//     const { logId, rawPassword, csvPath } = await saveReportLog(reportDetails);
+
+//     return res.status(200).json({
+//       message: 'HTML generated successfully',
+//       filePath: `http://localhost:3000/html_reports/${htmlFileName}`, // Full URL
+//       passwordCsvPath: csvPath,
+//       logId
+//     });
+
+//   } catch (error) {
+//     console.error('Error generating Student and Faculty HTML:', error);
+//     res.status(500).json({ 
+//       message: 'Error generating Student and Faculty HTML report',
+//       error: error.toString(),
+//       stack: error.stack
+//     });
+//   }
+// };
 
 module.exports = { 
   generateStudentFacultyPdf, 

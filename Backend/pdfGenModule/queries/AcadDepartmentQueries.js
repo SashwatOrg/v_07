@@ -1,59 +1,57 @@
+const { configDotenv } = require("dotenv");
 const db = require("../../db/dbConnection.js"); // Use the existing DB connection
 
-const getAcademicData = async (options, year) => {
-    let results = [];
-    let params = [year];
-
-    // Loop through the selected options to build queries
-    for (const option of options) {
-        let query;
-
-        switch (option) {
-            case "1":
-                query = `SELECT * FROM student WHERE year = ?`;
-                break;
-            case "2":
-                query = `SELECT * FROM faculty WHERE year = ?`;
-                break;
-            case "3":
-                query = `SELECT * FROM program WHERE year = ?`;
-                break;
-            case "4":
-                query = `SELECT * FROM result WHERE year = ?`;
-                break;
-            case "5":
-                query = `SELECT program.prog_name, COUNT(student.student_id) AS total_students 
-                          FROM program 
-                          LEFT JOIN student ON program.prog_id = student.program_id 
-                          WHERE student.year = ? 
-                          GROUP BY program.prog_name`;
-                break;
-            case "6":
-                query = `SELECT faculty.reg_no, faculty.dept_id 
-                          FROM faculty 
-                          WHERE faculty.year = ?`;
-                break;
-            case "7":
-                query = `SELECT result.grade, COUNT(result.result_id) AS total_results 
-                          FROM result 
-                          WHERE result.year = ? 
-                          GROUP BY result.grade`;
-                break;
-            default:
-                throw new Error("Invalid option selected");
-        }
-
-        const [rows] = await db.promise().query(query, params);
-        results.push(...rows); // Combine results from all queries
-    }
-
-    return results;
+// Function to get student data for a specific year
+const getStudentData = async (year) => {
+    const query = `SELECT student_id, user_id, program_id, current_semester, stud_reg, year 
+                   FROM student 
+                   WHERE year = ?`;
+    const [rows] = await db.promise().query(query, [year]);
+    return rows;
 };
 
+// Function to get faculty data for a specific year
+const getFacultyData = async (year) => {
+    const query = `SELECT faculty_id, user_id, reg_no, dept_id, year 
+                   FROM faculty 
+                   WHERE year = ?`;
+    const [rows] = await db.promise().query(query, [year]);
+    return rows;
+};
+
+// Function to get program data for a specific year
+const getProgramData = async (year) => {
+    const query = `SELECT prog_id, prog_name, dept_id, duration, intake, semester_count, year 
+                   FROM program 
+                   WHERE year = ?`;
+    const [rows] = await db.promise().query(query, [year]);
+    return rows;
+};
+
+// Function to get result data for a specific year
+const getResultData = async (year) => {
+    const query = `SELECT result_id, enrollment_id, grade, res_status, year 
+                   FROM result 
+                   WHERE year = ?`;
+    const [rows] = await db.promise().query(query, [year]);
+    return rows;
+};
+
+// Function to get the institute name based on institute_id
 const getInstituteName = async (instituteId) => {
-    const query = `SELECT institute_name FROM institute WHERE institute_id = ?`; // Adjust the query based on your database schema
+    const query = `SELECT institute_name FROM institute WHERE institute_id = ?`;
     const [rows] = await db.promise().query(query, [instituteId]);
     return rows;
 };
 
-module.exports = { getAcademicData, getInstituteName };
+const getDepartmentByCoordinatorId= async (coordinatorId) => {
+    console.log('the cord id got is',coordinatorId)
+    const query = `SELECT dept_name FROM department WHERE coordinator_id = ?`;
+    const result = await db.promise().query(query, [coordinatorId]);
+    console.log("Splendor is ...",result[0])
+    return result[0];
+  };
+
+
+// Export the functions
+module.exports = { getStudentData, getFacultyData, getProgramData, getResultData, getInstituteName, getDepartmentByCoordinatorId };
