@@ -99,8 +99,6 @@ const App: React.FC = () => {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Routes>
-        {/* Landing Page Route */}
-        <Route path="/" element={<Home />} />
 
         {/* Other routes */}
         <Route path="/dashboard/:username" element={<Dashboard/>}/>
