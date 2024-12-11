@@ -24,6 +24,7 @@ router.post("/generate-placement-html", pdfPlacementController.generatePlacement
 router.post("/generate-finance-pdf", pdfFinanceController.generateFinancePdf);
 router.post("/generate-finance-html", pdfFinanceController.generateFinanceHtml);
 
+
 router.post("/generate-infrastructure-pdf", pdfInfrastructureController.generateInfrastructurePdf);
 router.post("/generate-infrastructure-html", pdfInfrastructureController.generateInfrastructureHtml);
 
