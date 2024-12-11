@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import cn from "classnames";
 // Update image path here
-import ReportEaseLogo from "../../assets/img/logo/Reporteasy_logo.png"; // Adjust the path as needed
+import ReportEaseLogo from "../../assets/img/logo/logo.png"; // Adjust the path as needed
 import $ from "jquery";
 import { handleClickScroll } from "../../lib/helpers";
 

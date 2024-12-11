@@ -116,7 +116,7 @@ const WhyChooseUs: React.FC = () => {
             <div className="section-title text-center mb-50">
               <span className="sub-title">Why Choose Us</span>
               <h2 className="title">
-                Why choose our PLATFORM <span>REPORTEASE</span>
+                Why choose our PLATFORM <span></span>
               </h2>
             </div>
           </div>

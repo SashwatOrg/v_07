@@ -13,7 +13,7 @@ const ContactOne: React.FC = () => {
       icon: "fa-envelope",
       content: (
         <>
-          sashwat2704@gmail.com
+         ministryofayush@gmail.com
         </>
       ),
     },

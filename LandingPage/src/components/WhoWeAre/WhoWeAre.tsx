@@ -1,44 +1,38 @@
 import React from "react";
 import { Link } from "react-router-dom";
+// Adjust the import path to be correct based on the folder structure
+import backgroundImage from "../../assets/img/images/collab.jpeg"; // Replace with your actual image path
 
-// Import the image
-import backgroundImage from "../../assets/img/images/collab.jpeg"; // Correct path based on your folder structure
-
-// Define the prop types
-interface WhoWeAreProps {
-  imgSrc: string;
-}
-
-const WhoWeAre: React.FC<WhoWeAreProps> = () => {
+const WhoWeAre: React.FC = () => {
   return (
-    <section
-      id="about"
-      className="about-area pt-130 pb-130"
-      style={{ display: "flex", flexDirection: "row", alignItems: "center" }}
-    >
+    <section id="about" className="about-area pt-130 pb-130" style={{ display: 'flex' }}>
       {/* Left Side with Background Image */}
       <div
         style={{
-          backgroundImage: `url(${backgroundImage})`, // Using the imported image directly
+          backgroundImage: `url(${backgroundImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          width: "100%",
-          height: "65vh",
-          borderTopLeftRadius: "10px",
-          borderBottomLeftRadius: "20px",
-          opacity: "0.8",
-          flex: "1",
+          width: "35%", // Occupy half of the screen
+          height: "55vh", // Full height of the viewport
+          borderTopLeftRadius: "10px", // Optional: rounded corners
+          borderBottomLeftRadius: "10px", // Optional: rounded corners
+          borderTopRightRadius: "", // Optional: rounded corners
+          borderBottomRightRadius: "", // Optional: rounded corners
+          opacity:"0.7",
+          marginLeft:"80px"
+        
         }}
       />
       {/* Right Side with Content */}
-      <div className="container" style={{ flex: "1", padding: "0 20px" }}>
+      <div className="container" style={{ width: "50%", padding: "0 20px" }}>
         <div className="row align-items-center">
           <div className="col-lg-12">
             <div className="about-content wow fadeInRight" data-wow-delay=".2s">
               <div className="section-title mb-30">
-                <span className="sub-title">Who we are</span>
+                <span className="sub-title">About Us</span>
                 <h2 className="title">
-                  Streamlining <span>Annual Report</span> Creation for Educational Institutes.
+                  Streamlining <span>Annual Report</span> Creation for
+                  Educational Institutes.
                 </h2>
               </div>
               <p>

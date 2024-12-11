@@ -8,6 +8,7 @@ import WhoWeAre from "../../components/WhoWeAre/WhoWeAre";
 import WhyChooseUs from "../../components/WhyChooseUs/WhyChooseUs";
 import LayoutOne from "../../layouts/LayoutOne";
 import aboutImg from "../../assets/img/images/about_img01.png"; // Image path import
+import MOA from "../../components/MOA/MOA";
 
 const Home: React.FC = () => {
   return (
@@ -15,12 +16,13 @@ const Home: React.FC = () => {
       <main className="fix">
         <Banner />
         {/* Pass the imgSrc prop here with the correct path */}
-        <WhoWeAre imgSrc={aboutImg} />
+        <WhoWeAre />
         <WhyChooseUs />
         <Sales />
         <div className="area-bg">
           <Roadmap />
         </div>
+       <MOA/>
         <TeamOne />
         <ContactOne />
       </main>

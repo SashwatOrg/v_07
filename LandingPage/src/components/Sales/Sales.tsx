@@ -86,7 +86,7 @@ const WorkflowComponentWithGIFs: React.FC = () => {
             className="mb-3"
             style={{ fontWeight: "bold", fontSize: "2.5rem", color: "#05c5db" }}
           >
-            Workflow of ReportEase
+            Workflow of PORTAL
           </h1>
           <p className="lead" style={{ color: "white" }}>
             Streamlining the process end-to-end with stages of execution.

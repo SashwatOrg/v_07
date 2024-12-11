@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import logoImage from "../../../assets/img/logo/logo.png";
+import logoImage from "../../assets/img/logo/logo.png";
 import { scrollToTop } from "../../lib/helpers";  // Only keep this import
 
 const FooterOne: React.FC = () => {
@@ -25,12 +25,10 @@ const FooterOne: React.FC = () => {
                   data-wow-delay=".2s"
                 >
                  <Link to="/">
-                 <span className="text-3xl font-[1000]">
-  <span className="text-blue-500">REPORT</span>
-  <span className="text-white">EASE</span>
-</span>
-
-
+                  <span className="text-2xl font-bold">
+                    <span className="text-blue-500">MINISTRY OF </span>
+                        <span className="text-white-700">AYUSH</span>
+                      </span>
                   </Link> <br /><br />  
                   <div className="footer-content">
                     <p>
@@ -38,21 +36,25 @@ const FooterOne: React.FC = () => {
                     </p>
                     <ul className="footer-social">
                       <li>
-                        <a href="https://www.instagram.com/team_sashwat/">
+                        <a href="https://www.instagram.com/ministryofayush/">
                           <i className="fab fa-instagram"></i>
                         </a>
                       </li>
                       <li>
-                        <a href="#">
+                        <a href="https://x.com/moayush">
                           <i className="fab fa-twitter"></i>
                         </a>
                       </li>
                       <li>
-                        <a href="#">
-                          <i className="fab fa-linkedin"></i>
+                        <a href="https://www.facebook.com/moayush">
+                          <i className="fab fa-facebook"></i>
                         </a>
                       </li>
-                      
+                      <li>
+                        <a href="https://www.youtube.com/@MinistryofAYUSHofficial/videos?themeRefresh=1">
+                          <i className="fab fa-youtube"></i>
+                        </a>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -124,7 +126,7 @@ const FooterOne: React.FC = () => {
                     <form action="#">
                       <input
                         type="email"
-                        placeholder="sashwat2704@gmail.com"
+                        placeholder="ministryofayush@gmail.com"
                         required
                       />
                       <button type="submit">
@@ -140,7 +142,8 @@ const FooterOne: React.FC = () => {
             <div className="row align-items-center">
               <div className="col-lg-6">
                 <div className="copyright-text">
-                  <p>Copyright &copy; 2024. All Rights Reserved Sashwat</p>
+                  <p>Copyright &copy; Ministry of Ayush. All Rights Reserved
+</p>
                 </div>
               </div>
               <div className="col-lg-6 d-none d-sm-block">

@@ -89,7 +89,6 @@ a:hover,
 }
 a,
 button {
-  
   color: #00c4f4;
   outline: medium none;
   text-decoration: none;
@@ -945,6 +944,8 @@ label {
 }
 
 /* 4. Banner */
+
+
 .banner-bg {
   background-image: url(../img/banner/banner_bg.jpg);
   background-position: center;
@@ -969,14 +970,15 @@ label {
   z-index: -1;
 }
 .banner-shape-wrap img {
-  width: 350px;
+  width: 280px;
   position: absolute;
   left: 0;
   top: 0;
   z-index: -1;
 }
 .banner-shape-wrap img.img-one {
-  top: 28%;
+  width: 320px;
+  top: 25%;
   left: 1.5%;
   animation: leftToRight 5s infinite linear;
 }
@@ -1148,6 +1150,28 @@ label {
   }
   50% {
     transform: rotateX(0deg) translateX(50px);
+  }
+  100% {
+    transform: rotateX(0deg) translateX(0px);
+  }
+}
+
+
+
+
+.banner-shape-wrap img.img-two {
+  left: auto;
+  right: 30px; /* Adjust this value as needed */
+  top: 220px; /* Adjust this value as needed */
+  animation: rightToLeft 5s infinite linear; /* Optional animation */
+}
+
+@keyframes rightToLeft {
+  0% {
+    transform: rotateX(0deg) translateX(0px);
+  }
+  50% {
+    transform: rotateX(0deg) translateX(-50px);
   }
   100% {
     transform: rotateX(0deg) translateX(0px);
@@ -3624,22 +3648,7 @@ CHANGES FROM MY SIDE*/
 }
 
 
+/* SIH Image */
 
-.banner-shape-wrap img.img-two {
-  left: auto;
-  right: 30px; /* Adjust this value as needed */
-  top: 170px; /* Adjust this value as needed */
-  animation: rightToLeft 5s infinite linear; /* Optional animation */
-}
 
-@keyframes rightToLeft {
-  0% {
-    transform: rotateX(0deg) translateX(0px);
-  }
-  50% {
-    transform: rotateX(0deg) translateX(-50px);
-  }
-  100% {
-    transform: rotateX(0deg) translateX(0px);
-  }
-}
+
