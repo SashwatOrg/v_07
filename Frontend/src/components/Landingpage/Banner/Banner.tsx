@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import shape01 from "../../../assets/img/banner/banner_shape01.png"; // Ensure this path is correct
 import CountDownOne from "../CountDown/CountDownOne";
+// import './assets/css/bootstrap.min.css';
+// import './assets/css/animate.min.css';
+// import './assets/css/fontawesome-all.min.css';
+// import './assets/css/react-odometer-theme.css';
+// import './assets/css/default.css';
+// import './assets/css/style.css';
+// import './assets/css/responsive.css';
+// import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 
 interface BannerProps {
   // Define any props if needed here

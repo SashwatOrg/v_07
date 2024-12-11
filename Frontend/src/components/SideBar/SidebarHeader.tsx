@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { FileCheck2, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FC } from 'react';
-import logo from "../../components/icons/ReportEaseLogo.png";;
+import logo from "../../components/icons/Ayush.png";;
 
 interface AddSidebarProps {
   activePage: string;
@@ -24,7 +24,7 @@ export const SidebarHeader: FC<AddSidebarProps> = ({ user }) => {
         <img
           src={logo}
           alt="ReportEase Logo"
-          className="h-auto w-auto"
+          className="h-auto w-auto h-max-[50px]"
         />
       </Link>
       <Button variant="outline" size="icon" className="ml-auto h-8 w-8">

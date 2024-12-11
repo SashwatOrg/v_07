@@ -5,7 +5,7 @@ import { AddDataDialog } from './AddDataDialog';
 import { ProfileSection } from './ProfileSection';
 import { Link } from 'react-router-dom';
 import { EnrollCourses } from './EnrollCourses';
-import { Home, FileInput, FileSpreadsheet, Layout } from 'lucide-react';
+import { Home, FileInput, FileSpreadsheet, Layout, User2 } from 'lucide-react';
 import { ManageData } from './ManageData';
 
 interface SidebarProps {
@@ -154,7 +154,7 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                     }`}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
-                    Add Placement Data
+                    Add Opportunity
                   </Link>
                   <Link
                     to="/admin/create-infrastructure"
@@ -188,6 +188,28 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                   >
                     <FileSpreadsheet className="h-4 w-4" />
                     Clubs
+                  </Link>
+                  <Link
+                    to="/access-control"
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
+                      activePage === 'access-control'
+                        ? 'bg-sidebar text-white border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
+                    }`}
+                  >
+                    <FileSpreadsheet className="h-4 w-4" />
+                    Access Control
+                  </Link>
+                  <Link
+                    to="/user-management"
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
+                      activePage === 'user-management'
+                        ? 'bg-sidebar text-white border-black hover:text-white'
+                        : 'text-muted-foreground hover:text-primary'
+                    }`}
+                  >
+                    <User2 className="h-4 w-4" />
+                    User Management
                   </Link>
                 </>
               )}

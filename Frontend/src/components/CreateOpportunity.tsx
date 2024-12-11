@@ -139,6 +139,98 @@ export const CreateOpportunity: FC = () => {
     }
   };
 
+  const handleBulkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+
+    const token = Cookies.get("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("institute_id", user?.institute_id); // Include institute_id
+
+
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/departments/upload",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          }
+        );
+
+
+        if (response.ok) {
+          toast.success("Departments uploaded successfully!", {
+            className: "custom-toast",
+            autoClose: 2000,
+            onClose: () => navigate(`/dashboard/${user?.username}`),
+          });
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.message || "Failed to upload departments.");
+        }
+      } catch (err) {
+        toast.error(
+          "An error occurred while uploading the file. Please try again later." +
+            err
+        );
+      }
+    } else {
+      toast.error("Please select a file to upload.");
+    }
+  };
+
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/departments/template"
+      );
+      if (!response.ok) {
+        throw new Error("Failed to download template");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", "department_template.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      toast.error("Error downloading template: " + error.message);
+    }
+  };
+
+
+  const handleDownloadData = async (institute_id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/departments/download?institute_id=${user?.institute_id}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to download data");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", "departments_data.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      toast.error("Error downloading data: " + error.message);
+    }
+  };
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
@@ -217,60 +309,43 @@ export const CreateOpportunity: FC = () => {
             <h1 className="text-2xl text-sidebar font-bold">Add Opportunity</h1>
           </div>
           <div className="flex flex-col items-center justify-center">
-          <Dialog>
+          <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="mb-4 border-2 hover:border-sidebar">Add Opportunity</Button>
+                <Button variant="outline" className="mb-4 border-2">
+                  Bulk Create
+                </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[725px]">
                 <DialogHeader>
-                  <DialogTitle>Add Opportunity</DialogTitle>
+                  <DialogTitle>Bulk Create Departments</DialogTitle>
                 </DialogHeader>
-                <ScrollArea className="max-h-[410px] p-4">
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="organization" className="text-left">Type</Label>
-                    <Select name="type" onValueChange={handleTypeChange}>
-                      <SelectTrigger className="w-[475px]">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Opportunity Type</SelectLabel>
-                          <SelectItem value="Full-time">Full-time</SelectItem>
-                          <SelectItem value="Part-time">Part-time</SelectItem>
-                          <SelectItem value="Internship">Internship</SelectItem>
-                          <SelectItem value="Freelance">Freelance</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="organization" className="text-left">Organization</Label>
-                    <Input id="organization" type="string" required value={organization} onChange={(e) => setOrganization(e.target.value)} placeholder="Organization" className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="position" className="text-left">Position</Label>
-                    <Input id="position" type="string" required value={position} onChange={(e) => setPosition(e.target.value)} placeholder="Position" className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="compensation" className="text-left">Compensation</Label>
-                    <Input id="compensationposition" type="string" required value={income} onChange={(e) => setIncome(e.target.value)} placeholder="Compensation" className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="starts" className="text-left">Starts from</Label>
-                    <Input id="starts" type="date" required value={startsFrom} onChange={(e) => setStartsFrom(e.target.value)} placeholder="Starts from" className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="ends" className="text-left">Ends on</Label>
-                    <Input id="ends" type="date" required value={endsOn} onChange={(e) => setEndsOn(e.target.value)} placeholder="Intake" className="col-span-3" disabled={isEndsOnDisabled} />
+                <div className="flex flex-col gap-4">
+                  <Input
+                    type="file"
+                    accept=".xlsx"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        setFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                  <div className="flex gap-4 mt-4">
+                    <Button onClick={handleBulkSubmit}>
+                      Upload Departments
+                    </Button>
+                    <Button onClick={handleDownloadTemplate}>
+                      Download Template
+                    </Button>
+                    <Button onClick={handleDownloadData}>Download Data</Button>
                   </div>
                 </div>
-                </ScrollArea>
-                <DialogClose>
-                  <Button type="submit" onClick={handleSubmit} className="mr-4">Add Opportunity</Button>
-                </DialogClose>
               </DialogContent>
             </Dialog>
+
+
+
+
+
             </div>
         </main>
       </div>

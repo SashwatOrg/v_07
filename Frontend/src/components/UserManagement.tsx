@@ -33,6 +33,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
+import { ScrollArea } from "./ui/scroll-area"
 
 interface User {
   id: number | null;
@@ -42,7 +43,7 @@ interface User {
   username: string | null;
   mobile: number | null;
   accountCreated: string | number | Date;
-  role: string | null;
+  role: number | null;
   status: number;
   gender: string;
   lastUpdated: string | number | Date;
@@ -161,15 +162,16 @@ export const UserManagement = () => {
     fetchData()
   }, [])
 
-  const mapRole = (role: string | null) => {
+  const mapRole = (role: number | null) => {
+    console.log(role);
     switch (role) {
-      case "1":
+      case 1:
         return "Admin"
-      case "2":
+      case 2:
         return "Coordinator"
-      case "3":
+      case 3:
         return "Faculty"
-      case "4":
+      case 4:
         return "Student"
       default:
         return "Unknown" 
@@ -339,6 +341,8 @@ export const UserManagement = () => {
 
   return (
     <div className="w-full">
+      <h1 className="text-2xl text-sidebar font-bold">User Management</h1>
+      <ScrollArea className="max-h-[700px]">
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter names..."
@@ -449,6 +453,7 @@ export const UserManagement = () => {
           </Button>
         </div>
       </div>
+      </ScrollArea>
     </div>
   )
 }

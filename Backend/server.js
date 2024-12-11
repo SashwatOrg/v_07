@@ -158,7 +158,12 @@ const getUsersRoutes = require("./routes/getUsersRoutes");
 const toggleUserStatus = require("./routes/toggleUserStatusRoutes");
 const getActivityLog = require("./routes/activityLogRoutes");
 const facultyDashRoutes = require("./routes/facultyDashRoutes");
+const accessControlRoutes = require("./routes/accessControlRoutes.js");
+const bulkDepartment = require("./routes/BulkDepartmentRoutes.js");
+const BulkClubController = require("./routes/BulkClubRoutes.js")
 
+app.use("/api/club",BulkClubController);
+app.use("/api/departments", bulkDepartment);
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
 app.use("/api", programRoutes);
@@ -216,9 +221,47 @@ app.use("/api", getUsersRoutes);
 app.use("/api", toggleUserStatus);
 app.use("/api", getActivityLog);
 app.use("/api", facultyDashRoutes);
-//HK add Courses
+app.use("/api", accessControlRoutes);
 
+//Parth
 
+// Set up multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, 'studentDocs');
+    // Create the directory if it doesn't exist
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    // Use the original file name
+    cb(null, file.originalname);
+  }
+});
+
+// Initialize multer with the storage configuration
+const upload = multer({ storage: storage });
+
+// New route to handle file upload and save path to achievements table
+app.post("/upload-achievement", verifyToken, upload.single("file"), (req, res) => {
+  const userId = req.body.userId; // Assuming userId is sent in the request body
+  const documentPath = `studentDocs/${req.file.originalname}`; // Path to the uploaded file
+
+  // Insert the document path into the achievements table
+  const insertQuery = "INSERT INTO achievements (user_id, document) VALUES (?, ?)";
+  db.query(insertQuery, [userId, documentPath], (err, results) => {
+    if (err) {
+      console.error("Error inserting document path:", err);
+      return res.status(500).send("Error saving document path.");
+    }
+
+    res.status(201).json({ message: "File uploaded and path saved successfully.", documentPath });
+  });
+});
+
+//Parth
 
 //verify OTP
 app.post("/verify", (req, res) => {

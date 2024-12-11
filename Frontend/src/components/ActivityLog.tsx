@@ -12,7 +12,7 @@ interface ActivityItemProps {
 const ActivityItem: React.FC<ActivityItemProps> = ({ report_name, report_type, generated_at, first_name, last_name }) => {
   return (
     <ScrollArea className='max-h-[200px]'>
-    <div className="flex items-center w-full my-6 -ml-1.5">
+    <div className="flex items-center w-full my-6 -ml-1.5 hover:bg-muted">
       <div className="w-1/12 z-10">
         <div className="w-3.5 h-3.5 bg-blue-600 rounded-full"></div>
       </div>

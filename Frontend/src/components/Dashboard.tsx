@@ -28,6 +28,8 @@ import ModeToggle from './mode-toggle';
 import { Sidebar } from './SideBar/Sidebar';
 import PolarAreaChart from "./visuals/PolarChart";
 import PlacementChart from './visuals/PlacementChart';
+import Bar2 from './Bar';
+import CollegeAchievementsChart from './Line';
 import {
   Drawer,
   DrawerClose,
@@ -43,6 +45,7 @@ import { Bar, BarChart, ResponsiveContainer } from "recharts"
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from 'react-toastify';
 import ActivityLog from './ActivityLog';
+import Line from './Line';
 
 interface User {
   userid: number | null;
@@ -519,9 +522,11 @@ export const Dashboard: FC = () => {
             <div className="col-span-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               {user?.institute_id && user.type_id === 1 && (
                 <>
+                  <Bar2/>
+                  <Line/>
+                  {selectedGraphs.includes('placement') && <PlacementChart institute_id={user?.institute_id} />}
                   {selectedGraphs.includes('pie') && <PieInteractive institute_id={user?.institute_id} />}
                   {selectedGraphs.includes('polar') && <PolarAreaChart institute_id={user?.institute_id} />}
-                  {selectedGraphs.includes('placement') && <PlacementChart institute_id={user?.institute_id} />}
                 </>
               )}
             </div>

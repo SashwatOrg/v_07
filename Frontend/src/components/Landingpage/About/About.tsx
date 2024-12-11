@@ -4,6 +4,14 @@ import React from "react";
 import aboutImg from "../../assets/img/images/about_img01.png";
 import shape01 from "../../assets/img/images/about_shape01.png";
 import shape02 from "../../assets/img/images/about_shape02.png";
+// import './assets/css/bootstrap.min.css';
+// import './assets/css/animate.min.css';
+// import './assets/css/fontawesome-all.min.css';
+// import './assets/css/react-odometer-theme.css';
+// import './assets/css/default.css';
+// import './assets/css/style.css';
+// import './assets/css/responsive.css';
+// import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 
 const About: React.FC = () => {
   return (

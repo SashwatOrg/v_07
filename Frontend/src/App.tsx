@@ -39,29 +39,28 @@ import './index.css'
 // Landing page imports
 import WOW from "wow.js";
 import { useLocation } from "react-router-dom";
-import Home from './components/pages/Home/Home';// Your landing page Home component
+import Home from './components/pages/Home/Home';
 import { GenerateEventReport } from './components/GenerateDepartmentReport/GenerateEventReport';
 import { GenerateClubReport } from './components/GenerateDepartmentReport/GenerateClubReport';
 import { GenerateStudentAndFacultyAdministrationReport } from './components/GenerateDepartmentReport/GenerateStudentAndFacultyAdministrationReport';
 import { GenerateAcademicReport } from './components/GenerateDepartmentReport/GenerateAcademicReport';
 import ReportVersionSelector from './components/ReportVersionSelector';
-import { UserManagement } from './components/UserManagement';
-
-
+import {AccessPage} from './components/AccessPage';
+import { UserManagePage } from './components/UserManagePage';
 
 const App: React.FC = () => {
 
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
  
   const handleUpdateUserPhoto = (photoURL: string) => {
-    setUserPhoto(photoURL); // Update the state with the new photo URL
+    setUserPhoto(photoURL); 
     console.log("User photo updated:", photoURL);
   };
 
 
   const handleCloseProfile = () => {
     <Route path="/dashboard/:username" element={<Dashboard />} />
-    // navigate("/dashboard"); // Redirect to the dashboard or another page when profile is closed
+    // navigate("/dashboard");
   };
 
 
@@ -126,8 +125,10 @@ const App: React.FC = () => {
           <Route path="/generate-club-report" element={<GenerateClubReport/>} />
           <Route path="/generate-studentandfacultyadministration-report" element={<GenerateStudentAndFacultyAdministrationReport/>} />
           <Route path="/generate-academic-report" element={<GenerateAcademicReport/>} />
-          <Route path="/view-reports/:institute_id" element={<ReportVersionSelector />} /> <Route path="/support" element={<Support />} />
-          <Route path="/user-management" element={<UserManagement />} />
+          <Route path="/view-reports/:institute_id" element={<ReportVersionSelector />} /> 
+          <Route path="/support" element={<Support />} />
+          <Route path="/user-management" element={<UserManagePage />} />
+          <Route path="/access-control" element={<AccessPage/>} />
           <Route
             path="/profile/:userid"
             element={

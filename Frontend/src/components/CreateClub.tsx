@@ -323,17 +323,9 @@ export const CreateClub: FC = () => {
 
   const handleClubUpload = async () => {
     if (!clubFile) return;
-
-
-
-
     const formData = new FormData();
     formData.append("file", clubFile);
     formData.append("institute_id", user?.institute_id);
-
-
-
-
     try {
       const res = await fetch(`http://localhost:3000/api/club/upload-clubs`, {
         method: "POST",
