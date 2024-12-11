@@ -146,7 +146,7 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
                     Research
                   </Link>
                   <Link
-                    to="/add-placement"
+                    to="/add-opportunity"
                     className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
                       activePage === 'create-opportunity'
                         ? 'bg-muted text-primary'

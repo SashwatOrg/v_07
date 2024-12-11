@@ -494,7 +494,7 @@ const Profile: React.FC<ProfileProps> = ({
                     <div>
                       <p className="text-gray-700">
                         <strong className="text-gray-900">Email:</strong>{" "}
-                        {personalInfo.email}
+                        {personalInfo.email_id}
                       </p>
                     </div>
                     <div>
@@ -502,7 +502,7 @@ const Profile: React.FC<ProfileProps> = ({
                         <strong className="text-gray-900">
                           Mobile Number:
                         </strong>{" "}
-                        {personalInfo.mobile}
+                        {personalInfo.mobile_number}
                       </p>
                     </div>
                     <div>
