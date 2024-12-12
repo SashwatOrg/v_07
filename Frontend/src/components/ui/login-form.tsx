@@ -14,8 +14,10 @@ import Cookies from 'js-cookie';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import loginImage from "@/assets/Login_Page/login-img-two.svg";
-export const LoginForm: FC = () => {
 
+
+export const LoginForm: FC = () => {
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,6 +30,9 @@ export const LoginForm: FC = () => {
     username: "",
     password: "",
   });
+
+  // State to toggle registration options
+  const [showRegisterOptions, setShowRegisterOptions] = useState(false);
 
   const validateForm = () => {
     let isValid = true;
@@ -46,6 +51,7 @@ export const LoginForm: FC = () => {
     setFormErrors(errors);
     return isValid;
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -72,16 +78,29 @@ export const LoginForm: FC = () => {
         // });
       } else {
         setError(data.message || 'Login failed');
+        toast.error('Invalid Credentials!', {
+          className: 'custom-toast',
+          autoClose: 1000,
+        });
       }
     } catch (err) {
       setError('An error occurred. Please try again later.');
     }
   };
 
+  // Handler for toggling registration options
+  const handleRegisterClick = () => {
+    setShowRegisterOptions((prev) => !prev);
+  };
+
   return (
-    <div className="flex flex-row h-screen w-screen">
+    <div className="flex flex-row h-screen w-[180rem] ">
       {/* Left Side - Image */}
-      <div className="hidden md:flex items-center justify-center w-1/2 bg-gradient-to-r from-blue-700 to-teal-500 animate__animated animate__fadeIn animate__delay-1s h-full">
+      <div className="hidden md:flex flex-col items-center justify-center w-1/2 bg-gradient-to-r from-blue-700 to-teal-500 animate_animated animatefadeIn animate_delay-1s h-full ">
+        {/* Logo */}
+       
+        
+        {/* Login Illustration */}
         <img
           src={loginImage}
           alt="Login Illustration"
@@ -116,19 +135,37 @@ export const LoginForm: FC = () => {
 
             {/* Password */}
             <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-2 transition-all duration-300 ease-in-out focus:ring-2 focus:ring-blue-500"
-              />
-              {formErrors.password && (
-                <p className="text-red-500 text-sm">{formErrors.password}</p>
-              )}
-            </div>
+  <Label htmlFor="password">Password</Label>
+  <div className="relative">
+    <Input
+      type={passwordVisible ? "text" : "password"}
+      name="password"
+      placeholder="Password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="mt-2 transition-all duration-300 ease-in-out focus:ring-2 focus:ring-blue-500 w-full"
+    />
+    <button
+      type="button"
+      className="absolute right-2 top-1/2 transform -translate-y-1/2"
+      onClick={() => setPasswordVisible(!passwordVisible)}
+    >
+      {passwordVisible ? (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M10 11l3-3m0 0l-3-3m3 3h6M4 19v1a2 2 0 002 2h12a2 2 0 002-2v-1" />
+</svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+      )}
+    </button>
+  </div>
+  {formErrors.password && (
+    <p className="text-red-500 text-sm">{formErrors.password}</p>
+  )}
+</div>
 
             {/* Forgot Password Link */}
             <div className="text-right">
@@ -140,7 +177,7 @@ export const LoginForm: FC = () => {
             {/* Login Button */}
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-teal-500 text-white font-bold py-2  rounded-md shadow-lg hover:bg-gradient-to-l transition-all duration-500"
+              className="w-full bg-gradient-to-r from-blue-500 to-teal-500 text-white font-bold py-2 px-4 rounded-md shadow-lg hover:bg-gradient-to-l transition-all duration-500"
             >
               Login
             </Button>
@@ -150,11 +187,38 @@ export const LoginForm: FC = () => {
           <div className="text-center my-4">
             <p className="text-gray-500 text-sm">
               Don't have an account?{" "}
-              <a href="/" className="text-blue-500 hover:underline">
+              <button
+                onClick={handleRegisterClick}
+                className="text-blue-500 hover:underline cursor-pointer"
+              >
                 Register here
-              </a>
+              </button>
             </p>
           </div>
+
+          {/* Show Register Options */}
+          {showRegisterOptions && (
+            <div className="text-center mt-4 space-y-4">
+              <button
+                className="w-full  text-black py-2 px-4 rounded-md hover:bg-blue-300"
+                onClick={() => navigate("/signup/instituteAdmin")}
+              >
+                Register as Institute
+              </button>
+              <button
+                className="w-full  text-black py-2 px-4 rounded-md hover:bg-blue-300"
+                onClick={() => navigate("/signup/faculty")}
+              >
+                Register as Faculty
+              </button>
+              <button
+                className="w-full  text-black py-2 px-4 rounded-md hover:bg-blue-300"
+                onClick={() => navigate("/signup/student")}
+              >
+                Register as Student
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

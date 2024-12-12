@@ -419,6 +419,7 @@ label {
   display: block;
   font-weight: 400;  /* Optional: make the text bold */
   padding: 5px 13px;
+  background-color: black;
 }
 
 /* Hover effect for each dropdown item */

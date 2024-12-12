@@ -333,7 +333,7 @@ const ReportAccessDialog: React.FC<{
     <div className="flex flex-col">
       <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
         <div className="flex items-center">
-          <h1 className="text-2xl text-primary font-bold">Generate Event Report</h1>
+          <h1 className="text-2xl text-primary font-bold">Generate Placement Report</h1>
         </div>
         <div className="flex flex-col items-center justify-center">
           <form onSubmit={handleSubmit} className="w-full max-w-md">

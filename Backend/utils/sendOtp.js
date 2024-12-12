@@ -37,7 +37,7 @@ module.exports = (email, otp) => {
   const mailOptions = {
     from: process.env.EMAIL_USER, // Sender address
     to: email, // List of recipients
-    subject: 'Your OTP Code', // Subject line
+    subject: 'You have an OTP from Sashwat', // Subject line
     text: `Your OTP code is ${otp}`, // Plain text body
   };
 

@@ -19,11 +19,11 @@ import {
 } from "@/components/ui/chart";
 
 const chartData = [
-  { year: "2020", honors: 120, patents: 15, testScores: 85 },
-  { year: "2021", honors: 150, patents: 20, testScores: 88 },
-  { year: "2022", honors: 180, patents: 25, testScores: 90 },
-  { year: "2023", honors: 200, patents: 30, testScores: 92 },
-  { year: "2024", honors: 220, patents: 35, testScores: 95 },
+  { year: "2020", honors: 11, patents: 3},
+  { year: "2021", honors: 12, patents: 2 },
+  { year: "2022", honors: 17, patents: 3 },
+  { year: "2023", honors: 18, patents: 4 },
+  { year: "2024", honors: 16, patents: 3 },
 ];
 
 const chartConfig = {
@@ -45,7 +45,7 @@ const CollegeAchievementsChart = () => {
   return (
     <Card className="w-[10cm] h-[8cm] p-4 flex flex-col shadow-lg rounded-xl bg-gradient-to-r from-blue-100 to-indigo-100">
       <CardHeader>
-        <CardTitle>Year-wise College Achievements</CardTitle>
+        <CardTitle>Awards and Recognitions</CardTitle>
         <CardDescription>Overview from 2020 to 2024</CardDescription>
       </CardHeader>
       <CardContent>
@@ -87,14 +87,6 @@ const CollegeAchievementsChart = () => {
               name={chartConfig.patents.label}
               type="monotone"
               stroke="var(--color-patents)"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-            />
-            <Line
-              dataKey="testScores"
-              name={chartConfig.testScores.label}
-              type="monotone"
-              stroke="var(--color-testScores)"
               strokeWidth={2}
               dot={{ r: 3 }}
             />

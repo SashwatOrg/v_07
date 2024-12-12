@@ -1,10 +1,8 @@
 "use client";
 
-
 import { useState } from "react";
 import { TrendingUp, Filter } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from "recharts";
-
 
 import {
   Card,
@@ -15,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-
 const chartData = [
   { year: "2018", placements: 300, companies: 60, highestCTC: 6.5 },
   { year: "2019", placements: 350, companies: 60, highestCTC: 8.0 },
@@ -25,14 +22,11 @@ const chartData = [
   { year: "2023", placements: 450, companies: 99, highestCTC: 23.0 },
 ];
 
-
 const Bar2 = () => {
   const [selectedMetric, setSelectedMetric] = useState("placements");
   const [isFilterModalOpen, setFilterModalOpen] = useState(false);
 
-
   const handleFilterClick = () => setFilterModalOpen(!isFilterModalOpen);
-
 
   return (
     <Card
@@ -128,11 +122,4 @@ const Bar2 = () => {
   );
 };
 
-
 export default Bar2;
-
-
-
-
-
-

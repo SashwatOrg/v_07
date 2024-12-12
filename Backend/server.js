@@ -248,6 +248,7 @@ app.post("/verify", (req, res) => {
         console.error("Error verifying OTP:", err);
         return res.status(500).send("Internal Server Error");
       }
+      console.log(results);
 
       if (results.length === 0) {
         return res.status(400).send("Invalid OTP");
