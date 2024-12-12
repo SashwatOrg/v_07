@@ -199,19 +199,6 @@ export const GeneratePlacementReport: FC = () => {
     return `${year}-${year + 1}`;
   });
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if ( isCustomized) {
-  //     // Only set selected options if in customized mode
-  //     if (selectedOptions.length === 0) {
-  //       toast.error("Please select at least one option for the customized report.");
-  //       return;
-  //     }
-  //   } else {
-  //     setSelectedOptions(reportOptions.map(option => option.id)); // Select all options by default
-  //   }
-  //   setShowReportTypeDialog(true);
-  // };
  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

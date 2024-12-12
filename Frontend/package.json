@@ -87,6 +87,7 @@
     "@worqhat/command-gen": "^1.2.1",
     "axios": "^1.7.8",
     "bootstrap": "^5.3.3",
+    "chart.js": "^4.4.7",
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

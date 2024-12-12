@@ -117,6 +117,7 @@ const generateFinancePdf = async (req, res) => {
   try {
     const { options, year, user } = req.body; // Get user details from request
     console.log("hey i am inside generatePdf");
+    console.log()
     console.log("Request body:", req.body);
 
     // Generate financial data based on options and year
@@ -171,36 +172,36 @@ const generateFinancePdf = async (req, res) => {
       user.last_name
     }</p>
         <p style="margin: 5px 0;">Department: Finance Department</p>
-        <p style="margin: 5px 0;">Email: ${user.email}</p>
       </div>
     </div>
 
     <!-- Financial data table -->
-    <table>
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${financialData
-          .map(
-            (data) => `
-          <tr>
-            <td>${
-              data.description ||
-              data.event_name ||
-              data.club_name ||
-              data.dept_name
-            }</td>
-            <td>${data.amount || data.event_budget || data.total_budget}</td>
-          </tr>
-        `
-          )
-          .join("")}
-      </tbody>
-    </table>
+  <!-- Financial data table -->
+<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+  <thead>
+    <tr>
+      <th style="border: 1px solid #000; padding: 8px; text-align: left;">Description</th>
+      <th style="border: 1px solid #000; padding: 8px; text-align: left;">Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${financialData
+      .map(
+        (data) => `
+      <tr>
+        <td style="border: 1px solid #000; padding: 8px;">${
+          data.description ||
+          data.event_name ||
+          data.club_name ||
+          data.dept_name || "N/A"
+        }</td>
+        <td style="border: 1px solid #000; padding: 8px;">${data.amount || data.event_budget || data.total_budget || "N/A"}</td>
+      </tr>
+    `
+      )
+      .join("")}
+  </tbody>
+</table>
 
     <!-- Footer with Institute Name -->
     <div class="footer" style="position: fixed; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 16px; font-weight: bold;">

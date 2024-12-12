@@ -60,14 +60,16 @@ export const LoginForm: FC = () => {
       });
 
       const data = await response.json();
-
+      const email = data.email;
       if (response.ok) {
-        Cookies.set('token', data.token, { expires: 0.5 });
-        toast.success('Login successful!', {
-          className: 'custom-toast',
-          autoClose: 1000,
-          onClose: () => navigate(`/dashboard/${username}`),
-        });
+        Cookies.set("token", data.token, { expires: 0.5 });
+        console.log("success", username);
+        navigate(`/Verify/${email}`);
+        // toast.success('Login successful!', {
+        //   className: 'custom-toast',
+        //   autoClose: 1000,
+        //   onClose: () => navigate(`/input-otp/${email}`),
+        // });
       } else {
         setError(data.message || 'Login failed');
       }

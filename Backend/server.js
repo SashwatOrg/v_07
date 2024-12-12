@@ -1168,3 +1168,89 @@ app.delete("/api/delete-account", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+
+
+
+
+//search papers
+const axios = require('axios');
+app.get('/api/search-papers', async (req, res) => {
+  const { query } = req.query;
+
+
+  if (!query) {
+    return res.status(400).json({ error: 'Query is required' });
+  }
+
+
+  try {
+    const response = await axios.get('https://serpapi.com/search.json', {
+      params: {
+        engine: 'google_scholar',
+        q: query,
+        api_key:'a69bd9a73d18c4b769c874f3b2a90bc38d06144d5cfe3e026782c4884e59ce8c',
+      },
+    });
+    console.log(response.data); // Log response to debug
+
+
+    const results = response.data.organic_results || [];
+    console.log("results",results);
+    if (results.length === 0) {
+      return res.status(200).json({ message: 'No papers found for the given query.' });
+    }
+
+
+    const formattedResults = results.map((result, index) => ({
+      id: index + 1,
+      title: result.title || 'No title available',
+      link: result.link || '#',
+      snippet: result.snippet || 'No description available',
+      publication_info: result.publication_info || 'No publication info available',
+    }));
+
+
+    res.json(formattedResults);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch papers' });
+  }
+});
+
+
+
+
+//add research papers from the google scholar engine
+app.post('/api/research/add', (req, res) => {
+  const { title, description, status, publisher, link } = req.body;
+
+
+  // SQL query to insert data into researchwork table
+  const query = `
+    INSERT INTO researchwork 
+      (title, description, status, publisher, link, fund, funded_By, publication_date) 
+    VALUES 
+      (?, ?, ?, ?, ?, NULL, NULL, NULL)
+  `;
+
+
+  const values = [title, description, status, publisher, link];
+
+
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error('Error inserting data:', err);
+      return res.status(500).json({ success: false, message: 'Database error' });
+    }
+
+
+    console.log('Research paper added successfully');
+    res.status(200).json({ success: true, message: 'Research paper added successfully' });
+  });
+});
+
+
+
+
