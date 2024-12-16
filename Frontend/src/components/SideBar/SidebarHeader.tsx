@@ -24,7 +24,7 @@ export const SidebarHeader: FC<AddSidebarProps> = ({ user }) => {
         <img
           src={logo}
           alt="ReportEase Logo"
-          className="h-auto w-auto h-max-[50px]"
+          className="h-auto w-auto h-[45px]"
         />
       </Link>
       <Button variant="outline" size="icon" className="ml-auto h-8 w-8">

@@ -46,6 +46,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from 'react-toastify';
 import ActivityLog from './ActivityLog';
 import Line from './Line';
+import LineV1 from './LineV1';
+import {ResearchPaper} from './Donut';
+import {Events} from './BarV2'
+import { Financial } from './Pie';
 
 interface User {
   userid: number | null;
@@ -421,19 +425,16 @@ export const Dashboard: FC = () => {
               {user?.type_id === 2 && (
                 <>
                   {/* Coordinator-specific cards */}
-                  <StatsCard title="Tasks Assigned" entity="departments" username={user?.username} />
-                  <StatsCard title="Ongoing Programs" entity="departments" username={user?.username}  />
-                  <div className="col-span-full">
-                    <PieInteractive institute_id={user.institute_id}/>
-                  </div>
+                  <StatsCard title="Total Events" entity="events" username={user?.username}/>
+                  <StatsCard title="Departments" entity="departments" username={user?.username}  />
                 </>
               )}
               {user?.type_id === 3 && (
                 <>
-                  <StatsCard title="Classes Taken" entity="departments" username={user?.username} />
-                  <StatsCard title="Research Papers" entity="departments" username={user?.username} />
+                  <StatsCard title="Achievements" entity="departments" username={user?.username} />
+                  <StatsCard title="Research Papers" entity="clubs" username={user?.username} />
                   <div className="col-span-full">
-                    <PieInteractive institute_id={user.institute_id}/>
+                    {/* <PieInteractive institute_id={user.institute_id}/> */}
                   </div>
                 </>
               )}
@@ -448,7 +449,11 @@ export const Dashboard: FC = () => {
                 </>
               )}
             </div>
+            {user?.type_id === 1 && (
+                <>
             <ActivityLog institute_id={user?.institute_id}/>
+            </>
+            )}
             {/* <div className="flex-1 bg-white rounded-lg shadow-xl mt-4 p-8 dark:bg-black">
                     <h4 className="text-xl text-gray-900 font-bold dark:text-gray-500">Activity log</h4>
                     <div className="relative px-4">
@@ -527,6 +532,26 @@ export const Dashboard: FC = () => {
                   {selectedGraphs.includes('placement') && <PlacementChart institute_id={user?.institute_id} />}
                   {selectedGraphs.includes('pie') && <PieInteractive institute_id={user?.institute_id} />}
                   {selectedGraphs.includes('polar') && <PolarAreaChart institute_id={user?.institute_id} />}
+                </>
+              )}
+              {user?.institute_id && user.type_id === 2 && (
+                <>
+                  <Events/>
+                  <ResearchPaper/>
+                  <Financial/>
+                </>
+              )}
+              {user?.institute_id && user.type_id === 3 && (
+                <>
+                  <LineV1/>
+                  <ResearchPaper/>
+                  {selectedGraphs.includes('polar') && <PolarAreaChart institute_id={user?.institute_id} />}
+                </>
+              )}
+              {user?.institute_id && user.type_id === 4 && (
+                <>
+                  <Bar2/>
+                  <Line/>
                 </>
               )}
             </div>

@@ -14,10 +14,13 @@ import Cookies from 'js-cookie';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import loginImage from "@/assets/Login_Page/login-img-two.svg";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select";
+
 export const LoginForm: FC = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [utype, setUType] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -100,6 +103,28 @@ export const LoginForm: FC = () => {
             Enter your username and password to log in
           </p>
           <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Username */}
+            <div>
+              <Label htmlFor="utype">User Type</Label>
+              <Select name="utype" onValueChange={(value) => setUType((value))}>
+                        <SelectTrigger className="w-[475px]">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>User Type</SelectLabel>
+                            <SelectItem value="Institute Admin">Institute Admin</SelectItem>
+                            <SelectItem value="Coordinator">Coordinator</SelectItem>
+                            <SelectItem value="Faculty">Faculty</SelectItem>
+                            <SelectItem value="Student">Student</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+              {formErrors.username && (
+                <p className="text-red-500 text-sm">{formErrors.username}</p>
+              )}
+            </div>
             {/* Username */}
             <div>
               <Label htmlFor="username">Username</Label>
