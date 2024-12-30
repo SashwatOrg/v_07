@@ -9,37 +9,34 @@ const path = require("path");
 const fs = require("fs");
 const app = express();
 const corsOptions = {
-  origin: "http://localhost:5173", // Specify the frontend URL here
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  origin: 'http://localhost:5173', // Specify the frontend URL here
+  methods: ['GET', 'POST', "PUT", "DELETE"],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 };
 
-const corsConfig = require("./cors-config");
+const corsConfig = require('./cors-config');
 
 app.use(cors(corsConfig));
 // Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, 'public')));
 // This will allow inline scripts and styles by setting 'unsafe-inline' (not recommended for production)
 app.use((req, res, next) => {
   res.setHeader(
-    "Content-Security-Policy",
+    'Content-Security-Policy',
     "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:"
   );
   next();
 });
-app.use(
-  "/html_reports",
-  express.static(path.join(__dirname, "public", "html_reports"))
-);
+app.use('/html_reports', express.static(path.join(__dirname, 'public', 'html_reports')));
 
 app.use(cors(corsOptions));
 const port = 3000;
 const xlsx = require("xlsx");
 const db = require("./db/dbConnection");
 const multer = require("multer");
-const sendOtp = require("./utils/sendOtp.js");
-const pdfRoutes = require("./pdfGenModule/routes/allPdfAndHtmlRoutes.js");
+const sendOtp=require("./utils/sendOtp.js");
+const pdfRoutes = require('./pdfGenModule/routes/allPdfAndHtmlRoutes.js')
 app.options("*", cors()); // Allow all OPTIONS requests for CORS preflight
 
 app.use(express.json());
@@ -56,10 +53,10 @@ app.use((req, res, next) => {
 
 // Add error handling middleware at the end of your route configurations
 app.use((err, req, res, next) => {
-  console.error("Unhandled Error:", err);
+  console.error('Unhandled Error:', err);
   res.status(500).json({
-    message: "An unexpected error occurred",
-    error: err.message,
+    message: 'An unexpected error occurred',
+    error: err.message
   });
 });
 app.use("/pdf", pdfRoutes);
@@ -71,17 +68,17 @@ app.use(
     credentials: true,
   })
 );
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Allow requests from your frontend
-    methods: ["GET", "POST"], // Specify allowed methods
-    credentials: true, // Allow credentials (if needed)
-  })
-);
+app.use(cors({
+  origin: 'http://localhost:5173', // Allow requests from your frontend
+  methods: ['GET', 'POST'], // Specify allowed methods
+  credentials: true, // Allow credentials (if needed)
+}));
 app.use(cookieParser());
 
+
 // Serve the 'pdfs' directory statically
-app.use("/pdfs", express.static(path.join(__dirname, "public", "pdfs")));
+app.use('/pdfs', express.static(path.join(__dirname, 'public', 'pdfs')));
+
 
 const secretKey = "your_secret_key";
 
@@ -128,14 +125,14 @@ const addInfrastructure = require("./routes/infraRoutes");
 const financeRoutes = require("./routes/financeRoutes");
 const postFinanceRoutes = require("./routes/postFinanceRoutes");
 const placementRoutes = require("./routes/PlacementRoutes.js");
-const placementSingleRoutes = require("./routes/placementSingleRoutes");
-const visualRoutes = require("./routes/visualRoutes.js");
+const placementSingleRoutes = require('./routes/placementSingleRoutes'); 
+const visualRoutes = require('./routes/visualRoutes.js')
 const clubRoutes = require("./routes/clubRoutes");
 const achievementRoutes = require("./routes/achievementRoutes");
-const getClubNames = require("./routes/getClubNameRoutes");
+const getClubNames = require("./routes/getClubNameRoutes")
 const courseRoutes = require("./routes/CreatecourseRoutes.js");
-const userRoutes = require("./routes/userRoutes");
-const profileRoutes = require("./routes/profileRoutes");
+const userRoutes = require('./routes/userRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 const eventRouter = require("./routes/CreateBulkEventRoutes.js");
 const bulkProgramRouter = require("./routes/bulkProgramRouter.js");
 const bulkCreateCourseRoute = require("./routes/BulkCreateCourseRoute.js");
@@ -148,8 +145,8 @@ const deleteProgramRoutes = require("./routes/deleteProgRoutes");
 const getEvents = require("./routes/getEventRoutes");
 const putEventChangesRoutes = require("./routes/putEventRoutes");
 const deleteEventRoutes = require("./routes/deleteEventRoutes");
-const getInstituteClubNamesRoutes = require("./routes/getInstituteClubNamesRoutes.js");
-const departmentByCordIdRoutes = require("./routes/departmentByCordIdRoutes");
+const getInstituteClubNamesRoutes = require('./routes/getInstituteClubNamesRoutes.js')
+const departmentByCordIdRoutes = require('./routes/departmentByCordIdRoutes')
 const instAdminDashRoutes = require("./routes/instAdminDashRoutes");
 const putInfraRoutes = require("./routes/putInfraRoutes");
 const deleteInfraRoutes = require("./routes/deleteInfraRoutes");
@@ -159,13 +156,16 @@ const deleteClubRoutes = require("./routes/deleteClubRoutes");
 const getClubRoutes = require("./routes/getClubRoutes");
 const getUsersRoutes = require("./routes/getUsersRoutes");
 const toggleUserStatus = require("./routes/toggleUserStatusRoutes");
-const BulkDepartment = require("./routes/BulkDepartmentRoutes.js");
+const BulkDepartment = require('./routes/BulkDepartmentRoutes.js')
 const getActivityLog = require("./routes/activityLogRoutes");
 const accessControlRoutes = require("./routes/accessControlRoutes.js");
-const getUsernameByEmail = require("./routes/getEmailRoute");
-const updatepassRoutes = require("./routes/updatepassRoutes");
+const getUsernameByEmail=require("./routes/getEmailRoute");
+const updatepassRoutes=require("./routes/updatepassRoutes");
 
-app.use("/api", updatepassRoutes);
+
+
+
+app.use("/api",updatepassRoutes)
 app.use("/api", uploadRoutes);
 app.use("/api", updateRoutes);
 app.use("/api", programRoutes);
@@ -188,9 +188,9 @@ app.use("/api", addOpportunity);
 app.use("/api", addInfrastructure);
 app.use("/api", financeRoutes);
 app.use("/api", postFinanceRoutes);
-app.use("/api/placements", placementRoutes);
+app.use("/api/placements", placementRoutes);  
 app.use("/api", placementSingleRoutes);
-app.use("/api", visualRoutes);
+app.use("/api",visualRoutes)
 app.use("/api", clubRoutes);
 app.use("/api", achievementRoutes);
 app.use("/api", getClubNames);
@@ -206,9 +206,9 @@ app.use("/api", putProgChangesRoutes);
 app.use("/api", deleteProgramRoutes);
 app.use("/api", getEvents);
 app.use("/api", putEventChangesRoutes);
-app.use("/api", deleteEventRoutes);
-app.use("/api", getInstituteClubNamesRoutes);
-app.use("/api", departmentByCordIdRoutes);
+app.use("/api", deleteEventRoutes)
+app.use("/api",getInstituteClubNamesRoutes);
+app.use("/api",departmentByCordIdRoutes)
 app.use("/api", instAdminDashRoutes);
 app.use("/api", putInfraRoutes);
 app.use("/api", deleteInfraRoutes);
@@ -221,23 +221,25 @@ app.use("/api", putProgChangesRoutes);
 app.use("/api", deleteProgramRoutes);
 app.use("/api", getUsersRoutes);
 app.use("/api", toggleUserStatus);
-app.use("/api/departments", BulkDepartment);
+app.use("/api/departments",BulkDepartment)
 app.use("/api", getActivityLog);
 app.use("/api", accessControlRoutes);
-app.use("/api", getUsernameByEmail);
+app.use('/api',getUsernameByEmail);
 //HK add Courses
+
+
 
 //verify OTP
 app.post("/verify", (req, res) => {
-  const { otp, emailId } = req.body; // Retrieve OTP and user_id from request body
+  const {otp,emailId} = req.body; // Retrieve OTP and user_id from request body
 
-  console.log("otp", otp);
+  console.log("otp",otp);
   // user_id=sessionStorage.getItem("user_id");
-  if (!otp) {
+  if (!otp ) {
     return res.status(400).send("OTP are required");
   }
 
-  console.log("email", emailId);
+  console.log("email",emailId);
   db.query(
     "SELECT * FROM user WHERE  email_id = ? AND otp = ?",
     [emailId, otp],
@@ -953,22 +955,20 @@ app.get("/courses", (req, res) => {
   });
 });
 
-app.post("/generate-html", async (req, res) => {
+
+app.post('/generate-html', async (req, res) => {
   const { options, year, user } = req.body;
 
   // Fetch the financial data based on the provided options and year
   const financialData = await getFinancialData(options, year); // Your logic to get financial data
 
   // Define the path where the HTML report will be saved
-  const reportDirectory = path.join(__dirname, "public", "html_reports");
-  const reportFilePath = path.join(
-    reportDirectory,
-    `financial_report_${year}.html`
-  );
+  const reportDirectory = path.join(__dirname, 'public', 'html_reports');
+  const reportFilePath = path.join(reportDirectory, `financial_report_${year}.html`);
 
   // Create the directory if it doesn't exist
   if (!fs.existsSync(reportDirectory)) {
-    fs.mkdirSync(reportDirectory, { recursive: true });
+      fs.mkdirSync(reportDirectory, { recursive: true });
   }
 
   // Generate the HTML content
@@ -990,33 +990,16 @@ app.post("/generate-html", async (req, res) => {
                   </tr>
               </thead>
               <tbody>
-                  ${
-                    financialData.length > 0
-                      ? financialData
-                          .map(
-                            (data) => `
+                  ${financialData.length > 0 ? financialData.map(data => `
                       <tr>
-                          <td>${
-                            data.description ||
-                            data.event_name ||
-                            data.club_name ||
-                            data.dept_name
-                          }</td>
-                          <td>${
-                            data.amount ||
-                            data.event_budget ||
-                            data.total_budget
-                          }</td>
+                          <td>${data.description || data.event_name || data.club_name || data.dept_name}</td>
+                          <td>${data.amount || data.event_budget || data.total_budget}</td>
                       </tr>
-                  `
-                          )
-                          .join("")
-                      : `
+                  `).join('') : `
                       <tr>
                           <td colspan="2">No data available for the selected options.</td>
                       </tr>
-                  `
-                  }
+                  `}
               </tbody>
           </table>
       </body>
@@ -1025,21 +1008,23 @@ app.post("/generate-html", async (req, res) => {
 
   // Write the HTML content to the file
   fs.writeFile(reportFilePath, htmlContent, (err) => {
-    if (err) {
-      console.error("Error writing HTML file:", err);
-      return res.status(500).json({ message: "Error generating HTML report" });
-    }
-    // Send the path of the generated HTML file
-    res
-      .status(200)
-      .json({ filePath: `/html_reports/financial_report_${year}.html` });
+      if (err) {
+          console.error('Error writing HTML file:', err);
+          return res.status(500).json({ message: 'Error generating HTML report' });
+      }
+      // Send the path of the generated HTML file
+      res.status(200).json({ filePath: `/html_reports/financial_report_${year}.html` });
   });
 });
+
+
+
 
 app.get("/api/user-photo/:userid", (req, res) => {
   const { userid } = req.params;
   // Step 1: Define the query to fetch the photo URL
   const queryFetchPhoto = "SELECT url FROM photourl WHERE user_id = ?";
+
 
   // Execute the query
   db.query(queryFetchPhoto, [userid], (err, results) => {
@@ -1048,30 +1033,42 @@ app.get("/api/user-photo/:userid", (req, res) => {
       return res.status(500).send("Error fetching photo.");
     }
 
+
     // Check if the query returned any results
     if (results.length === 0) {
+
+
       return res.status(404).send("Photo not found.");
     }
 
+
     // Extract the photo URL
     const photoURL = results[0].url;
+
+
+
 
     // Return the photo URL as JSON response
     res.status(200).json({ photoURL });
   });
 });
 
-app.use("/api", userRoutes);
-// app.use('/api',updatepassRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-// Use the profile routes
-app.use("/api", profileRoutes);
 
-const crypto = require("crypto");
+
+
+app.use('/api', userRoutes);
+// app.use('/api',updatepassRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Use the profile routes
+app.use('/api', profileRoutes);
+
+
+
+const crypto = require("crypto"); 
 app.post("/send-reset-link", (req, res) => {
   const { userId } = req.body;
   console.log("userId is ", userId);
-  let email = "";
+  let email="";
   const query = "SELECT email_id FROM user WHERE user_id = ?";
   db.query(query, [userId], (err, results) => {
     if (err) return res.status(500).json({ error: "Database error." });
@@ -1089,7 +1086,7 @@ app.post("/send-reset-link", (req, res) => {
 SET otp = ? 
 WHERE email_id = ?;`;
     // const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
-    db.query(otpQuery, [otp, email], (otpErr) => {
+    db.query(otpQuery, [otp,email], (otpErr) => {
       if (otpErr)
         return res.status(500).json({ error: "Failed to store OTP." });
 
@@ -1102,9 +1099,9 @@ WHERE email_id = ?;`;
 
 app.post("/verify-otp", (req, res) => {
   const { userId, otp } = req.body;
-  let email = "";
+  let email="";
   const query = "SELECT email_id FROM user WHERE user_id = ?";
-
+  
   db.query(query, [userId], (err, results) => {
     if (err) return res.status(500).json({ error: "Database error." });
 
@@ -1119,7 +1116,7 @@ app.post("/verify-otp", (req, res) => {
   console.log("email is ", email);
   const query1 =
     "SELECT * FROM user WHERE user_id = ? AND otp = ? AND isVerified = 0";
-  console.log("email in ");
+    console.log("email in ")
   db.query(query1, [userId, otp], (err, results) => {
     if (err) return res.status(500).json({ error: "Database error." });
 
@@ -1147,8 +1144,11 @@ app.post("/reset-password", (req, res) => {
   });
 });
 
+
+
+
 app.delete("/api/delete-account", async (req, res) => {
-  const db1 = db.promise();
+  const db1=db.promise();
   const userId = req.body.userId; // Assume user ID is sent in the body
   if (!userId) {
     return res.status(400).json({ message: "User ID is required" });
@@ -1156,14 +1156,10 @@ app.delete("/api/delete-account", async (req, res) => {
 
   try {
     // Delete user from the database
-    const result1 = await db1.query("DELETE FROM photourl WHERE user_id = ?", [
-      userId,
-    ]);
-    const result = await db1.query("DELETE FROM user WHERE user_id = ?", [
-      userId,
-    ]);
+    const result1 = await db1.query("DELETE FROM photourl WHERE user_id = ?", [userId]);
+    const result = await db1.query("DELETE FROM user WHERE user_id = ?", [userId]);
 
-    if (result.rowCount === 0 && result1.rowCount == 0) {
+    if (result.rowCount === 0 && result1.rowCount==0) {
       return res.status(404).json({ message: "User not found" });
     }
 
@@ -1174,53 +1170,63 @@ app.delete("/api/delete-account", async (req, res) => {
   }
 });
 
+
+
+
+
+
 //search papers
-const axios = require("axios");
-app.get("/api/search-papers", async (req, res) => {
+const axios = require('axios');
+app.get('/api/search-papers', async (req, res) => {
   const { query } = req.query;
 
+
   if (!query) {
-    return res.status(400).json({ error: "Query is required" });
+    return res.status(400).json({ error: 'Query is required' });
   }
 
+
   try {
-    const response = await axios.get("https://serpapi.com/search.json", {
+    const response = await axios.get('https://serpapi.com/search.json', {
       params: {
-        engine: "google_scholar",
+        engine: 'google_scholar',
         q: query,
-        api_key:
-          "a69bd9a73d18c4b769c874f3b2a90bc38d06144d5cfe3e026782c4884e59ce8c",
+        api_key:'a69bd9a73d18c4b769c874f3b2a90bc38d06144d5cfe3e026782c4884e59ce8c',
       },
     });
     console.log(response.data); // Log response to debug
 
+
     const results = response.data.organic_results || [];
-    console.log("results", results);
+    console.log("results",results);
     if (results.length === 0) {
-      return res
-        .status(200)
-        .json({ message: "No papers found for the given query." });
+      return res.status(200).json({ message: 'No papers found for the given query.' });
     }
+
 
     const formattedResults = results.map((result, index) => ({
       id: index + 1,
-      title: result.title || "No title available",
-      link: result.link || "#",
-      snippet: result.snippet || "No description available",
-      publication_info:
-        result.publication_info || "No publication info available",
+      title: result.title || 'No title available',
+      link: result.link || '#',
+      snippet: result.snippet || 'No description available',
+      publication_info: result.publication_info || 'No publication info available',
     }));
+
 
     res.json(formattedResults);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch papers" });
+    res.status(500).json({ error: 'Failed to fetch papers' });
   }
 });
 
+
+
+
 //add research papers from the google scholar engine
-app.post("/api/research/add", (req, res) => {
+app.post('/api/research/add', (req, res) => {
   const { title, description, status, publisher, link } = req.body;
+
 
   // SQL query to insert data into researchwork table
   const query = `
@@ -1230,19 +1236,22 @@ app.post("/api/research/add", (req, res) => {
       (?, ?, ?, ?, ?, NULL, NULL, NULL)
   `;
 
+
   const values = [title, description, status, publisher, link];
+
 
   db.query(query, values, (err, result) => {
     if (err) {
-      console.error("Error inserting data:", err);
-      return res
-        .status(500)
-        .json({ success: false, message: "Database error" });
+      console.error('Error inserting data:', err);
+      return res.status(500).json({ success: false, message: 'Database error' });
     }
 
-    console.log("Research paper added successfully");
-    res
-      .status(200)
-      .json({ success: true, message: "Research paper added successfully" });
+
+    console.log('Research paper added successfully');
+    res.status(200).json({ success: true, message: 'Research paper added successfully' });
   });
 });
+
+
+
+
